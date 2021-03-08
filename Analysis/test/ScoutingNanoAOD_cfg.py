@@ -86,14 +86,14 @@ process.options = cms.untracked.PSet(
 )
 
 # How many events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 # Input EDM files
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring([
 #       '/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/D6AB8ED4-7F65-E811-BCCC-FA163ED6BA41.root',
 #	'/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/7C89F148-8E65-E811-82AF-FA163EE95896.root',
-	'file:/eos/cms/store/group/phys_exotica/darkPhoton/jakob/outputScoutingPFRun3.root'
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_1.root'
 
 
 
@@ -121,7 +121,7 @@ else :
 
 # Define the services needed for the treemaker
 process.TFileService = cms.Service("TFileService", 
-    fileName = cms.string("scout16_3.root")
+    fileName = cms.string("basicNTuple")
 )
 
 # Tree for the generator weights
