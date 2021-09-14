@@ -274,7 +274,7 @@ private:
   vector<Float16_t> 	    pfcandpt;
   vector<Float16_t>         pfcandeta;
   vector<Float16_t>         pfcandphi;
-  vector<Float16_t>	    pdcandm;
+  vector<Float16_t>	    pfcandm;
   vector<Float16_t>	    pfcandpdgid;
   vector<Float16_t>	    pfcandvertex;
 
@@ -394,7 +394,7 @@ ScoutingNanoAOD::ScoutingNanoAOD(const edm::ParameterSet& iConfig):
   tree->Branch("pfcandpt"        	   ,&pfcandpt 		 );
   tree->Branch("pfcandeta"            	   ,&pfcandeta 		 );
   tree->Branch("pfcandphi"            	   ,&pfcandphi		 );
-  tree->Branch("pdcandm"            	   ,&pdcandm 		 );
+  tree->Branch("pfcandm"            	   ,&pfcandm 		 );
   tree->Branch("pfcandpdgid"               ,&pfcandpdgid		 );
   tree->Branch("pfcandvertex"              ,&pfcandvertex 	 );
 
@@ -655,7 +655,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       pfcandpt.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->pt())));
       pfcandeta.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->eta())));
       pfcandphi.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->phi())));
-    pdcandm.push_back(pfcands_iter->m());
+    pfcandm.push_back(pfcands_iter->m());
     pfcandpdgid.push_back(pfcands_iter->pdgId());
     pfcandvertex.push_back(pfcands_iter->vertex());
     PseudoJet temp_jet = PseudoJet(0, 0, 0, 0);
@@ -792,9 +792,11 @@ for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_ite
       }
  }
 
+ 
 
  tree->Fill();	
  clearVars();
+
 }
 
 void ScoutingNanoAOD::clearVars(){
@@ -885,7 +887,7 @@ void ScoutingNanoAOD::clearVars(){
   pfcandpt.clear();
   pfcandeta.clear();
   pfcandphi.clear();
-  pdcandm.clear();
+  pfcandm.clear();
   pfcandpdgid.clear();
   pfcandvertex.clear();
   FatJet_area.clear();
