@@ -47,8 +47,8 @@ params.register(
 )
 
 params.register(
-    'GlobalTagData',
-    '<not available>',
+    'GlobalTagData', 
+    '112X_mcRun3_2021_realistic_v16', 
     VarParsing.multiplicity.singleton,VarParsing.varType.string,
     'Process name for the HLT paths'
 )
@@ -65,6 +65,13 @@ params.register(
     0.001,
     VarParsing.multiplicity.singleton,VarParsing.varType.float,
     'Cross-section for a Monte Carlo Sample'
+)
+
+params.register(
+    'output', 
+    'scoutingNTuple.root', 
+    VarParsing.multiplicity.singleton,VarParsing.varType.string,
+    'Name of the output root file'
 )
 
 # Define the process
@@ -89,11 +96,55 @@ process.options = cms.untracked.PSet(
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 # Input EDM files
+'''
 process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring([
+<<<<<<< HEAD
+#       '/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/D6AB8ED4-7F65-E811-BCCC-FA163ED6BA41.root',
+#	'/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/7C89F148-8E65-E811-82AF-FA163EE95896.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_11.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_12.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_13.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_14.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_15.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_16.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_17.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_18.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_19.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_20.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_21.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_22.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_23.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_24.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_26.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_27.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_28.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_29.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_1.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_2.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_3.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_4.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_6.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_7.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_8.root',
+	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_9.root'
+ 	])
+=======
 	'root://cms-xrd-global.cern.ch//store/group/dpg_trigger/comm_trigger/TriggerStudiesGroup/Scouting/Run3/ML_210512/SMS-T1qqqq_TuneCP5_14TeV-pythia8/ML_210512/210519_133149/0000/scouting_1.root'
 	])
+>>>>>>> 25612e01bc52d76e5105f394143dcfa9e4154fe9
 )
+'''
+
+process.source = cms.Source("PoolSource",
+                            fileNames = cms.untracked.vstring([
+                                #       '/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/D6AB8ED4-7F65-E811-BCCC-FA163ED6BA41.root',
+                                #	'/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/7C89F148-8E65-E811-82AF-FA163EE95896.root',
+                                #'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_11.root'
+                                #'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/ZToEE_TuneCUETP8M1_14TeV-pythia8/GEN-SIM-DIGI-RAW/NoPURAW_for_DNN_112X_mcRun3_2021_realistic_v16_ext1-v1/100000/454ebd22-10bd-48fe-9e64-529c9e7e6fdd.root'
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/SingletTripletHDMToDisplacedL_M200deltaM20ctau30cm_TuneCP5_14TeV-madgraph-pythia8/GEN-SIM-DIGI-RAW/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v5/270000/017a34d6-1e09-4083-b007-396f639efa8f.root'
+                            ])
+                        )
 
 # Load the standard set of configuration modules
 process.load('Configuration.StandardSequences.Services_cff')
@@ -114,8 +165,8 @@ else :
     process.GlobalTag.globaltag = params.GlobalTagData
 
 # Define the services needed for the treemaker
-process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("scout16_3.root")
+process.TFileService = cms.Service("TFileService", 
+                                   fileName = cms.string(params.output)
 )
 
 # Tree for the generator weights
@@ -131,30 +182,32 @@ process.gentree = cms.EDAnalyzer("LHEWeightsTreeMaker",
 L1Info = ['L1_DoubleMu4p5er2p0_SQ_OS_Mass_Min7', 'L1_DoubleMu_12_5','L1_DoubleMu_15_7','L1_TripleMu_5_3_3','L1_TripleMu_5_5_3','L1_QuadMu0','L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4','L1_DoubleMu4p5er2p0_SQ_OS_Mass7to18','L1_DoubleMu4_SQ_OS_dR_Max1p2','L1_SingleMu22','L1_DoubleMu0er1p4_SQ_OS_dR_Max1p4','L1_DoubleMu4p5_SQ_OS_dR_Max1p2','L1_DoubleMu4p5_SQ_OS','L1_DoubleMu0er1p5_SQ_dR_Max1p4','L1_DoubleMu0er2p0_SQ_dR_Max1p4','L1_DoubleMu0_SQ']
 # Make tree
 process.mmtree = cms.EDAnalyzer('ScoutingNanoAOD',
-
-    	triggerresults   = cms.InputTag("TriggerResults", "", params.trigProcess),
-        doL1 = cms.bool(False),
-        triggerConfiguration = cms.PSet(
-    		hltResults            = cms.InputTag('TriggerResults','','HLT'),
-    		l1tResults            = cms.InputTag(''),
-    		daqPartitions         = cms.uint32(1),
-    		l1tIgnoreMaskAndPrescale = cms.bool(False),
-    		throw                 = cms.bool(False)
-  	),
-	ReadPrescalesFromFile = cms.bool( False ),
-        AlgInputTag       = cms.InputTag("gtStage2Digis"),
-        l1tAlgBlkInputTag = cms.InputTag("gtStage2Digis"),
-        l1tExtBlkInputTag = cms.InputTag("gtStage2Digis"),
-        l1Seeds           = cms.vstring(L1Info),
-	#vertices         = cms.InputTag("hltScoutingMuonPacker","displacedVtx"),
-	muons            = cms.InputTag("hltScoutingMuonPacker"),
-	electrons        = cms.InputTag("hltScoutingEgammaPacker"),
-        photons          = cms.InputTag("hltScoutingEgammaPacker"),
-	pfcands          = cms.InputTag("hltScoutingPFPacker"),
-	pfjets           = cms.InputTag("hltScoutingPFPacker"),
-        tracks           = cms.InputTag("hltScoutingTrackPacker"),
-    	#pileupinfo       = cms.InputTag("addPileupInfo"),
-    	#geneventinfo     = cms.InputTag("generator"),
+                                triggerresults   = cms.InputTag("TriggerResults", "", params.trigProcess),
+                                doL1 = cms.bool(False),
+                                triggerConfiguration = cms.PSet(
+                                    hltResults            = cms.InputTag('TriggerResults','','HLT'),
+                                    l1tResults            = cms.InputTag(''),
+                                    daqPartitions         = cms.uint32(1),
+                                    l1tIgnoreMaskAndPrescale = cms.bool(False),
+                                    throw                 = cms.bool(False)
+                                ),
+                                ReadPrescalesFromFile = cms.bool( False ),
+                                AlgInputTag       = cms.InputTag("gtStage2Digis"),
+                                l1tAlgBlkInputTag = cms.InputTag("gtStage2Digis"),
+                                l1tExtBlkInputTag = cms.InputTag("gtStage2Digis"),
+                                l1Seeds           = cms.vstring(L1Info),
+                                #vertices         = cms.InputTag("hltScoutingMuonPacker","displacedVtx"),
+                                muons            = cms.InputTag("hltScoutingMuonPacker"),
+                                electrons        = cms.InputTag("hltScoutingEgammaPacker"),
+                                photons          = cms.InputTag("hltScoutingEgammaPacker"),
+                                pfcands          = cms.InputTag("hltScoutingPFPacker"),
+                                pfjets           = cms.InputTag("hltScoutingPFPacker"),
+                                tracks           = cms.InputTag("hltScoutingTrackPacker"),
+                                gens = cms.InputTag("genParticles"),
+                                #pileupinfo       = cms.InputTag("addPileupInfo"),
+                                #geneventinfo     = cms.InputTag("generator"),
+                                
+                            )
 
 )
 process.p = cms.Path(                  process.mmtree)

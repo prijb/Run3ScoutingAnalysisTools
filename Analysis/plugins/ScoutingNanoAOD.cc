@@ -111,15 +111,15 @@ class ScoutingNanoAOD : public edm::one::EDAnalyzer<edm::one::SharedResources, e
 public:
   explicit ScoutingNanoAOD(const edm::ParameterSet&);
   ~ScoutingNanoAOD();
-		
+  
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-	
-	
+  
+  
 private:
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
   virtual void endJob() override;
-
+  
   virtual void beginRun(edm::Run const&, edm::EventSetup const&) override;
   virtual void endRun(edm::Run const&, edm::EventSetup const&) override;
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
@@ -127,14 +127,15 @@ private:
   virtual void clearVars();
   const edm::InputTag triggerResultsTag;
   const edm::EDGetTokenT<edm::TriggerResults>             	triggerResultsToken;
-
+  
   const edm::EDGetTokenT<std::vector<Run3ScoutingMuon> >      muonsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> >  	electronsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> >  	photonsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingParticle> >  	pfcandsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingPFJet> >  	pfjetsToken;
- const edm::EDGetTokenT<std::vector<Run3ScoutingTrack> >  	tracksToken;
-  
+  const edm::EDGetTokenT<std::vector<Run3ScoutingTrack> >  	tracksToken;
+  const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
+  const edm::EDGetTokenT<float> gensT0Token;
 
   //const edm::EDGetTokenT<GenEventInfoProduct>             genEvtInfoToken;
 
@@ -161,7 +162,17 @@ private:
   std::vector<bool>            l1Result_;
        
         
-
+  // Gen Level Lepton, Neutrino and DM particle
+  UInt_t n_gen;
+  vector<Int_t> genpart_pdg;
+  vector<Float16_t> genpart_pt;
+  vector<Float16_t> genpart_eta;
+  vector<Float16_t> genpart_phi;
+  vector<Float16_t> genpart_m;
+  vector<Float16_t> genpart_vx;
+  vector<Float16_t> genpart_vy;
+  vector<Float16_t> genpart_vz;
+  vector<Float16_t> genpart_isHP;
 
   //Photon
   const static int 	max_pho = 1000;
@@ -303,7 +314,7 @@ ScoutingNanoAOD::ScoutingNanoAOD(const edm::ParameterSet& iConfig):
   pfjetsToken              (consumes<std::vector<Run3ScoutingPFJet> >            (iConfig.getParameter<edm::InputTag>("pfjets"))),
  tracksToken              (consumes<std::vector<Run3ScoutingTrack> >            (iConfig.getParameter<edm::InputTag>("tracks"))), 
 //  pileupInfoToken          (consumes<std::vector<PileupSummaryInfo> >        (iConfig.getParameter<edm::InputTag>("pileupinfo"))),
-//  gensToken                (consumes<std::vector<reco::GenParticle> >        (iConfig.getParameter<edm::InputTag>("gens"))),
+  gensToken                (consumes<std::vector<reco::GenParticle> >        (iConfig.getParameter<edm::InputTag>("gens"))),
   //genEvtInfoToken          (consumes<GenEventInfoProduct>                    (iConfig.getParameter<edm::InputTag>("geneventinfo"))),    
   doL1                     (iConfig.existsAs<bool>("doL1")               ?    iConfig.getParameter<bool>  ("doL1")            : false)
 {
@@ -340,21 +351,34 @@ ScoutingNanoAOD::ScoutingNanoAOD(const edm::ParameterSet& iConfig):
   // Pileup info
   //tree->Branch("nvtx"                 , &nvtx                          , "nvtx/i"       );
 
+  // Gen level particles
+  tree->Branch("n_genpart", &n_gen, "n_genpart/i");
+  tree->Branch("genpart_pdg", &genpart_pdg);
+  tree->Branch("genpart_pt", &genpart_pt);
+  tree->Branch("genpart_eta", &genpart_eta);
+  tree->Branch("genpart_phi", &genpart_phi);
+  tree->Branch("genpart_m", &genpart_m);
+  tree->Branch("genpart_vx", &genpart_vx);
+  tree->Branch("genpart_vy", &genpart_vy);
+  tree->Branch("genpart_vz", &genpart_vz);
+  tree->Branch("genpart_isHP", &genpart_isHP);
+
   //Electrons
   tree->Branch("n_ele"            	   ,&n_ele 			, "n_ele/i"		);
   tree->Branch("Electron_pt"         ,&Electron_pt 		 		);
   tree->Branch("Electron_eta"               ,&Electron_eta 		  	);
   tree->Branch("Electron_phi"               ,&Electron_phi 		 	);
+  tree->Branch("Electron_d0"               ,&Electron_d0 		 	);
   tree->Branch("Electron_charge"            ,&Electron_charge 		 	);
   tree->Branch("Electron_m"            	   ,&Electron_m 			 );
-tree->Branch("Electron_tkiso"               ,&Electron_tkiso 		 );
-tree->Branch("Electron_HoE"            	   ,&Electron_HoE 		 );
-tree->Branch("Electron_sigmaietaieta"       ,&Electron_sigmaietaieta 	 );
- tree->Branch("Electron_dphiin"              ,&Electron_dphiin 		 );
- tree->Branch("Electron_detain"              ,&Electron_detain 		 );
- tree->Branch("Electron_mHits"               ,&Electron_mHits 		 );
- tree->Branch("Electron_ooEMOop"             ,&Electron_ooEMOop  		 );
-
+  tree->Branch("Electron_tkiso"               ,&Electron_tkiso 		 );
+  tree->Branch("Electron_HoE"            	   ,&Electron_HoE 		 );
+  tree->Branch("Electron_sigmaietaieta"       ,&Electron_sigmaietaieta 	 );
+  tree->Branch("Electron_dphiin"              ,&Electron_dphiin 		 );
+  tree->Branch("Electron_detain"              ,&Electron_detain 		 );
+  tree->Branch("Electron_mHits"               ,&Electron_mHits 		 );
+  tree->Branch("Electron_ooEMOop"             ,&Electron_ooEMOop  		 );
+  
   //Photons
   tree->Branch("n_pho"            	   ,&n_pho 			, "n_pho/i"		);
   tree->Branch("Photon_pt"            	   ,&Photon_pt 			);
@@ -483,6 +507,12 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   Handle<vector<Run3ScoutingTrack> > tracksH;
   iEvent.getByToken(tracksToken, tracksH);
 
+  Handle<vector<reco::GenParticle> >gensH;
+  iEvent.getByToken(gensToken, gensH);
+
+  //Handle<Float_t>gensT0H;
+  //iEvent.getByToken(gensT0Token, gensT0H);
+
   run = iEvent.eventAuxiliary().run();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
 
@@ -556,12 +586,40 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
   std::cout<<"vertex position: "<<tv.position().x()<<"  "<<tv.position().y()<<std::endl;
   */
+
+  //std::cout<<gensT0H<<std::endl;
+  
+  n_gen=0;
+  for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
+    if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15) && gen_iter->isLastCopy()) {
+      genpart_pdg.push_back(gen_iter->pdgId());
+      genpart_pt.push_back(gen_iter->pt());
+      genpart_eta.push_back(gen_iter->eta());
+      genpart_phi.push_back(gen_iter->phi());
+      genpart_m.push_back(gen_iter->mass());
+      genpart_vx.push_back(gen_iter->vx());
+      genpart_vy.push_back(gen_iter->vy());
+      genpart_vz.push_back(gen_iter->vz());
+      genpart_isHP.push_back(gen_iter->fromHardProcessBeforeFSR()+
+			     gen_iter->fromHardProcessDecayed()+
+			     gen_iter->fromHardProcessFinalState());
+      n_gen++;
+      //std::cout<<dght<<": "<<dght->pdgId()<<"\t"<<dght->pt()<<"\t";
+      //std::cout<<std::endl;
+    }
+    //if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15) && gen_iter->isLastCopy() ){ 
+    //std::cout<<n_gen<<"\t"<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<std::endl;
+    //std::cout<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<"\t"<<gen_iter->numberOfDaughters()<<"\t"<<gen_iter->numberOfMothers()<<"\t"<<gen_iter->fromHardProcessBeforeFSR()<<"\t"<<gen_iter->fromHardProcessDecayed()<<"\t"<<gen_iter->fromHardProcessFinalState()<<std::endl;
+    //}
+  }
+
   n_ele = 0;
   for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) 
     {
       Electron_pt.push_back(electrons_iter->pt());
       Electron_eta.push_back(electrons_iter->eta());
       Electron_phi.push_back(electrons_iter->phi());	
+      Electron_d0.push_back(electrons_iter->d0());
       Electron_m.push_back(electrons_iter->m());
       Electron_detain.push_back(electrons_iter->dEtaIn());
       Electron_dphiin.push_back(electrons_iter->dPhiIn());
@@ -738,10 +796,19 @@ for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_ite
 
  tree->Fill();	
  clearVars();
-	
+
 }
 
 void ScoutingNanoAOD::clearVars(){
+  genpart_pdg.clear();
+  genpart_pt.clear();
+  genpart_eta.clear();
+  genpart_phi.clear();
+  genpart_m.clear();
+  genpart_vx.clear();
+  genpart_vy.clear();
+  genpart_vz.clear();
+  genpart_isHP.clear();
   Photon_pt.clear();
   Photon_eta.clear();
   Photon_phi.clear();
