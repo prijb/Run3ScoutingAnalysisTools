@@ -82,7 +82,7 @@ params.parseArguments()
 
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.destinations = ['cout', 'cerr']
+#process.MessageLogger.destinations = ['cout', 'cerr']
 process.MessageLogger.cerr.FwkReport.reportEvery = 5
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
@@ -95,54 +95,9 @@ process.options = cms.untracked.PSet(
 # How many events to process
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
-# Input EDM files
-'''
-process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring([
-<<<<<<< HEAD
-#       '/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/D6AB8ED4-7F65-E811-BCCC-FA163ED6BA41.root',
-#	'/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/7C89F148-8E65-E811-82AF-FA163EE95896.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_11.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_12.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_13.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_14.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_15.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_16.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_17.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_18.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_19.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_20.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_21.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_22.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_23.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_24.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_26.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_27.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_28.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_29.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_1.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_2.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_3.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_4.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_6.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_7.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_8.root',
-	'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_9.root'
- 	])
-=======
-	'root://cms-xrd-global.cern.ch//store/group/dpg_trigger/comm_trigger/TriggerStudiesGroup/Scouting/Run3/ML_210512/SMS-T1qqqq_TuneCP5_14TeV-pythia8/ML_210512/210519_133149/0000/scouting_1.root'
-	])
->>>>>>> 25612e01bc52d76e5105f394143dcfa9e4154fe9
-)
-'''
-
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring([
-                                #       '/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/D6AB8ED4-7F65-E811-BCCC-FA163ED6BA41.root',
-                                #	'/store/data/Run2018A/ScoutingPFMuon/RAW/v1/000/316/569/00000/7C89F148-8E65-E811-82AF-FA163EE95896.root',
-                                #'root://xrootd-cms.infn.it//store/user/asahasra/SingletTripletHDMToDisplacedL_TuneCP5_M200deltaM20ctau3cm_14TeV-madgraph-pythia8/Run3Winter21DIGIRAW/210304_105400/0000/DIGI_RAW_11.root'
-                                #'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/ZToEE_TuneCUETP8M1_14TeV-pythia8/GEN-SIM-DIGI-RAW/NoPURAW_for_DNN_112X_mcRun3_2021_realistic_v16_ext1-v1/100000/454ebd22-10bd-48fe-9e64-529c9e7e6fdd.root'
-                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/SingletTripletHDMToDisplacedL_M200deltaM20ctau30cm_TuneCP5_14TeV-madgraph-pythia8/GEN-SIM-DIGI-RAW/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v5/270000/017a34d6-1e09-4083-b007-396f639efa8f.root'
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/120001/003f1472-9e77-47d9-9ea4-5dec6dbc50ad.root'
                             ])
                         )
 
@@ -167,21 +122,11 @@ else :
 # Define the services needed for the treemaker
 process.TFileService = cms.Service("TFileService", 
                                    fileName = cms.string(params.output)
-)
-
-# Tree for the generator weights
-'''
-process.gentree = cms.EDAnalyzer("LHEWeightsTreeMaker",
-    lheInfo = cms.InputTag("externalLHEProducer"),
-    genInfo = cms.InputTag("generator"),
-    useLHEWeights = cms.bool(params.useWeights)
-)
-'''
-
+                               )
 #from DarkPhotonAnalysis.DimuonAnalysis2018.TriggerPaths_cfi import getL1Conf
 L1Info = ['L1_DoubleMu4p5er2p0_SQ_OS_Mass_Min7', 'L1_DoubleMu_12_5','L1_DoubleMu_15_7','L1_TripleMu_5_3_3','L1_TripleMu_5_5_3','L1_QuadMu0','L1_DoubleMu0er1p5_SQ_OS_dR_Max1p4','L1_DoubleMu4p5er2p0_SQ_OS_Mass7to18','L1_DoubleMu4_SQ_OS_dR_Max1p2','L1_SingleMu22','L1_DoubleMu0er1p4_SQ_OS_dR_Max1p4','L1_DoubleMu4p5_SQ_OS_dR_Max1p2','L1_DoubleMu4p5_SQ_OS','L1_DoubleMu0er1p5_SQ_dR_Max1p4','L1_DoubleMu0er2p0_SQ_dR_Max1p4','L1_DoubleMu0_SQ']
 # Make tree
-process.mmtree = cms.EDAnalyzer('ScoutingNanoAOD',
+process.mmtree = cms.EDAnalyzer('EGammaOnly_ScoutingNanoAOD',
                                 triggerresults   = cms.InputTag("TriggerResults", "", params.trigProcess),
                                 doL1 = cms.bool(False),
                                 triggerConfiguration = cms.PSet(
@@ -196,18 +141,10 @@ process.mmtree = cms.EDAnalyzer('ScoutingNanoAOD',
                                 l1tAlgBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1tExtBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1Seeds           = cms.vstring(L1Info),
-                                #vertices         = cms.InputTag("hltScoutingMuonPacker","displacedVtx"),
-                                muons            = cms.InputTag("hltScoutingMuonPacker"),
                                 electrons        = cms.InputTag("hltScoutingEgammaPacker"),
                                 photons          = cms.InputTag("hltScoutingEgammaPacker"),
-                                pfcands          = cms.InputTag("hltScoutingPFPacker"),
-                                pfjets           = cms.InputTag("hltScoutingPFPacker"),
-                                tracks           = cms.InputTag("hltScoutingTrackPacker"),
                                 gens = cms.InputTag("genParticles"),
-                                #pileupinfo       = cms.InputTag("addPileupInfo"),
-                                #geneventinfo     = cms.InputTag("generator"),
                                 
                             )
 
-)
 process.p = cms.Path(                  process.mmtree)
