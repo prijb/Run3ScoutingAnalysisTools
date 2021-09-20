@@ -165,7 +165,11 @@ private:
   vector<Float16_t> genpart_vx;
   vector<Float16_t> genpart_vy;
   vector<Float16_t> genpart_vz;
-  vector<Float16_t> genpart_isHP;
+  vector<Int_t> genpart_nmoms;
+  vector<Int_t> genpart_mompdg;
+  vector<Bool_t> genpart_isPromptFS;
+  vector<Bool_t> genpart_isPromptDec;
+  vector<Bool_t> genpart_isDirectPromptTauDecayProdFS;
 
   //Photon
   const static int 	max_pho = 1000;
@@ -258,7 +262,11 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("genpart_vx", &genpart_vx);
   tree->Branch("genpart_vy", &genpart_vy);
   tree->Branch("genpart_vz", &genpart_vz);
-  tree->Branch("genpart_isHP", &genpart_isHP);
+  tree->Branch("genpart_nmoms", &genpart_nmoms);
+  tree->Branch("genpart_mompdg", &genpart_mompdg);
+  tree->Branch("genpart_isPromptFS", &genpart_isPromptFS);
+  tree->Branch("genpart_isPromptDec", &genpart_isPromptDec);
+  tree->Branch("genpart_isDirectPromptTauDecayProdFS", &genpart_isDirectPromptTauDecayProdFS);
 
   //Electrons
   tree->Branch("n_ele"            	   ,&n_ele 			, "n_ele/i"		);
@@ -342,9 +350,13 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       genpart_vx.push_back(gen_iter->vx());
       genpart_vy.push_back(gen_iter->vy());
       genpart_vz.push_back(gen_iter->vz());
-      genpart_isHP.push_back(gen_iter->fromHardProcessBeforeFSR()+
-			     gen_iter->fromHardProcessDecayed()+
-			     gen_iter->fromHardProcessFinalState());
+      genpart_nmoms.push_back(gen_iter->numberOfMothers());
+      std::cout<<gen_iter->numberOfMothers()<<std::endl;
+      genpart_mompdg.push_back(gen_iter->mother(0)->pdgId());
+      std::cout<<gen_iter->mother(0)->pdgId()<<std::endl;
+      genpart_isPromptFS.push_back(gen_iter->isPromptFinalState());
+      genpart_isPromptDec.push_back(gen_iter->isPromptDecayed());
+      genpart_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
       n_gen++;
     }
     //if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15) && gen_iter->isLastCopy() ){ 
@@ -423,7 +435,11 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   genpart_vx.clear();
   genpart_vy.clear();
   genpart_vz.clear();
-  genpart_isHP.clear();
+  genpart_nmoms.clear();
+  genpart_mompdg.clear();
+  genpart_isPromptFS.clear();
+  genpart_isPromptDec.clear();
+  genpart_isDirectPromptTauDecayProdFS.clear();
   Photon_pt.clear();
   Photon_eta.clear();
   Photon_phi.clear();
