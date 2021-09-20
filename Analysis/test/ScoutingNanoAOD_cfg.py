@@ -83,7 +83,7 @@ params.parseArguments()
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 5
+process.MessageLogger.cerr.FwkReport.reportEvery = 200
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -93,11 +93,35 @@ process.options = cms.untracked.PSet(
 )
 
 # How many events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring([
-                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/120001/003f1472-9e77-47d9-9ea4-5dec6dbc50ad.root'
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/120001/003f1472-9e77-47d9-9ea4-5dec6dbc50ad.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/52da57ee-fdb4-4268-b8ff-c4b23da87d2b.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/64c37853-fe4e-4440-a23b-6ae4fcdd23f0.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/87e3862d-c57f-43da-9763-e4d6fcb6b93b.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/e5dd5c81-1486-4538-8a3e-5e887781744f.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/f0da900d-a175-4e6a-8540-91b6e47f945b.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/9d650050-bd6d-42c4-8dab-2e4ed4bb8b86.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/402501fc-9cd1-4613-aef3-1cda21eee13e.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/799a2712-2996-4e76-832e-ea2fdf8f265c.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/81a15d64-5617-49f0-915b-e5f4ab692ceb.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/28f5a6b8-149a-4cca-93c9-89e6787fdeb9.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/907b8e71-05e4-484d-9848-fc309a14f30a.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/9591747e-abf4-4743-8bb0-d4ed81eb6b7b.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/7e581e35-7cc5-4bd9-922b-b72c93f03b88.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/95696d78-a123-4c5f-a0e4-23afb4902c88.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/262cb0c4-1e74-4591-9220-c7560b89a8b3.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/d7c102d3-50d0-41d6-a03d-b9509cec9e93.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/425b166b-4baf-4d55-aaf5-0c8eabfda3c9.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/8ec3011e-6168-463d-9bd3-5550a7bc1d4b.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/703c9678-9b11-4a92-b803-5538021afabe.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/e0af59e0-3d24-410f-bf75-c33fdcf8806b.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/d5e5e7d7-2ae8-42ea-871b-67089da81129.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/42a645fb-b838-4388-9a3c-a90deef4de32.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/120011/0ffb0b1c-51eb-4bc9-9e62-ac06bcaa25d0.root',
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/120011/c0fc4976-fd04-4382-9246-e4ecb17a705e.root'
                             ])
                         )
 
