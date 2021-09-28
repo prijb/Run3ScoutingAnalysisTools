@@ -128,6 +128,7 @@ private:
   const edm::InputTag triggerResultsTag;
   const edm::EDGetTokenT<edm::TriggerResults>             	triggerResultsToken;
   
+  const edm::EDGetTokenT<reco::BeamSpot>             	beamSpotToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> >  	electronsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> >  	photonsToken;
   const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
@@ -154,6 +155,9 @@ private:
   std::vector<std::string>     l1Seeds_;
   std::vector<bool>            l1Result_;
        
+  Float16_t beamspot_x;
+  Float16_t beamspot_y;
+  Float16_t beamspot_z;
         
   // Gen Level Lepton, Neutrino and DM particle
   UInt_t n_gen;
@@ -171,17 +175,18 @@ private:
   vector<Bool_t> genpart_isPromptDec;
   vector<Bool_t> genpart_isDirectPromptTauDecayProdFS;
 
-  //Photon
-  const static int 	max_pho = 1000;
-  UInt_t n_pho;
-  vector<Float16_t> 	    	Photon_pt;
-  vector<Float16_t>        	Photon_eta;
-  vector<Float16_t>        	Photon_phi;
-  vector<Float16_t>	    	Photon_m;
-  vector<Float16_t>	    	Photon_sigmaietaieta;
-  vector<Float16_t>	    	Photon_HoE;
-  vector<Float16_t>        	Photon_ecaliso;
-  vector<Float16_t>	    	Photon_hcaliso;
+  UInt_t n_genpartmomZ;
+  vector<Int_t> genpartmomZ_pdg;
+  vector<Float16_t> genpartmomZ_pt;
+  vector<Float16_t> genpartmomZ_eta;
+  vector<Float16_t> genpartmomZ_phi;
+  vector<Float16_t> genpartmomZ_m;
+  vector<Float16_t> genpartmomZ_vx;
+  vector<Float16_t> genpartmomZ_vy;
+  vector<Float16_t> genpartmomZ_vz;
+  vector<Bool_t> genpartmomZ_isPromptFS;
+  vector<Bool_t> genpartmomZ_isPromptDec;
+  vector<Bool_t> genpartmomZ_isDirectPromptTauDecayProdFS;
 
   //Electron
   const static int 	max_ele = 1000;
@@ -195,14 +200,39 @@ private:
   vector<Float16_t>	    Electron_detain;
   vector<Float16_t>	    Electron_dphiin;
   vector<Float16_t>	    Electron_sigmaietaieta;
-  vector<Float16_t>	    Electron_HoE;
-  vector<Float16_t>	    Electron_ooEMOop;
-  vector<Float16_t>	    Electron_mHits;
-  vector<Float16_t>        Electron_charge;
+  vector<Float16_t>	    Electron_hoe;
+  vector<Float16_t>	    Electron_ooemoop;
+  vector<Int_t>	    Electron_missinghits;
+  vector<Int_t>        Electron_charge;
   vector<Float16_t>        Electron_ecaliso;
   vector<Float16_t>	    Electron_hcaliso;
   vector<Float16_t>        Electron_tkiso;
-        
+  vector<Float16_t>        Electron_r9;
+  vector<Float16_t>        Electron_smin;
+  vector<Float16_t>        Electron_smaj;
+  vector<UInt_t>        Electron_seedid;
+  vector<vector<Float16_t>> Electron_energymatrix;
+  vector<vector<Float16_t>> Electron_timingmatrix;
+
+  //Photon
+  const static int 	max_pho = 1000;
+  UInt_t n_pho;
+  vector<Float16_t> 	    	Photon_pt;
+  vector<Float16_t>        	Photon_eta;
+  vector<Float16_t>        	Photon_phi;
+  vector<Float16_t>	    	Photon_m;
+  vector<Float16_t>	    	Photon_sigmaietaieta;
+  vector<Float16_t>	    	Photon_hoe;
+  vector<Float16_t>        	Photon_ecaliso;
+  vector<Float16_t>	    	Photon_hcaliso;
+  vector<Float16_t>	    	Photon_trkiso;
+  vector<Float16_t>	    	Photon_r9;
+  vector<Float16_t>	    	Photon_smin;
+  vector<Float16_t>	    	Photon_smaj;
+  vector<Float16_t>	    	Photon_seedid;
+  vector<vector<Float16_t>> Photon_energymatrix;
+  vector<vector<Float16_t>> Photon_timingmatrix;
+
   // TTree carrying the event weight information
   TTree* tree;
 
@@ -215,6 +245,7 @@ private:
 EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& iConfig): 
   triggerResultsTag        (iConfig.getParameter<edm::InputTag>("triggerresults")),
   triggerResultsToken      (consumes<edm::TriggerResults>                    (triggerResultsTag)),
+  beamSpotToken(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamspot"))),
   electronsToken           (consumes<std::vector<Run3ScoutingElectron> >         (iConfig.getParameter<edm::InputTag>("electrons"))), 
   photonsToken           (consumes<std::vector<Run3ScoutingPhoton> >         (iConfig.getParameter<edm::InputTag>("photons"))), 
   gensToken                (consumes<std::vector<reco::GenParticle> >        (iConfig.getParameter<edm::InputTag>("gens"))),
@@ -252,6 +283,10 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   // Pileup info
   //tree->Branch("nvtx"                 , &nvtx                          , "nvtx/i"       );
 
+  tree->Branch("beamspot_x", &beamspot_x, "beamspot_x/f");
+  tree->Branch("beamspot_y", &beamspot_y, "beamspot_y/f");
+  tree->Branch("beamspot_z", &beamspot_z, "beamspot_z/f");
+
   // Gen level particles
   tree->Branch("n_genpart", &n_gen, "n_genpart/i");
   tree->Branch("genpart_pdg", &genpart_pdg);
@@ -268,32 +303,61 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("genpart_isPromptDec", &genpart_isPromptDec);
   tree->Branch("genpart_isDirectPromptTauDecayProdFS", &genpart_isDirectPromptTauDecayProdFS);
 
+  tree->Branch("n_genpartmomZ", &n_genpartmomZ, "n_genpartmomZ/i");
+  tree->Branch("genpartmomZ_pdg", &genpartmomZ_pdg);
+  tree->Branch("genpartmomZ_pt", &genpartmomZ_pt);
+  tree->Branch("genpartmomZ_eta", &genpartmomZ_eta);
+  tree->Branch("genpartmomZ_phi", &genpartmomZ_phi);
+  tree->Branch("genpartmomZ_m", &genpartmomZ_m);
+  tree->Branch("genpartmomZ_vx", &genpartmomZ_vx);
+  tree->Branch("genpartmomZ_vy", &genpartmomZ_vy);
+  tree->Branch("genpartmomZ_vz", &genpartmomZ_vz);
+  tree->Branch("genpartmomZ_isPromptFS", &genpartmomZ_isPromptFS);
+  tree->Branch("genpartmomZ_isPromptDec", &genpartmomZ_isPromptDec);
+  tree->Branch("genpartmomZ_isDirectPromptTauDecayProdFS", &genpartmomZ_isDirectPromptTauDecayProdFS);
+
   //Electrons
-  tree->Branch("n_ele"            	   ,&n_ele 			, "n_ele/i"		);
-  tree->Branch("Electron_pt"         ,&Electron_pt 		 		);
-  tree->Branch("Electron_eta"               ,&Electron_eta 		  	);
-  tree->Branch("Electron_phi"               ,&Electron_phi 		 	);
-  tree->Branch("Electron_d0"               ,&Electron_d0 		 	);
-  tree->Branch("Electron_charge"            ,&Electron_charge 		 	);
-  tree->Branch("Electron_m"            	   ,&Electron_m 			 );
-  tree->Branch("Electron_tkiso"               ,&Electron_tkiso 		 );
-  tree->Branch("Electron_HoE"            	   ,&Electron_HoE 		 );
-  tree->Branch("Electron_sigmaietaieta"       ,&Electron_sigmaietaieta 	 );
-  tree->Branch("Electron_dphiin"              ,&Electron_dphiin 		 );
-  tree->Branch("Electron_detain"              ,&Electron_detain 		 );
-  tree->Branch("Electron_mHits"               ,&Electron_mHits 		 );
-  tree->Branch("Electron_ooEMOop"             ,&Electron_ooEMOop  		 );
+  tree->Branch("n_ele", &n_ele, "n_ele/i");
+  tree->Branch("Electron_pt", &Electron_pt);
+  tree->Branch("Electron_eta", &Electron_eta);
+  tree->Branch("Electron_phi", &Electron_phi);
+  tree->Branch("Electron_m", &Electron_m);
+  tree->Branch("Electron_d0", &Electron_d0);
+  tree->Branch("Electron_dz", &Electron_dz);
+  tree->Branch("Electron_detain", &Electron_detain);
+  tree->Branch("Electron_dphiin", &Electron_dphiin);
+  tree->Branch("Electron_sigmaietaieta", &Electron_sigmaietaieta);
+  tree->Branch("Electron_hoe", &Electron_hoe);
+  tree->Branch("Electron_ooemoop", &Electron_ooemoop);
+  tree->Branch("Electron_missinghits", &Electron_missinghits);
+  tree->Branch("Electron_charge", &Electron_charge);
+  tree->Branch("Electron_ecaliso", &Electron_ecaliso);
+  tree->Branch("Electron_hcaliso", &Electron_hcaliso);
+  tree->Branch("Electron_tkiso", &Electron_tkiso);
+  tree->Branch("Electron_r9", &Electron_r9);
+  tree->Branch("Electron_smin", &Electron_smaj);
+  tree->Branch("Electron_smaj", &Electron_smin);
+  tree->Branch("Electron_seedid", &Electron_seedid);
+  tree->Branch("Electron_energymatrix", &Electron_energymatrix);
+  tree->Branch("Electron_timingmatrix", &Electron_timingmatrix);
   
   //Photons
-  tree->Branch("n_pho"            	   ,&n_pho 			, "n_pho/i"		);
-  tree->Branch("Photon_pt"            	   ,&Photon_pt 			);
-  tree->Branch("Photon_eta"            	   ,&Photon_eta 			);
-  tree->Branch("Photon_phi"            	   ,&Photon_phi 			);	
-  tree->Branch("Photon_m"            	   ,&Photon_m 			);
-  tree->Branch("Photon_hcaliso"             ,&Photon_hcaliso 		);
-  tree->Branch("Photon_ecaliso"             ,&Photon_ecaliso 		);
-  tree->Branch("Photon_HoE"            	   ,&Photon_HoE 			);
-  tree->Branch("Photon_sigmaietaieta"       ,&Photon_sigmaietaieta		 );
+  tree->Branch("n_pho", &n_pho, "n_pho/i");
+  tree->Branch("Photon_pt", &Photon_pt);
+  tree->Branch("Photon_eta", &Photon_eta);
+  tree->Branch("Photon_phi", &Photon_phi);	
+  tree->Branch("Photon_m", &Photon_m);
+  tree->Branch("Photon_sigmaietaieta", &Photon_sigmaietaieta);
+  tree->Branch("Photon_hoe", &Photon_hoe);
+  tree->Branch("Photon_ecaliso", &Photon_ecaliso);
+  tree->Branch("Photon_hcaliso", &Photon_hcaliso);
+  tree->Branch("Photon_trkiso", &Photon_trkiso);
+  tree->Branch("Photon_r9", &Photon_r9);
+  tree->Branch("Photon_smin", &Photon_smin);
+  tree->Branch("Photon_smaj", &Photon_smaj);
+  tree->Branch("Photon_seedid", &Photon_seedid);
+  tree->Branch("Photon_energymatrix", &Photon_energymatrix);
+  tree->Branch("Photon_timingmatrix", &Photon_timingmatrix);
 }
 
 
@@ -311,6 +375,9 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   edm::Handle<edm::TriggerResults> triggerResultsH;
   iEvent.getByToken(triggerResultsToken, triggerResultsH);
     
+  edm::Handle<reco::BeamSpot> beamSpotH;
+  iEvent.getByToken(beamSpotToken, beamSpotH);
+
   Handle<vector<Run3ScoutingElectron> > electronsH;
   iEvent.getByToken(electronsToken, electronsH);
 
@@ -338,10 +405,15 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
     if (i == 6  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=  64; // DST_HT410_PFScouting
     if (i == 7  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig += 128; // DST_HT450_PFScouting
   }
-    
+
+  beamspot_x = beamSpotH->x0();
+  beamspot_y = beamSpotH->y0();
+  beamspot_z = beamSpotH->z0();
+
   n_gen=0;
+  n_genpartmomZ = 0;
   for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
-    if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15) && gen_iter->isLastCopy()) {
+    if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) {
       genpart_pdg.push_back(gen_iter->pdgId());
       genpart_pt.push_back(gen_iter->pt());
       genpart_eta.push_back(gen_iter->eta());
@@ -351,9 +423,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       genpart_vy.push_back(gen_iter->vy());
       genpart_vz.push_back(gen_iter->vz());
       genpart_nmoms.push_back(gen_iter->numberOfMothers());
-      std::cout<<gen_iter->numberOfMothers()<<std::endl;
       genpart_mompdg.push_back(gen_iter->mother(0)->pdgId());
-      std::cout<<gen_iter->mother(0)->pdgId()<<std::endl;
       genpart_isPromptFS.push_back(gen_iter->isPromptFinalState());
       genpart_isPromptDec.push_back(gen_iter->isPromptDecayed());
       genpart_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
@@ -363,40 +433,68 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
     //std::cout<<n_gen<<"\t"<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<std::endl;
     //std::cout<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<"\t"<<gen_iter->numberOfDaughters()<<"\t"<<gen_iter->numberOfMothers()<<"\t"<<gen_iter->fromHardProcessBeforeFSR()<<"\t"<<gen_iter->fromHardProcessDecayed()<<"\t"<<gen_iter->fromHardProcessFinalState()<<std::endl;
     //}
+    if( ((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) && 
+	(std::abs(gen_iter->mother(0)->pdgId())==23 || std::abs(gen_iter->mother(0)->pdgId())==22)) {
+      genpartmomZ_pdg.push_back(gen_iter->pdgId());
+      genpartmomZ_pt.push_back(gen_iter->pt());
+      genpartmomZ_eta.push_back(gen_iter->eta());
+      genpartmomZ_phi.push_back(gen_iter->phi());
+      genpartmomZ_m.push_back(gen_iter->mass());
+      genpartmomZ_vx.push_back(gen_iter->vx());
+      genpartmomZ_vy.push_back(gen_iter->vy());
+      genpartmomZ_vz.push_back(gen_iter->vz());      
+      genpartmomZ_isPromptFS.push_back(gen_iter->isPromptFinalState());
+      genpartmomZ_isPromptDec.push_back(gen_iter->isPromptDecayed());
+      genpartmomZ_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
+      n_genpartmomZ++;
+    }
   }
 
   n_ele = 0;
-  for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) 
-    {
-      Electron_pt.push_back(electrons_iter->pt());
-      Electron_eta.push_back(electrons_iter->eta());
-      Electron_phi.push_back(electrons_iter->phi());	
-      Electron_d0.push_back(electrons_iter->d0());
-      Electron_m.push_back(electrons_iter->m());
-      Electron_detain.push_back(electrons_iter->dEtaIn());
-      Electron_dphiin.push_back(electrons_iter->dPhiIn());
-      Electron_sigmaietaieta.push_back(electrons_iter->sigmaIetaIeta());
-      Electron_HoE.push_back(electrons_iter->hOverE());	
-      Electron_ooEMOop.push_back(electrons_iter->ooEMOop());
-      Electron_mHits.push_back(electrons_iter->missingHits());
-      Electron_charge.push_back(electrons_iter->charge());
-      Electron_tkiso.push_back(electrons_iter->trackIso());
-      Electron_ecaliso.push_back(electrons_iter->ecalIso());
-      Electron_hcaliso.push_back(electrons_iter->hcalIso());
-      n_ele++;
-    }
-
+  for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) {
+    Electron_pt.push_back(electrons_iter->pt());
+    Electron_eta.push_back(electrons_iter->eta());
+    Electron_phi.push_back(electrons_iter->phi());	
+    Electron_m.push_back(electrons_iter->m());
+    Electron_d0.push_back(electrons_iter->d0());
+    Electron_dz.push_back(electrons_iter->dz());
+    Electron_detain.push_back(electrons_iter->dEtaIn());
+    Electron_dphiin.push_back(electrons_iter->dPhiIn());
+    Electron_sigmaietaieta.push_back(electrons_iter->sigmaIetaIeta());
+    Electron_hoe.push_back(electrons_iter->hOverE());	
+    Electron_ooemoop.push_back(electrons_iter->ooEMOop());
+    Electron_missinghits.push_back(electrons_iter->missingHits());
+    Electron_charge.push_back(electrons_iter->charge());
+    Electron_ecaliso.push_back(electrons_iter->ecalIso());
+    Electron_hcaliso.push_back(electrons_iter->hcalIso());
+    Electron_tkiso.push_back(electrons_iter->trackIso());
+    Electron_r9.push_back(electrons_iter->r9());
+    Electron_smin.push_back(electrons_iter->sMin());
+    Electron_smaj.push_back(electrons_iter->sMaj());
+    Electron_seedid.push_back(electrons_iter->seedId());
+    Electron_energymatrix.push_back(electrons_iter->energyMatrix());
+    Electron_timingmatrix.push_back(electrons_iter->timingMatrix());
+    n_ele++;
+  }
+  
   n_pho = 0;
-
+  
   for (auto photons_iter = photonsH->begin(); photons_iter != photonsH->end(); ++photons_iter) {
     Photon_pt.push_back(photons_iter->pt());
     Photon_eta.push_back(photons_iter->eta());
     Photon_phi.push_back(photons_iter->phi());
     Photon_m.push_back(photons_iter->m());
     Photon_sigmaietaieta.push_back(photons_iter->sigmaIetaIeta());
-    Photon_HoE.push_back(photons_iter->hOverE());
+    Photon_hoe.push_back(photons_iter->hOverE());
     Photon_ecaliso.push_back(photons_iter->ecalIso());
     Photon_hcaliso.push_back(photons_iter->hcalIso());
+    Photon_trkiso.push_back(photons_iter->trkIso());
+    Photon_r9.push_back(photons_iter->r9());
+    Photon_smin.push_back(photons_iter->sMin());
+    Photon_smaj.push_back(photons_iter->sMaj());
+    Photon_seedid.push_back(photons_iter->seedId());
+    Photon_energymatrix.push_back(photons_iter->energyMatrix());
+    Photon_timingmatrix.push_back(photons_iter->timingMatrix());
     
     n_pho++;
   }
@@ -440,14 +538,17 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   genpart_isPromptFS.clear();
   genpart_isPromptDec.clear();
   genpart_isDirectPromptTauDecayProdFS.clear();
-  Photon_pt.clear();
-  Photon_eta.clear();
-  Photon_phi.clear();
-  Photon_m.clear();
-  Photon_sigmaietaieta.clear();
-  Photon_HoE.clear();
-  Photon_ecaliso.clear();
-  Photon_hcaliso.clear();
+  genpartmomZ_pdg.clear();
+  genpartmomZ_pt.clear();
+  genpartmomZ_eta.clear();
+  genpartmomZ_phi.clear();
+  genpartmomZ_m.clear();
+  genpartmomZ_vx.clear();
+  genpartmomZ_vy.clear();
+  genpartmomZ_vz.clear();
+  genpartmomZ_isPromptFS.clear();
+  genpartmomZ_isPromptDec.clear();
+  genpartmomZ_isDirectPromptTauDecayProdFS.clear();
   Electron_pt.clear();
   Electron_eta.clear();
   Electron_phi.clear();
@@ -457,13 +558,34 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Electron_detain.clear();
   Electron_dphiin.clear();
   Electron_sigmaietaieta.clear();
-  Electron_HoE.clear();
-  Electron_ooEMOop.clear();
-  Electron_mHits.clear();
+  Electron_hoe.clear();
+  Electron_ooemoop.clear();
+  Electron_missinghits.clear();
   Electron_charge.clear();
   Electron_ecaliso.clear();
   Electron_hcaliso.clear();
   Electron_tkiso.clear();
+  Electron_r9.clear();
+  Electron_smin.clear();
+  Electron_smaj.clear();
+  Electron_seedid.clear();
+  Electron_energymatrix.clear();
+  Electron_timingmatrix.clear();
+  Photon_pt.clear();
+  Photon_eta.clear();
+  Photon_phi.clear();
+  Photon_m.clear();
+  Photon_sigmaietaieta.clear();
+  Photon_hoe.clear();
+  Photon_ecaliso.clear();
+  Photon_hcaliso.clear();
+  Photon_trkiso.clear();
+  Photon_r9.clear();
+  Photon_smin.clear();
+  Photon_smaj.clear();
+  Photon_seedid.clear();
+  Photon_energymatrix.clear();
+  Photon_timingmatrix.clear();
 }
 
 void EGammaOnly_ScoutingNanoAOD::beginJob() {

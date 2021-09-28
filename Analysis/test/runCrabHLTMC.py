@@ -1,7 +1,7 @@
 from CRABClient.UserUtilities import config
 config = config()
 
-config.General.requestName = 'Run3Scouting_DYToLL_Run3Winter21_crabRunSkim3'
+config.General.requestName = 'Run3Scouting_DYToLL_Run3Winter21_crabRunSkim8'
 config.General.workArea = 'crab_Run3Scouting_DYToLL_Run3Winter21'
 config.General.transferOutputs = True
 #config.General.instance = 'prod'
@@ -15,7 +15,7 @@ config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 10
 config.Data.totalUnits = 200
 config.Data.publication = False
-config.Data.outputDatasetTag = 'DYToLL_Run3Winter21_crabRunSkim3_asahasra'
+config.Data.outputDatasetTag = 'Scouting_DYToLL_Run3Winter21_crabRunSkim8_asahasra'
 config.Data.ignoreLocality = True
 
 config.Site.whitelist = ['T2_US*','T2_CH*']

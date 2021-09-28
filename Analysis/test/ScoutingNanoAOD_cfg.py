@@ -83,7 +83,7 @@ params.parseArguments()
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 200
+process.MessageLogger.cerr.FwkReport.reportEvery = 100
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -93,7 +93,7 @@ process.options = cms.untracked.PSet(
 )
 
 # How many events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring([
@@ -165,6 +165,7 @@ process.mmtree = cms.EDAnalyzer('EGammaOnly_ScoutingNanoAOD',
                                 l1tAlgBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1tExtBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1Seeds           = cms.vstring(L1Info),
+                                beamspot        = cms.InputTag("offlineBeamSpot"),
                                 electrons        = cms.InputTag("hltScoutingEgammaPacker"),
                                 photons          = cms.InputTag("hltScoutingEgammaPacker"),
                                 gens = cms.InputTag("genParticles"),
