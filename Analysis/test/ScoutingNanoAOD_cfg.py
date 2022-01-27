@@ -83,7 +83,7 @@ params.parseArguments()
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -93,10 +93,11 @@ process.options = cms.untracked.PSet(
 )
 
 # How many events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring([
+                                'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DoubleElectron_Pt-1To300-gun/GEN-SIM-RECO/FlatPU0to80FEVT_112X_mcRun3_2021_realistic_v16-v3/280001/df5df79a-ee45-4d0e-9d5a-108ffcb232ae.root',
                                 'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/120001/003f1472-9e77-47d9-9ea4-5dec6dbc50ad.root',
                                 'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/52da57ee-fdb4-4268-b8ff-c4b23da87d2b.root',
                                 'root://xrootd-cms.infn.it//store/mc/Run3Winter21DRMiniAOD/DYToLL_M-50_TuneCP5_14TeV-pythia8/GEN-SIM-RECO/FlatPU30to80FEVT_112X_mcRun3_2021_realistic_v16-v2/280009/64c37853-fe4e-4440-a23b-6ae4fcdd23f0.root',

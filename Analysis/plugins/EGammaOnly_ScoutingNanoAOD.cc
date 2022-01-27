@@ -370,7 +370,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   using namespace reco;
   using namespace fastjet;
   using namespace fastjet::contrib;
-    
+      
   // Handles to the EDM content
   edm::Handle<edm::TriggerResults> triggerResultsH;
   iEvent.getByToken(triggerResultsToken, triggerResultsH);
@@ -392,7 +392,8 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 
   run = iEvent.eventAuxiliary().run();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
-
+  cout<<"Run number: "<<run<<". Lumi: "<<lumSec<<endl;
+  
   // Which triggers fired
   for (size_t i = 0; i < triggerPathsVector.size(); i++) {
     if (triggerPathsMap[triggerPathsVector[i]] == -1) continue;
@@ -409,7 +410,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   beamspot_x = beamSpotH->x0();
   beamspot_y = beamSpotH->y0();
   beamspot_z = beamSpotH->z0();
-
+  /*
   n_gen=0;
   n_genpartmomZ = 0;
   for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
@@ -449,7 +450,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       n_genpartmomZ++;
     }
   }
-
+  */
   n_ele = 0;
   for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) {
     Electron_pt.push_back(electrons_iter->pt());
