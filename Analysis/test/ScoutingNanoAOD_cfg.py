@@ -68,6 +68,13 @@ params.register(
 )
 
 params.register(
+    'inputFile', 
+    'HLT2022_HLT_OR_GENSIMDIGIRAW.root', 
+    VarParsing.multiplicity.singleton,VarParsing.varType.string,
+    'Name of the input root file'
+)
+
+params.register(
     'output', 
     'scoutingNTuple.root', 
     VarParsing.multiplicity.singleton,VarParsing.varType.string,
@@ -83,7 +90,7 @@ params.parseArguments()
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -97,7 +104,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring([
-                                'file:/afs/cern.ch/work/a/asahasra/private/CMSSW_12_1_0_pre4/src/HLTrigger/Configuration/test/HLT2022_HLT.root'
+                                params.inputFile#'file:/pnfs/iihe/cms/store/user/asahasra/DYToLL_M-50_TuneCP5_14TeV-pythia8/ScoutingSkim220127_DYToLLM50Run3Summer21_asahasra/220127_135957/0000/HLT2022_HLT_1.root'
                             ])
                         )
 

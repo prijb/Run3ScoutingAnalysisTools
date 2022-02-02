@@ -392,7 +392,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 
   run = iEvent.eventAuxiliary().run();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
-  cout<<"Run number: "<<run<<". Lumi: "<<lumSec<<endl;
+  //cout<<"Run number: "<<run<<". Lumi: "<<lumSec<<endl;
   
   // Which triggers fired
   for (size_t i = 0; i < triggerPathsVector.size(); i++) {
