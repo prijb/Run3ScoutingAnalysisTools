@@ -40,6 +40,7 @@
 #include "FWCore/Common/interface/TriggerNames.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/EgammaObject.h"
 
 #include "DataFormats/Scouting/interface/Run3ScoutingElectron.h"
 #include "DataFormats/Scouting/interface/Run3ScoutingPhoton.h"
@@ -132,6 +133,7 @@ private:
   const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> >  	electronsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> >  	photonsToken;
   const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
+  const edm::EDGetTokenT<std::vector<trigger::EgammaObject> > hltEgammaExtraToken;
 
   std::vector<std::string> triggerPathsVector;
   std::map<std::string, int> triggerPathsMap;
@@ -243,13 +245,14 @@ private:
 };
 
 EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& iConfig): 
-  triggerResultsTag        (iConfig.getParameter<edm::InputTag>("triggerresults")),
-  triggerResultsToken      (consumes<edm::TriggerResults>                    (triggerResultsTag)),
+  triggerResultsTag(iConfig.getParameter<edm::InputTag>("triggerresults")),
+  triggerResultsToken(consumes<edm::TriggerResults>(triggerResultsTag)),
   beamSpotToken(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamspot"))),
-  electronsToken           (consumes<std::vector<Run3ScoutingElectron> >         (iConfig.getParameter<edm::InputTag>("electrons"))), 
-  photonsToken           (consumes<std::vector<Run3ScoutingPhoton> >         (iConfig.getParameter<edm::InputTag>("photons"))), 
-  gensToken                (consumes<std::vector<reco::GenParticle> >        (iConfig.getParameter<edm::InputTag>("gens"))),
-  doL1                     (iConfig.existsAs<bool>("doL1")               ?    iConfig.getParameter<bool>  ("doL1")            : false)
+  electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
+  photonsToken(consumes<std::vector<Run3ScoutingPhoton> >(iConfig.getParameter<edm::InputTag>("photons"))), 
+  gensToken(consumes<std::vector<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("gens"))),
+  hltEgammaExtraToken(consumes<std::vector<trigger::EgammaObject> >(iConfig.getParameter<edm::InputTag>("hltEgammaExtra"))),
+  doL1(iConfig.existsAs<bool>("doL1")?iConfig.getParameter<bool>("doL1"):false)
 {
   usesResource("TFileService");
   if (doL1) {
@@ -387,6 +390,9 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   Handle<vector<reco::GenParticle> >gensH;
   iEvent.getByToken(gensToken, gensH);
 
+  Handle<vector<trigger::EgammaObject> >hltEgExtraH;
+  iEvent.getByToken(hltEgammaExtraToken, hltEgExtraH);
+
   //Handle<Float_t>gensT0H;
   //iEvent.getByToken(gensT0Token, gensT0H);
 
@@ -451,8 +457,17 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
     }
   }
   */
+
+  cout<<"hltEgammaExtraVariables:==========="<<endl;
+  for (auto hltEgExt_iter = hltEgExtraH->begin(); hltEgExt_iter != hltEgExtraH->end(); ++hltEgExt_iter) {
+    cout<<hltEgExt_iter->pt()<<endl;
+    cout<<hltEgExt_iter->varNamesStr()<<endl;
+  }
+
+  cout<<"Electrons:==========="<<endl;
   n_ele = 0;
   for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) {
+    cout<<electrons_iter->pt()<<endl;
     Electron_pt.push_back(electrons_iter->pt());
     Electron_eta.push_back(electrons_iter->eta());
     Electron_phi.push_back(electrons_iter->phi());	
