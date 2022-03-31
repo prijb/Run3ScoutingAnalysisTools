@@ -133,7 +133,7 @@ private:
   const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> >  	electronsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> >  	photonsToken;
   const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
-  const edm::EDGetTokenT<std::vector<trigger::EgammaObject> > hltEgammaExtraToken;
+  //const edm::EDGetTokenT<std::vector<trigger::EgammaObject> > hltEgammaExtraToken;
 
   std::vector<std::string> triggerPathsVector;
   std::map<std::string, int> triggerPathsMap;
@@ -251,7 +251,7 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
   photonsToken(consumes<std::vector<Run3ScoutingPhoton> >(iConfig.getParameter<edm::InputTag>("photons"))), 
   gensToken(consumes<std::vector<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("gens"))),
-  hltEgammaExtraToken(consumes<std::vector<trigger::EgammaObject> >(iConfig.getParameter<edm::InputTag>("hltEgammaExtra"))),
+//hltEgammaExtraToken(consumes<std::vector<trigger::EgammaObject> >(iConfig.getParameter<edm::InputTag>("hltEgammaExtra"))),
   doL1(iConfig.existsAs<bool>("doL1")?iConfig.getParameter<bool>("doL1"):false)
 {
   usesResource("TFileService");
@@ -390,8 +390,8 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   Handle<vector<reco::GenParticle> >gensH;
   iEvent.getByToken(gensToken, gensH);
 
-  Handle<vector<trigger::EgammaObject> >hltEgExtraH;
-  iEvent.getByToken(hltEgammaExtraToken, hltEgExtraH);
+  //Handle<vector<trigger::EgammaObject> >hltEgExtraH;
+  //iEvent.getByToken(hltEgammaExtraToken, hltEgExtraH);
 
   //Handle<Float_t>gensT0H;
   //iEvent.getByToken(gensT0Token, gensT0H);
@@ -416,7 +416,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   beamspot_x = beamSpotH->x0();
   beamspot_y = beamSpotH->y0();
   beamspot_z = beamSpotH->z0();
-  /*
+  
   n_gen=0;
   n_genpartmomZ = 0;
   for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
@@ -441,7 +441,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
     //std::cout<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<"\t"<<gen_iter->numberOfDaughters()<<"\t"<<gen_iter->numberOfMothers()<<"\t"<<gen_iter->fromHardProcessBeforeFSR()<<"\t"<<gen_iter->fromHardProcessDecayed()<<"\t"<<gen_iter->fromHardProcessFinalState()<<std::endl;
     //}
     if( ((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) && 
-	(std::abs(gen_iter->mother(0)->pdgId())==23 || std::abs(gen_iter->mother(0)->pdgId())==22)) {
+	(std::abs(gen_iter->mother(0)->pdgId())==23) ){
       genpartmomZ_pdg.push_back(gen_iter->pdgId());
       genpartmomZ_pt.push_back(gen_iter->pt());
       genpartmomZ_eta.push_back(gen_iter->eta());
@@ -456,18 +456,18 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       n_genpartmomZ++;
     }
   }
-  */
-
+  
+  /*
   cout<<"hltEgammaExtraVariables:==========="<<endl;
   for (auto hltEgExt_iter = hltEgExtraH->begin(); hltEgExt_iter != hltEgExtraH->end(); ++hltEgExt_iter) {
     cout<<hltEgExt_iter->pt()<<endl;
     cout<<hltEgExt_iter->varNamesStr()<<endl;
   }
-
-  cout<<"Electrons:==========="<<endl;
+  */
+  //cout<<"Electrons:==========="<<endl;
   n_ele = 0;
   for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) {
-    cout<<electrons_iter->pt()<<endl;
+    //cout<<electrons_iter->pt()<<endl;
     Electron_pt.push_back(electrons_iter->pt());
     Electron_eta.push_back(electrons_iter->eta());
     Electron_phi.push_back(electrons_iter->phi());	

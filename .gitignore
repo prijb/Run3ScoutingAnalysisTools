@@ -5,3 +5,4 @@ Analysis/test/__pycache__/
 Analysis/test/crab*/*
 Analysis/test/runCrabQCD*
 Analysis/test/runCrabDYJets*
+*.Efmrl
