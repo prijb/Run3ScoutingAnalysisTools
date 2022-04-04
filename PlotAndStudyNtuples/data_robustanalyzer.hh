@@ -11,25 +11,40 @@
 using namespace std;
 
 class data_robustanalyzer {
-
- public:
+  
+public:
   data_robustanalyzer(TString, TString, bool);
   ~data_robustanalyzer();
   
   void analyzersinglefile(int);
   void addhist(TString);
+  void addgenhist(TString);
+  void addgenmchhist(TString);
   void fillhistinevent(TString, vector<int>);
+  void fillgenhistinevent(TString, vector<int>);
+  void fillgenmchhistinevent(TString, vector<int>, vector<int>);
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
   pair<int,int> inZwindow(vector<int>);
-  
- private:
-
-  bool isDiEl;
-  
-  TTreeReader* tree;
-  TTreeReaderArray<float> *bsx;
+  pair< pair<int,int>,pair<int,int> > diElecGenMatching(vector<int>, vector<int>);
+    
+  private:
+    
+    bool isDiEl;
+    
+    TTreeReader* tree;
+    TTreeReaderArray<float> *bsx;
   TTreeReaderArray<float> *bsy;
   TTreeReaderArray<float> *bsz;
+  TTreeReaderValue<unsigned int> *n_gen;
+  TTreeReaderValue<vector<int>> *gen_pdg;
+  TTreeReaderValue<vector<float>> *gen_pt;
+  TTreeReaderValue<vector<float>> *gen_eta;
+  TTreeReaderValue<vector<float>> *gen_phi;
+  TTreeReaderValue<vector<float>> *gen_vx;
+  TTreeReaderValue<vector<float>> *gen_vy;
+  TTreeReaderValue<vector<float>> *gen_vz;
+  TTreeReaderValue<vector<int>> *gen_nmoms;
+  TTreeReaderValue<vector<int>> *gen_mompdg;
   TTreeReaderValue<UInt_t> *n_ele;
   TTreeReaderValue<vector<float>> *ele_pt;
   TTreeReaderValue<vector<float>> *ele_eta;

@@ -29,5 +29,9 @@ echo "Run over. Clean up and combine files."
 rm data_robustanalyzer.out
 
 hadd -f hists_DYToLLM50.root hists_DYToLLM50_?.root
+hadd -f hists_QCDPt20To30EmEnriched.root hists_QCDPt20To30EmEnriched_?.root
+hadd -f hists_QCDPt30To50EmEnriched.root hists_QCDPt30To50EmEnriched_?.root
 
 rm hists_DYToLLM50_?.root
+rm hists_QCDPt20To30EmEnriched_?.root
+rm hists_QCDPt30To50EmEnriched_?.root
