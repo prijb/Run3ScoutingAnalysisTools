@@ -4,82 +4,8 @@
 #include <iostream>
 
 // ROOT includes
-#include <TTree.h>
-#include <TLorentzVector.h>
-#include <TPRegexp.h>
-
-// CMSSW framework includes
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/one/EDAnalyzer.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-
-// CMSSW data formats
-#include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
-#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
-#include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
-
-// Other relevant CMSSW includes
-#include "CommonTools/UtilAlgos/interface/TFileService.h" 
-#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
-
-
-#include <memory>
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "CommonTools/UtilAlgos/interface/TFileService.h"
-#include "FWCore/ServiceRegistry/interface/Service.h"
-#include "FWCore/Framework/interface/one/EDAnalyzer.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "FWCore/Common/interface/TriggerNames.h"
-#include "DataFormats/Common/interface/TriggerResults.h"
-#include "DataFormats/HLTReco/interface/TriggerEvent.h"
-#include "DataFormats/HLTReco/interface/EgammaObject.h"
-
-#include "DataFormats/Scouting/interface/Run3ScoutingElectron.h"
-#include "DataFormats/Scouting/interface/Run3ScoutingPhoton.h"
-#include "DataFormats/Scouting/interface/Run3ScoutingPFJet.h"
-#include "DataFormats/Scouting/interface/Run3ScoutingVertex.h"
-#include "DataFormats/Scouting/interface/Run3ScoutingTrack.h"
-#include "DataFormats/Scouting/interface/Run3ScoutingMuon.h"
-#include "DataFormats/Scouting/interface/Run3ScoutingParticle.h"
-
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "DataFormats/PatCandidates/interface/Muon.h"
-#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
-#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
-#include "L1Trigger/L1TGlobal/interface/L1TGlobalUtil.h"
-#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionData.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionEvaluator.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionParser.h"
-
-#include <DataFormats/TrackReco/interface/TrackBase.h>
-
-#include "DataFormats/Math/interface/libminifloat.h"
-
-#include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/TrackReco/interface/TrackBase.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-
-#include "DataFormats/TrackReco/interface/fillCovariance.h"
-
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "DataFormats/Common/interface/RefToBase.h"
-
-// Root include files
+#include "TLorentzVector.h"
+#include "TPRegexp.h"
 #include "TLorentzVector.h"
 #include "TFile.h"
 #include "TTree.h"
@@ -91,8 +17,59 @@
 #include "TMatrixDSym.h"
 #include "TMatrixDSymEigen.h"
 
-// User include files
+// CMSSW framework includes
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/one/EDAnalyzer.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/MessageLogger/interface/MessageLogger.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 
+// CMSSW data formats
+#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/Math/interface/libminifloat.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/Common/interface/RefToBase.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/EgammaObject.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackBase.h"
+#include "DataFormats/TrackReco/interface/fillCovariance.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingElectron.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingPhoton.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingPFJet.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingVertex.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingTrack.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingMuon.h"
+#include "DataFormats/Scouting/interface/Run3ScoutingParticle.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
+#include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
+#include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenLumiInfoHeader.h"
+
+// Other relevant CMSSW includes
+#include "CommonTools/UtilAlgos/interface/TFileService.h" 
+#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
+#include "HLTrigger/HLTcore/interface/TriggerExpressionData.h"
+#include "HLTrigger/HLTcore/interface/TriggerExpressionEvaluator.h"
+#include "HLTrigger/HLTcore/interface/TriggerExpressionParser.h"
+#include "L1Trigger/L1TGlobal/interface/L1TGlobalUtil.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
+#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+
+// User include files
 #include "fastjet/ClusterSequence.hh"
 #include "fastjet/ClusterSequenceArea.hh"
 #include "fastjet/contrib/Nsubjettiness.hh"
@@ -107,15 +84,13 @@
 
 using namespace std;
 
-
 class EGammaOnly_ScoutingNanoAOD : public edm::one::EDAnalyzer<edm::one::SharedResources, edm::one::WatchRuns, edm::one::WatchLuminosityBlocks> {
 public:
   explicit EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet&);
   ~EGammaOnly_ScoutingNanoAOD();
   
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
-  
-  
+    
 private:
   virtual void beginJob() override;
   virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
@@ -127,17 +102,15 @@ private:
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void clearVars();
   const edm::InputTag triggerResultsTag;
-  const edm::EDGetTokenT<edm::TriggerResults>             	triggerResultsToken;
+  const edm::EDGetTokenT<edm::TriggerResults> triggerResultsToken;
   
-  const edm::EDGetTokenT<reco::BeamSpot>             	beamSpotToken;
-  const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> >  	electronsToken;
-  const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> >  	photonsToken;
+  const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken;
+  const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> > electronsToken;
+  const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> > photonsToken;
   const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
 
   std::vector<std::string> triggerPathsVector;
   std::map<std::string, int> triggerPathsMap;
-
-        
 	
   bool doL1;       
   triggerExpression::Data triggerCache_;
@@ -386,25 +359,6 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   iEvent.getByToken(electronsToken, electronsH);
   bool eleValid = electronsH.isValid();
   bool beamValid = beamSpotH.isValid();
-  //if(!eleValid) {
-  //  cout << "Error: electronsH invalid!!!" << endl;
-  //  if(beamValid) cout << "beamSpotH is valid tho" << endl;
-  //  else cout << "beamSpotH is invalid too." << endl;
-  //}  
-  //else {
-  //  cout << "electronsH is valid." << endl;
-  //}
-
-  bool eleValid = electronsH.isValid();
-  //bool beamValid = beamSpotH.isValid();
-  //if(!eleValid) {
-  //  cout << "Error: electronsH invalid!!!" << endl;
-  //  if(beamValid) cout << "beamSpotH is valid tho" << endl;
-  //  else cout << "beamSpotH is invalid too." << endl;
-  //}  
-  //else {
-  //  cout << "electronsH is valid." << endl;
-  //}
 
   Handle<vector<Run3ScoutingPhoton> > photonsH;
   iEvent.getByToken(photonsToken, photonsH);
