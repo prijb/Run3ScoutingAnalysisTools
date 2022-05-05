@@ -101,34 +101,12 @@ private:
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void clearVars();
-  const edm::InputTag triggerResultsTag;
-  const edm::EDGetTokenT<edm::TriggerResults> triggerResultsToken;
-  
+
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> > electronsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> > photonsToken;
   const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
 
-  std::vector<std::string> triggerPathsVector;
-  std::map<std::string, int> triggerPathsMap;
-	
-  bool doL1;       
-  triggerExpression::Data triggerCache_;
-      
-	
-  // Generator-level information
-  // Flags for the different types of triggers used in the analysis
-  // For now we are interested in events passing either the single or double lepton triggers
-  unsigned char                trig;
-       
-  edm::InputTag                algInputTag_;       
-  edm::InputTag                extInputTag_;       
-  edm::EDGetToken              algToken_;
-  //l1t::L1TGlobalUtil          *l1GtUtils_;
-  std::unique_ptr<l1t::L1TGlobalUtil> l1GtUtils_;
-  std::vector<std::string>     l1Seeds_;
-  std::vector<bool>            l1Result_;
-       
   Float16_t beamspot_x;
   Float16_t beamspot_y;
   Float16_t beamspot_z;
@@ -145,69 +123,64 @@ private:
   vector<Float16_t> genpart_vz;
   vector<Int_t> genpart_nmoms;
   vector<Int_t> genpart_mompdg;
+  vector<Bool_t> genpart_fromHardProcessBeforeFSR;
+  vector<Bool_t> genpart_fromHardProcessDecayed;
+  vector<Bool_t> genpart_fromHardProcessFS;
+  vector<Bool_t> genpart_isHardProcess;
+  vector<Bool_t> genpart_isLastCopy;
+  vector<Bool_t> genpart_isLastCopyBeforeFSR;
   vector<Bool_t> genpart_isPromptFS;
   vector<Bool_t> genpart_isPromptDec;
   vector<Bool_t> genpart_isDirectPromptTauDecayProdFS;
 
-  UInt_t n_genpartmomZ;
-  vector<Int_t> genpartmomZ_pdg;
-  vector<Float16_t> genpartmomZ_pt;
-  vector<Float16_t> genpartmomZ_eta;
-  vector<Float16_t> genpartmomZ_phi;
-  vector<Float16_t> genpartmomZ_m;
-  vector<Float16_t> genpartmomZ_vx;
-  vector<Float16_t> genpartmomZ_vy;
-  vector<Float16_t> genpartmomZ_vz;
-  vector<Bool_t> genpartmomZ_isPromptFS;
-  vector<Bool_t> genpartmomZ_isPromptDec;
-  vector<Bool_t> genpartmomZ_isDirectPromptTauDecayProdFS;
-
   //Electron
-  const static int 	max_ele = 1000;
+  const static int max_ele = 1000;
   UInt_t n_ele;
-  vector<Float16_t> 	    Electron_pt;
-  vector<Float16_t>        Electron_eta;
-  vector<Float16_t>        Electron_phi;
-  vector<Float16_t>	    Electron_m;
-  vector<Float16_t>        Electron_d0;
-  vector<Float16_t>	    Electron_dz;
-  vector<Float16_t>	    Electron_detain;
-  vector<Float16_t>	    Electron_dphiin;
-  vector<Float16_t>	    Electron_sigmaietaieta;
-  vector<Float16_t>	    Electron_hoe;
-  vector<Float16_t>	    Electron_ooemoop;
-  vector<Int_t>	    Electron_missinghits;
-  vector<Int_t>        Electron_charge;
-  vector<Float16_t>        Electron_ecaliso;
-  vector<Float16_t>	    Electron_hcaliso;
-  vector<Float16_t>        Electron_tkiso;
-  vector<Float16_t>        Electron_r9;
-  vector<Float16_t>        Electron_smin;
-  vector<Float16_t>        Electron_smaj;
-  vector<UInt_t>        Electron_seedid;
+  vector<Float16_t> Electron_pt;
+  vector<Float16_t> Electron_eta;
+  vector<Float16_t> Electron_phi;
+  vector<Float16_t> Electron_m;
+  vector<Float16_t> Electron_d0;
+  vector<Float16_t> Electron_dz;
+  vector<Float16_t> Electron_detain;
+  vector<Float16_t> Electron_dphiin;
+  vector<Float16_t> Electron_sigmaietaieta;
+  vector<Float16_t> Electron_hoe;
+  vector<Float16_t> Electron_ooemoop;
+  vector<Int_t>	Electron_missinghits;
+  vector<Int_t> Electron_charge;
+  vector<Float16_t> Electron_ecaliso;
+  vector<Float16_t> Electron_hcaliso;
+  vector<Float16_t> Electron_tkiso;
+  vector<Float16_t> Electron_r9;
+  vector<Float16_t> Electron_smin;
+  vector<Float16_t> Electron_smaj;
+  vector<UInt_t> Electron_seedid;
   vector<vector<Float16_t>> Electron_energymatrix;
+  vector<vector<uint32_t>> Electron_detids;
   vector<vector<Float16_t>> Electron_timingmatrix;
+  vector<bool> Electron_rechitzerosuppression;
 
-  //trying to get Electron supercluster energy (should be the same as E in H/E)
-  vector<Float16_t>   Electron_energy;
   //Photon
-  const static int 	max_pho = 1000;
+  const static int max_pho = 1000;
   UInt_t n_pho;
-  vector<Float16_t> 	    	Photon_pt;
-  vector<Float16_t>        	Photon_eta;
-  vector<Float16_t>        	Photon_phi;
-  vector<Float16_t>	    	Photon_m;
-  vector<Float16_t>	    	Photon_sigmaietaieta;
-  vector<Float16_t>	    	Photon_hoe;
-  vector<Float16_t>        	Photon_ecaliso;
-  vector<Float16_t>	    	Photon_hcaliso;
-  vector<Float16_t>	    	Photon_trkiso;
-  vector<Float16_t>	    	Photon_r9;
-  vector<Float16_t>	    	Photon_smin;
-  vector<Float16_t>	    	Photon_smaj;
-  vector<Float16_t>	    	Photon_seedid;
+  vector<Float16_t> Photon_pt;
+  vector<Float16_t> Photon_eta;
+  vector<Float16_t> Photon_phi;
+  vector<Float16_t> Photon_m;
+  vector<Float16_t> Photon_sigmaietaieta;
+  vector<Float16_t> Photon_hoe;
+  vector<Float16_t> Photon_ecaliso;
+  vector<Float16_t> Photon_hcaliso;
+  vector<Float16_t> Photon_trkiso;
+  vector<Float16_t> Photon_r9;
+  vector<Float16_t> Photon_smin;
+  vector<Float16_t> Photon_smaj;
+  vector<Float16_t> Photon_seedid;
   vector<vector<Float16_t>> Photon_energymatrix;
+  vector<vector<uint32_t>> Photon_detids;
   vector<vector<Float16_t>> Photon_timingmatrix;
+  vector<bool> Photon_rechitzerosuppression;
 
   // TTree carrying the event weight information
   TTree* tree;
@@ -219,50 +192,28 @@ private:
 };
 
 EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& iConfig): 
-  triggerResultsTag        (iConfig.getParameter<edm::InputTag>("triggerresults")),
-  triggerResultsToken      (consumes<edm::TriggerResults>                    (triggerResultsTag)),
   beamSpotToken(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamspot"))),
-  electronsToken           (consumes<std::vector<Run3ScoutingElectron> >         (iConfig.getParameter<edm::InputTag>("electrons"))), 
-  photonsToken           (consumes<std::vector<Run3ScoutingPhoton> >         (iConfig.getParameter<edm::InputTag>("photons"))), 
-  gensToken                (consumes<std::vector<reco::GenParticle> >        (iConfig.getParameter<edm::InputTag>("gens"))),
-  doL1                     (iConfig.existsAs<bool>("doL1")               ?    iConfig.getParameter<bool>  ("doL1")            : false)
-{
-  usesResource("TFileService");
-  if (doL1) {
-   algInputTag_ = iConfig.getParameter<edm::InputTag>("AlgInputTag");
-   extInputTag_ = iConfig.getParameter<edm::InputTag>("l1tExtBlkInputTag");
-   algToken_ = consumes<BXVector<GlobalAlgBlk>>(algInputTag_);
-   l1Seeds_ = iConfig.getParameter<std::vector<std::string> >("l1Seeds");
-    /* l1GtUtils_ = new l1t::L1TGlobalUtil(iConfig,consumesCollector());*/	
-   l1GtUtils_ = std::make_unique<l1t::L1TGlobalUtil>(
-    iConfig, consumesCollector(), *this, algInputTag_, extInputTag_, l1t::UseEventSetupIn::Event);
-  }
-  else {
-    l1Seeds_ = std::vector<std::string>();
-    l1GtUtils_ = 0;
-  }
+  electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
+  photonsToken(consumes<std::vector<Run3ScoutingPhoton> >(iConfig.getParameter<edm::InputTag>("photons"))), 
+  gensToken(consumes<std::vector<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("gens"))) {
 
- // Access the TFileService
+  usesResource("TFileService");
+
+  // Access the TFileService
   edm::Service<TFileService> fs;
 
   // Create the TTree
   tree = fs->make<TTree>("tree"       , "tree");
 
-  // Event weights
-    
+  // Event details  
   tree->Branch("lumSec"		, &lumSec			 , "lumSec/i" );
   tree->Branch("run"			, &run				 , "run/i" );
     
-  // Triggers
-  tree->Branch("trig"                 , &trig                          , "trig/b");
-  tree->Branch("l1Result"		, "std::vector<bool>"             ,&l1Result_	, 32000, 0);		
-  // Pileup info
-  //tree->Branch("nvtx"                 , &nvtx                          , "nvtx/i"       );
-
+  // Beamspot info
   tree->Branch("beamspot_x", &beamspot_x, "beamspot_x/f");
   tree->Branch("beamspot_y", &beamspot_y, "beamspot_y/f");
   tree->Branch("beamspot_z", &beamspot_z, "beamspot_z/f");
-
+  
   // Gen level particles
   tree->Branch("n_genpart", &n_gen, "n_genpart/i");
   tree->Branch("genpart_pdg", &genpart_pdg);
@@ -275,23 +226,16 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("genpart_vz", &genpart_vz);
   tree->Branch("genpart_nmoms", &genpart_nmoms);
   tree->Branch("genpart_mompdg", &genpart_mompdg);
+  tree->Branch("genpart_fromHardProcessBeforeFSR", &genpart_fromHardProcessBeforeFSR);
+  tree->Branch("genpart_fromHardProcessDecayed", &genpart_fromHardProcessDecayed);
+  tree->Branch("genpart_fromHardProcessFS", &genpart_fromHardProcessFS);
+  tree->Branch("genpart_isHardProcess", &genpart_isHardProcess);
+  tree->Branch("genpart_isLastCopy", &genpart_isLastCopy);
+  tree->Branch("genpart_isLastCopyBeforeFSR", &genpart_isLastCopyBeforeFSR);
   tree->Branch("genpart_isPromptFS", &genpart_isPromptFS);
   tree->Branch("genpart_isPromptDec", &genpart_isPromptDec);
   tree->Branch("genpart_isDirectPromptTauDecayProdFS", &genpart_isDirectPromptTauDecayProdFS);
-
-  tree->Branch("n_genpartmomZ", &n_genpartmomZ, "n_genpartmomZ/i");
-  tree->Branch("genpartmomZ_pdg", &genpartmomZ_pdg);
-  tree->Branch("genpartmomZ_pt", &genpartmomZ_pt);
-  tree->Branch("genpartmomZ_eta", &genpartmomZ_eta);
-  tree->Branch("genpartmomZ_phi", &genpartmomZ_phi);
-  tree->Branch("genpartmomZ_m", &genpartmomZ_m);
-  tree->Branch("genpartmomZ_vx", &genpartmomZ_vx);
-  tree->Branch("genpartmomZ_vy", &genpartmomZ_vy);
-  tree->Branch("genpartmomZ_vz", &genpartmomZ_vz);
-  tree->Branch("genpartmomZ_isPromptFS", &genpartmomZ_isPromptFS);
-  tree->Branch("genpartmomZ_isPromptDec", &genpartmomZ_isPromptDec);
-  tree->Branch("genpartmomZ_isDirectPromptTauDecayProdFS", &genpartmomZ_isDirectPromptTauDecayProdFS);
-
+  
   //Electrons
   tree->Branch("n_ele", &n_ele, "n_ele/i");
   tree->Branch("Electron_pt", &Electron_pt);
@@ -315,7 +259,10 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Electron_smaj", &Electron_smin);
   tree->Branch("Electron_seedid", &Electron_seedid);
   tree->Branch("Electron_energymatrix", &Electron_energymatrix);
+  tree->Branch("Electron_energymatrix", &Electron_energymatrix);
+  tree->Branch("Electron_detids", &Electron_detids);
   tree->Branch("Electron_timingmatrix", &Electron_timingmatrix);
+  tree->Branch("Electron_rechitzerosuppression", &Electron_rechitzerosuppression);
   
   //Photons
   tree->Branch("n_pho", &n_pho, "n_pho/i");
@@ -333,7 +280,9 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Photon_smaj", &Photon_smaj);
   tree->Branch("Photon_seedid", &Photon_seedid);
   tree->Branch("Photon_energymatrix", &Photon_energymatrix);
+  tree->Branch("Photon_detids", &Photon_detids);
   tree->Branch("Photon_timingmatrix", &Photon_timingmatrix);
+  tree->Branch("Photon_rechitzerosuppression", &Photon_rechitzerosuppression);
 }
 
 
@@ -341,24 +290,20 @@ EGammaOnly_ScoutingNanoAOD::~EGammaOnly_ScoutingNanoAOD() {
 }
 
 void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
   using namespace edm;
   using namespace std;
   using namespace reco;
   using namespace fastjet;
   using namespace fastjet::contrib;
       
-  //cout << "about to try to get the handles." << endl;
-  // Handles to the EDM content
-  edm::Handle<edm::TriggerResults> triggerResultsH;
-  iEvent.getByToken(triggerResultsToken, triggerResultsH);
-    
   edm::Handle<reco::BeamSpot> beamSpotH;
   iEvent.getByToken(beamSpotToken, beamSpotH);
+  bool beamValid = beamSpotH.isValid();
 
   Handle<vector<Run3ScoutingElectron> > electronsH;
   iEvent.getByToken(electronsToken, electronsH);
   bool eleValid = electronsH.isValid();
-  bool beamValid = beamSpotH.isValid();
 
   Handle<vector<Run3ScoutingPhoton> > photonsH;
   iEvent.getByToken(photonsToken, photonsH);
@@ -367,165 +312,126 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   Handle<vector<reco::GenParticle> >gensH;
   iEvent.getByToken(gensToken, gensH);
 
-  //Handle<Float_t>gensT0H;
-  //iEvent.getByToken(gensT0Token, gensT0H);
-
   run = iEvent.eventAuxiliary().run();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
-  //cout<<"Run number: "<<run<<". Lumi: "<<lumSec<<endl;
-  //cout << "handles and junk gotten." << endl; 
-  // Which triggers fired
-  for (size_t i = 0; i < triggerPathsVector.size(); i++) {
-    if (triggerPathsMap[triggerPathsVector[i]] == -1) continue;
-    if (i == 0  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=   1; // DST_L1DoubleMu_CaloScouting_PFScouting
-    if (i == 1  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=   2; // DST_DoubleMu3_Mass10_CaloScouting_PFScouting
-    if (i == 2  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=   4; // DST_ZeroBias_CaloScouting_PFScouting
-    if (i == 3  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=   8; // DST_L1HTT_CaloScouting_PFScouting
-    if (i == 4  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=  16; // DST_CaloJet40_CaloScouting_PFScouting
-    if (i == 5  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=  32; // DST_HT250_CaloScouting
-    if (i == 6  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig +=  64; // DST_HT410_PFScouting
-    if (i == 7  && triggerResultsH->accept(triggerPathsMap[triggerPathsVector[i]])) trig += 128; // DST_HT450_PFScouting
-  }
 
-  beamspot_x = beamSpotH->x0();
-  beamspot_y = beamSpotH->y0();
-  beamspot_z = beamSpotH->z0();
+  // beamspot
+  if(beamValid) {
+    beamspot_x = beamSpotH->x0();
+    beamspot_y = beamSpotH->y0();
+    beamspot_z = beamSpotH->z0();
+  }
+  else {
+    beamspot_x = 1e20;
+    beamspot_y = 1e20;
+    beamspot_z = 1e20;
+  }
   
-//  /////////////////// for genmatching /////////////////////////////////////////////
-  n_gen=0;
-  n_genpartmomZ = 0;
-  cout << "gensH isValid: " << gensH.isValid() << endl;
-  if(gensH.isValid())
-  for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
-    //cout << "starting loop iteration " << n_gen << endl;
-    //cout << "this particle is: " << gen_iter->pdgId() << endl;
-    int nmoms = 0;
-    if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) {
-      genpart_pdg.push_back(gen_iter->pdgId());
-      genpart_pt.push_back(gen_iter->pt());
-      genpart_eta.push_back(gen_iter->eta());
-      genpart_phi.push_back(gen_iter->phi());
-      genpart_m.push_back(gen_iter->mass());
-      genpart_vx.push_back(gen_iter->vx());
-      genpart_vy.push_back(gen_iter->vy());
-      genpart_vz.push_back(gen_iter->vz());
-      //cout << "now will push back mothers." << endl;
-      nmoms = gen_iter->numberOfMothers();
-      genpart_nmoms.push_back(nmoms);
-      //cout << "nmoms found: " << nmoms << endl;
-      if(gen_iter->numberOfMothers() > 0) genpart_mompdg.push_back(gen_iter->mother(0)->pdgId());
-      //cout << "mom pdg found." << endl;
-      genpart_isPromptFS.push_back(gen_iter->isPromptFinalState());
-      //cout << "mom ispromptFinal found." << endl;
-      genpart_isPromptDec.push_back(gen_iter->isPromptDecayed());
-      //cout << "mom ispromptDecayed found." << endl;
-      genpart_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
-      n_gen++;
-    } //end if gen lepton
-    //if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15) && gen_iter->isLastCopy() ){ 
-    //std::cout<<n_gen<<"\t"<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<std::endl;
-    //std::cout<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<"\t"<<gen_iter->numberOfDaughters()<<"\t"<<gen_iter->numberOfMothers()<<"\t"<<gen_iter->fromHardProcessBeforeFSR()<<"\t"<<gen_iter->fromHardProcessDecayed()<<"\t"<<gen_iter->fromHardProcessFinalState()<<std::endl;
-    //}
-    //cout << "starting 2nd if statement." << endl;
-    if( nmoms > 0 && ((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) && 
-	(std::abs(gen_iter->mother(0)->pdgId())==23 || std::abs(gen_iter->mother(0)->pdgId())==22)) {
-      genpartmomZ_pdg.push_back(gen_iter->pdgId());
-      genpartmomZ_pt.push_back(gen_iter->pt());
-      genpartmomZ_eta.push_back(gen_iter->eta());
-      genpartmomZ_phi.push_back(gen_iter->phi());
-      genpartmomZ_m.push_back(gen_iter->mass());
-      genpartmomZ_vx.push_back(gen_iter->vx());
-      genpartmomZ_vy.push_back(gen_iter->vy());
-      genpartmomZ_vz.push_back(gen_iter->vz());      
-      genpartmomZ_isPromptFS.push_back(gen_iter->isPromptFinalState());
-      genpartmomZ_isPromptDec.push_back(gen_iter->isPromptDecayed());
-      genpartmomZ_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
-      n_genpartmomZ++;
-    } //end if gen lepton, offspring of photon or Z
-    //cout << "ended loop iteration " << n_gen << endl;
-  } //end for genpart loop
-  //cout << "ended whole gen_iter loop." << endl;
- ////////////////////// for gen matching (I think) ////////////////////////////////////////// 
+  ///////////////////// for genmatching /////////////////////////////////////////////
 
+  n_gen=0;
+
+  if(gensH.isValid()) {
+
+    for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
+      
+      int nmoms = 0;
+      if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) {
+	
+	genpart_pdg.push_back(gen_iter->pdgId());
+	genpart_pt.push_back(gen_iter->pt());
+	genpart_eta.push_back(gen_iter->eta());
+	genpart_phi.push_back(gen_iter->phi());
+	genpart_m.push_back(gen_iter->mass());
+	genpart_vx.push_back(gen_iter->vx());
+	genpart_vy.push_back(gen_iter->vy());
+	genpart_vz.push_back(gen_iter->vz());
+	
+	nmoms = gen_iter->numberOfMothers();
+	genpart_nmoms.push_back(nmoms);
+	if(gen_iter->numberOfMothers() > 0) genpart_mompdg.push_back(gen_iter->mother(0)->pdgId());
+
+	genpart_fromHardProcessBeforeFSR.push_back(gen_iter->fromHardProcessBeforeFSR());
+	genpart_fromHardProcessDecayed.push_back(gen_iter->fromHardProcessDecayed());
+	genpart_fromHardProcessFS.push_back(gen_iter->fromHardProcessFinalState());
+	genpart_isHardProcess.push_back(gen_iter->isHardProcess());
+	genpart_isLastCopy.push_back(gen_iter->isLastCopy());
+	genpart_isLastCopyBeforeFSR.push_back(gen_iter->isLastCopyBeforeFSR());
+	genpart_isPromptFS.push_back(gen_iter->isPromptFinalState());
+	genpart_isPromptDec.push_back(gen_iter->isPromptDecayed());
+	genpart_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
+
+	n_gen++;
+      } //end if gen lepton
+
+    } //end for genpart loop
+
+  } // end of gensH.isValid()
+  
   n_ele = 0;
-  //cout << "now about to start the electrons loop." << endl;
-  //for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) {
-  if(eleValid)
-  for (auto &ele : *electronsH) {
-    auto *electrons_iter = &ele;
-    //cout << "started the loop." << endl;
-    Electron_pt.push_back(electrons_iter->pt());
-    Electron_eta.push_back(electrons_iter->eta());
-    Electron_phi.push_back(electrons_iter->phi());	
-    Electron_m.push_back(electrons_iter->m());
-    Electron_d0.push_back(electrons_iter->d0());
-    Electron_dz.push_back(electrons_iter->dz());
-    Electron_detain.push_back(electrons_iter->dEtaIn());
-    Electron_dphiin.push_back(electrons_iter->dPhiIn());
-    Electron_sigmaietaieta.push_back(electrons_iter->sigmaIetaIeta());
-    Electron_hoe.push_back(electrons_iter->hOverE());	
-    Electron_ooemoop.push_back(electrons_iter->ooEMOop());
-    Electron_missinghits.push_back(electrons_iter->missingHits());
-    Electron_charge.push_back(electrons_iter->charge());
-    Electron_ecaliso.push_back(electrons_iter->ecalIso());
-    Electron_hcaliso.push_back(electrons_iter->hcalIso());
-    Electron_tkiso.push_back(electrons_iter->trackIso());
-    Electron_r9.push_back(electrons_iter->r9());
-    Electron_smin.push_back(electrons_iter->sMin());
-    Electron_smaj.push_back(electrons_iter->sMaj());
-    Electron_seedid.push_back(electrons_iter->seedId());
-    Electron_energymatrix.push_back(electrons_iter->energyMatrix());
-    Electron_timingmatrix.push_back(electrons_iter->timingMatrix());
-    n_ele++;
-    //cout << "finished an iteration of the electrons loop." << endl;
-  }
-  //cout << "electrons loop finished." << endl; 
+
+  if(eleValid) {
+    for (auto &ele : *electronsH) {
+      auto *electrons_iter = &ele;
+      Electron_pt.push_back(electrons_iter->pt());
+      Electron_eta.push_back(electrons_iter->eta());
+      Electron_phi.push_back(electrons_iter->phi());	
+      Electron_m.push_back(electrons_iter->m());
+      Electron_d0.push_back(electrons_iter->d0());
+      Electron_dz.push_back(electrons_iter->dz());
+      Electron_detain.push_back(electrons_iter->dEtaIn());
+      Electron_dphiin.push_back(electrons_iter->dPhiIn());
+      Electron_sigmaietaieta.push_back(electrons_iter->sigmaIetaIeta());
+      Electron_hoe.push_back(electrons_iter->hOverE());	
+      Electron_ooemoop.push_back(electrons_iter->ooEMOop());
+      Electron_missinghits.push_back(electrons_iter->missingHits());
+      Electron_charge.push_back(electrons_iter->charge());
+      Electron_ecaliso.push_back(electrons_iter->ecalIso());
+      Electron_hcaliso.push_back(electrons_iter->hcalIso());
+      Electron_tkiso.push_back(electrons_iter->trackIso());
+      Electron_r9.push_back(electrons_iter->r9());
+      Electron_smin.push_back(electrons_iter->sMin());
+      Electron_smaj.push_back(electrons_iter->sMaj());
+      Electron_seedid.push_back(electrons_iter->seedId());
+      Electron_energymatrix.push_back(electrons_iter->energyMatrix());
+      Electron_detids.push_back(electrons_iter->detIds());
+      Electron_timingmatrix.push_back(electrons_iter->timingMatrix());
+      //Electron_rechitzerosuppression.push_back(electrons_iter->rechitZeroSuppression());
+      n_ele++;
+
+    } // end electron loop
+  } // end eleValid condition
+
   n_pho = 0;
   
-  if(phoValid)
-  for (auto photons_iter = photonsH->begin(); photons_iter != photonsH->end(); ++photons_iter) {
-    Photon_pt.push_back(photons_iter->pt());
-    Photon_eta.push_back(photons_iter->eta());
-    Photon_phi.push_back(photons_iter->phi());
-    Photon_m.push_back(photons_iter->m());
-    Photon_sigmaietaieta.push_back(photons_iter->sigmaIetaIeta());
-    Photon_hoe.push_back(photons_iter->hOverE());
-    Photon_ecaliso.push_back(photons_iter->ecalIso());
-    Photon_hcaliso.push_back(photons_iter->hcalIso());
-    Photon_trkiso.push_back(photons_iter->trkIso());
-    Photon_r9.push_back(photons_iter->r9());
-    Photon_smin.push_back(photons_iter->sMin());
-    Photon_smaj.push_back(photons_iter->sMaj());
-    Photon_seedid.push_back(photons_iter->seedId());
-    Photon_energymatrix.push_back(photons_iter->energyMatrix());
-    Photon_timingmatrix.push_back(photons_iter->timingMatrix());
-    
-    n_pho++;
-  }
+  if(phoValid) {
+
+    for (auto &pho : *photonsH) {
+      auto *photons_iter = &pho;
+      Photon_pt.push_back(photons_iter->pt());
+      Photon_eta.push_back(photons_iter->eta());
+      Photon_phi.push_back(photons_iter->phi());
+      Photon_m.push_back(photons_iter->m());
+      Photon_sigmaietaieta.push_back(photons_iter->sigmaIetaIeta());
+      Photon_hoe.push_back(photons_iter->hOverE());
+      Photon_ecaliso.push_back(photons_iter->ecalIso());
+      Photon_hcaliso.push_back(photons_iter->hcalIso());
+      Photon_trkiso.push_back(photons_iter->trkIso());
+      Photon_r9.push_back(photons_iter->r9());
+      Photon_smin.push_back(photons_iter->sMin());
+      Photon_smaj.push_back(photons_iter->sMaj());
+      Photon_seedid.push_back(photons_iter->seedId());
+      Photon_energymatrix.push_back(photons_iter->energyMatrix());
+      Photon_detids.push_back(photons_iter->detIds());
+      Photon_timingmatrix.push_back(photons_iter->timingMatrix());
+      //Photon_rechitzerosuppression.push_back(photons_iter->rechitZeroSuppression());
+      n_pho++;
+
+    } // end photon loop
+  } // end phoValid condition
   
- if (doL1) {
-    l1GtUtils_->retrieveL1(iEvent,iSetup,algToken_);
-    	for( int r = 0; r<280; r++){
-	string name ("empty");
-	bool algoName_ = false;
-	algoName_ = l1GtUtils_->getAlgNameFromBit(r,name);
-	cout << "getAlgNameFromBit = " << algoName_  << endl;
-	cout << "L1 bit number = " << r << " ; L1 bit name = " << name << endl;
-	}
-    for( unsigned int iseed = 0; iseed < l1Seeds_.size(); iseed++ ) {
-      bool l1htbit = 0;	
-			
-      l1GtUtils_->getFinalDecisionByName(string(l1Seeds_[iseed]), l1htbit);
-      //cout<<string(l1Seeds_[iseed])<<"  "<<l1htbit<<endl;
-      l1Result_.push_back( l1htbit );
-      }
- }
-
- 
-
- tree->Fill();	
- clearVars();
-
+  tree->Fill();	
+  clearVars(); 
 }
 
 void EGammaOnly_ScoutingNanoAOD::clearVars(){
@@ -542,17 +448,6 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   genpart_isPromptFS.clear();
   genpart_isPromptDec.clear();
   genpart_isDirectPromptTauDecayProdFS.clear();
-  genpartmomZ_pdg.clear();
-  genpartmomZ_pt.clear();
-  genpartmomZ_eta.clear();
-  genpartmomZ_phi.clear();
-  genpartmomZ_m.clear();
-  genpartmomZ_vx.clear();
-  genpartmomZ_vy.clear();
-  genpartmomZ_vz.clear();
-  genpartmomZ_isPromptFS.clear();
-  genpartmomZ_isPromptDec.clear();
-  genpartmomZ_isDirectPromptTauDecayProdFS.clear();
   Electron_pt.clear();
   Electron_eta.clear();
   Electron_phi.clear();
@@ -574,7 +469,9 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Electron_smaj.clear();
   Electron_seedid.clear();
   Electron_energymatrix.clear();
+  Electron_detids.clear();
   Electron_timingmatrix.clear();
+  Electron_rechitzerosuppression.clear();
   Photon_pt.clear();
   Photon_eta.clear();
   Photon_phi.clear();
@@ -589,7 +486,9 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Photon_smaj.clear();
   Photon_seedid.clear();
   Photon_energymatrix.clear();
+  Photon_detids.clear();
   Photon_timingmatrix.clear();
+  Photon_rechitzerosuppression.clear();
 }
 
 void EGammaOnly_ScoutingNanoAOD::beginJob() {
@@ -600,34 +499,6 @@ void EGammaOnly_ScoutingNanoAOD::endJob() {
 }
 
 void EGammaOnly_ScoutingNanoAOD::beginRun(edm::Run const& iRun, edm::EventSetup const& iSetup) {
-  // HLT paths
-
-  triggerPathsVector.push_back("DST_DoubleMu1_noVtx_CaloScouting_v*");
-  triggerPathsVector.push_back("DST_DoubleMu3_noVtx_CaloScouting_v*");
-  triggerPathsVector.push_back("DST_DoubleMu3_noVtx_Mass10_PFScouting_v*");
-  triggerPathsVector.push_back("DST_L1HTT_CaloScouting_PFScouting_v*");
-  triggerPathsVector.push_back("DST_CaloJet40_CaloScouting_PFScouting_v*");
-  triggerPathsVector.push_back("DST_HT250_CaloScouting_v*");
-  triggerPathsVector.push_back("DST_HT410_PFScouting_v*");
-  triggerPathsVector.push_back("DST_HT450_PFScouting_v*");
-
-  HLTConfigProvider hltConfig;
-  bool changedConfig = false;
-  hltConfig.init(iRun, iSetup, triggerResultsTag.process(), changedConfig);
-
-  for (size_t i = 0; i < triggerPathsVector.size(); i++) {
-    triggerPathsMap[triggerPathsVector[i]] = -1;
-  }
-
-  for(size_t i = 0; i < triggerPathsVector.size(); i++){
-    TPRegexp pattern(triggerPathsVector[i]);
-    for(size_t j = 0; j < hltConfig.triggerNames().size(); j++){
-      std::string pathName = hltConfig.triggerNames()[j];
-      if(TString(pathName).Contains(pattern)){
-	triggerPathsMap[triggerPathsVector[i]] = j;
-      }
-    }
-  }
 }
 
 void EGammaOnly_ScoutingNanoAOD::endRun(edm::Run const&, edm::EventSetup const&) {
