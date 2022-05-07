@@ -7,3 +7,4 @@ Analysis/test/runCrabQCD*
 Analysis/test/runCrabDYJets*
 *.out
 *dirplots*
+*.Efmrl

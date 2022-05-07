@@ -1,0 +1,15 @@
+executable = jobTemplate.sh
+arguments = $(Step)
+
+should_transfer_files = yes
+when_to_transfer_output = ON_EXIT
+
+error = err$(Step).Efmrl$(Item)
+output = out$(Step).Efmrl$(Item)
+log = log$(Step).Efmrl$(Item)
+
+request_cpus = 1
+request_memory = 2048MB
+request_disk = 2048MB
+
+queue 10
