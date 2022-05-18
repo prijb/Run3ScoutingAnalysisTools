@@ -107,6 +107,17 @@ private:
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> > photonsToken;
   const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
 
+  // Branches for L1 info
+  edm::InputTag algInputTag_;
+  edm::InputTag extInputTag_;
+  edm::EDGetToken algToken_;
+  std::unique_ptr<l1t::L1TGlobalUtil> l1GtUtils_;
+
+  // L1 trigger branches
+  bool doL1;
+  std::vector<std::string> l1Seeds_;
+  std::vector<bool> l1Result_;
+
   Float16_t beamspot_x;
   Float16_t beamspot_y;
   Float16_t beamspot_z;
@@ -195,9 +206,23 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   beamSpotToken(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamspot"))),
   electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
   photonsToken(consumes<std::vector<Run3ScoutingPhoton> >(iConfig.getParameter<edm::InputTag>("photons"))), 
-  gensToken(consumes<std::vector<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("gens"))) {
+  gensToken(consumes<std::vector<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("gens"))),
+  doL1(iConfig.existsAs<bool>("doL1")?iConfig.getParameter<bool>("doL1"):false) {
 
   usesResource("TFileService");
+
+  // If doL1, access necessary heads for L1 algorithm
+  if(doL1) {
+    algInputTag_ = iConfig.getParameter<edm::InputTag>("AlgInputTag");
+    extInputTag_ = iConfig.getParameter<edm::InputTag>("l1tExtBlkInputTag");
+    algToken_ = consumes<BXVector<GlobalAlgBlk>>(algInputTag_);
+    l1Seeds_ = iConfig.getParameter<std::vector<std::string> >("l1Seeds");
+    l1GtUtils_ = std::make_unique<l1t::L1TGlobalUtil>(iConfig, consumesCollector(), *this, algInputTag_, extInputTag_, l1t::UseEventSetupIn::Event);
+  }
+  else {
+    l1Seeds_ = std::vector<std::string>();
+    l1GtUtils_ = 0;
+  }
 
   // Access the TFileService
   edm::Service<TFileService> fs;
@@ -206,9 +231,12 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree = fs->make<TTree>("tree"       , "tree");
 
   // Event details  
-  tree->Branch("lumSec"		, &lumSec			 , "lumSec/i" );
-  tree->Branch("run"			, &run				 , "run/i" );
+  tree->Branch("lumSec", &lumSec, "lumSec/i" );
+  tree->Branch("run", &run, "run/i" );
     
+  // L1 info
+  tree->Branch("l1Result", "std::vector<bool>", &l1Result_, 32000, 0);
+
   // Beamspot info
   tree->Branch("beamspot_x", &beamspot_x, "beamspot_x/f");
   tree->Branch("beamspot_y", &beamspot_y, "beamspot_y/f");
@@ -284,7 +312,6 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Photon_timingmatrix", &Photon_timingmatrix);
   tree->Branch("Photon_rechitzerosuppression", &Photon_rechitzerosuppression);
 }
-
 
 EGammaOnly_ScoutingNanoAOD::~EGammaOnly_ScoutingNanoAOD() {
 }
@@ -429,6 +456,27 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 
     } // end photon loop
   } // end phoValid condition
+
+  // Fill L1 seeds
+  if(doL1) {
+    l1GtUtils_->retrieveL1(iEvent,iSetup,algToken_);
+    for( int r = 0; r<506; r++){
+      string name("empty");
+      //bool algoName_ = false;
+      //algoName_ = l1GtUtils_->getAlgNameFromBit(r,name);
+      l1GtUtils_->getAlgNameFromBit(r,name);
+      //cout << "getAlgNameFromBit = " << algoName_  << endl;
+      //cout << "L1 bit number = " << r << " ; L1 bit name = " << name << endl;
+    }
+    for( unsigned int iseed = 0; iseed < l1Seeds_.size(); iseed++ ) {
+      bool l1htbit = 0;
+      
+      l1GtUtils_->getFinalDecisionByName(string(l1Seeds_[iseed]), l1htbit);
+      //cout<<string(l1Seeds_[iseed])<<"  "<<l1htbit<<endl;
+      l1Result_.push_back( l1htbit );
+    }
+  }
+
   
   tree->Fill();	
   clearVars(); 
@@ -489,6 +537,7 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Photon_detids.clear();
   Photon_timingmatrix.clear();
   Photon_rechitzerosuppression.clear();
+  l1Result_.clear();
 }
 
 void EGammaOnly_ScoutingNanoAOD::beginJob() {
