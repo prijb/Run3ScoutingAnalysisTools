@@ -1,5 +1,5 @@
 echo "Compiling the C++ files: "
-g++ robustanalyzermain.C data_robustanalyzer.C `root-config --cflags --glibs` -o data_robustanalyzer.out
+g++ -I /home/arsahasransu/Software/madgraph/MG5_aMC_v2_7_0/HEPTools/boost/include/ robustanalyzermain.C data_robustanalyzer.C `root-config --cflags --glibs` -o data_robustanalyzer.out
 
 echo "Compiling successful. Begin execution."
 
@@ -28,10 +28,12 @@ echo "Run over. Clean up and combine files."
 
 rm data_robustanalyzer.out
 
-hadd -f hists_DYToLLM50.root hists_DYToLLM50_?.root
-hadd -f hists_QCDPt20To30EmEnriched.root hists_QCDPt20To30EmEnriched_?.root
-hadd -f hists_QCDPt30To50EmEnriched.root hists_QCDPt30To50EmEnriched_?.root
+hadd -f hists_DoubleElectronGunPt1To300.root hists_DoubleElectronGunPt1To300_?.root
+#hadd -f hists_DoubleElectronGunPt1To300Old.root hists_DoubleElectronGunPt1To300Old_?.root
+#hadd -f hists_QCDPt20To30EmEnriched.root hists_QCDPt20To30EmEnriched_?.root
+#hadd -f hists_QCDPt30To50EmEnriched.root hists_QCDPt30To50EmEnriched_?.root
 
-rm hists_DYToLLM50_?.root
-rm hists_QCDPt20To30EmEnriched_?.root
-rm hists_QCDPt30To50EmEnriched_?.root
+rm hists_DoubleElectronGunPt1To300_?.root
+#rm hists_DoubleElectronGunPt1To300Old_?.root
+#rm hists_QCDPt20To30EmEnriched_?.root
+#rm hists_QCDPt30To50EmEnriched_?.root
