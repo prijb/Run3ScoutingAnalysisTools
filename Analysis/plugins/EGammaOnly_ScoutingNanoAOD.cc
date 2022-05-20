@@ -2,11 +2,11 @@
 #include <memory>
 #include <vector>
 #include <iostream>
+#include <boost/phoenix.hpp>
 
 // ROOT includes
 #include "TLorentzVector.h"
 #include "TPRegexp.h"
-#include "TLorentzVector.h"
 #include "TFile.h"
 #include "TTree.h"
 #include "TMath.h"
@@ -59,28 +59,7 @@
 
 // Other relevant CMSSW includes
 #include "CommonTools/UtilAlgos/interface/TFileService.h" 
-#include "HLTrigger/HLTcore/interface/HLTConfigProvider.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionData.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionEvaluator.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionParser.h"
 #include "L1Trigger/L1TGlobal/interface/L1TGlobalUtil.h"
-#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
-#include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "RecoVertex/KalmanVertexFit/interface/KalmanVertexFitter.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
-
-// User include files
-#include "fastjet/ClusterSequence.hh"
-#include "fastjet/ClusterSequenceArea.hh"
-#include "fastjet/contrib/Nsubjettiness.hh"
-#include "fastjet/contrib/XConePlugin.hh"
-#include "fastjet/contrib/SoftDrop.hh"
-#include "fastjet/tools/Pruner.hh"
-#include "fastjet/tools/Filter.hh"
-#include "fastjet/contrib/RecursiveSoftDrop.hh"
-#include "fastjet/contrib/EnergyCorrelator.hh"
-#include "fastjet/JadePlugin.hh"
-#include "fastjet/contrib/SoftKiller.hh"
 
 using namespace std;
 
@@ -101,6 +80,9 @@ private:
   virtual void beginLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void clearVars();
+
+  // Flag for simualtion processing
+  Bool_t isMC;
 
   const edm::EDGetTokenT<reco::BeamSpot> beamSpotToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> > electronsToken;
@@ -203,6 +185,7 @@ private:
 };
 
 EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& iConfig): 
+  isMC(iConfig.existsAs<bool>("isMC")?iConfig.getParameter<bool>("isMC"):true),
   beamSpotToken(consumes<reco::BeamSpot>(iConfig.getParameter<edm::InputTag>("beamspot"))),
   electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
   photonsToken(consumes<std::vector<Run3ScoutingPhoton> >(iConfig.getParameter<edm::InputTag>("photons"))), 
@@ -243,27 +226,29 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("beamspot_z", &beamspot_z, "beamspot_z/f");
   
   // Gen level particles
-  tree->Branch("n_genpart", &n_gen, "n_genpart/i");
-  tree->Branch("genpart_pdg", &genpart_pdg);
-  tree->Branch("genpart_pt", &genpart_pt);
-  tree->Branch("genpart_eta", &genpart_eta);
-  tree->Branch("genpart_phi", &genpart_phi);
-  tree->Branch("genpart_m", &genpart_m);
-  tree->Branch("genpart_vx", &genpart_vx);
-  tree->Branch("genpart_vy", &genpart_vy);
-  tree->Branch("genpart_vz", &genpart_vz);
-  tree->Branch("genpart_nmoms", &genpart_nmoms);
-  tree->Branch("genpart_mompdg", &genpart_mompdg);
-  tree->Branch("genpart_fromHardProcessBeforeFSR", &genpart_fromHardProcessBeforeFSR);
-  tree->Branch("genpart_fromHardProcessDecayed", &genpart_fromHardProcessDecayed);
-  tree->Branch("genpart_fromHardProcessFS", &genpart_fromHardProcessFS);
-  tree->Branch("genpart_isHardProcess", &genpart_isHardProcess);
-  tree->Branch("genpart_isLastCopy", &genpart_isLastCopy);
-  tree->Branch("genpart_isLastCopyBeforeFSR", &genpart_isLastCopyBeforeFSR);
-  tree->Branch("genpart_isPromptFS", &genpart_isPromptFS);
-  tree->Branch("genpart_isPromptDec", &genpart_isPromptDec);
-  tree->Branch("genpart_isDirectPromptTauDecayProdFS", &genpart_isDirectPromptTauDecayProdFS);
-  
+  if(isMC) {
+    tree->Branch("n_genpart", &n_gen, "n_genpart/i");
+    tree->Branch("genpart_pdg", &genpart_pdg);
+    tree->Branch("genpart_pt", &genpart_pt);
+    tree->Branch("genpart_eta", &genpart_eta);
+    tree->Branch("genpart_phi", &genpart_phi);
+    tree->Branch("genpart_m", &genpart_m);
+    tree->Branch("genpart_vx", &genpart_vx);
+    tree->Branch("genpart_vy", &genpart_vy);
+    tree->Branch("genpart_vz", &genpart_vz);
+    tree->Branch("genpart_nmoms", &genpart_nmoms);
+    tree->Branch("genpart_mompdg", &genpart_mompdg);
+    tree->Branch("genpart_fromHardProcessBeforeFSR", &genpart_fromHardProcessBeforeFSR);
+    tree->Branch("genpart_fromHardProcessDecayed", &genpart_fromHardProcessDecayed);
+    tree->Branch("genpart_fromHardProcessFS", &genpart_fromHardProcessFS);
+    tree->Branch("genpart_isHardProcess", &genpart_isHardProcess);
+    tree->Branch("genpart_isLastCopy", &genpart_isLastCopy);
+    tree->Branch("genpart_isLastCopyBeforeFSR", &genpart_isLastCopyBeforeFSR);
+    tree->Branch("genpart_isPromptFS", &genpart_isPromptFS);
+    tree->Branch("genpart_isPromptDec", &genpart_isPromptDec);
+    tree->Branch("genpart_isDirectPromptTauDecayProdFS", &genpart_isDirectPromptTauDecayProdFS);
+  }
+
   //Electrons
   tree->Branch("n_ele", &n_ele, "n_ele/i");
   tree->Branch("Electron_pt", &Electron_pt);
@@ -321,8 +306,6 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   using namespace edm;
   using namespace std;
   using namespace reco;
-  using namespace fastjet;
-  using namespace fastjet::contrib;
       
   edm::Handle<reco::BeamSpot> beamSpotH;
   iEvent.getByToken(beamSpotToken, beamSpotH);
@@ -337,7 +320,9 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   bool phoValid = photonsH.isValid();
 
   Handle<vector<reco::GenParticle> >gensH;
-  iEvent.getByToken(gensToken, gensH);
+  if(isMC) {
+    iEvent.getByToken(gensToken, gensH);
+  }
 
   run = iEvent.eventAuxiliary().run();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
@@ -358,42 +343,44 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 
   n_gen=0;
 
-  if(gensH.isValid()) {
-
-    for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
+  if(isMC) {
+    if(gensH.isValid()) {
       
-      int nmoms = 0;
-      if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) {
+      for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
 	
-	genpart_pdg.push_back(gen_iter->pdgId());
-	genpart_pt.push_back(gen_iter->pt());
-	genpart_eta.push_back(gen_iter->eta());
-	genpart_phi.push_back(gen_iter->phi());
-	genpart_m.push_back(gen_iter->mass());
-	genpart_vx.push_back(gen_iter->vx());
-	genpart_vy.push_back(gen_iter->vy());
-	genpart_vz.push_back(gen_iter->vz());
+	int nmoms = 0;
+	if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) {
+	  
+	  genpart_pdg.push_back(gen_iter->pdgId());
+	  genpart_pt.push_back(gen_iter->pt());
+	  genpart_eta.push_back(gen_iter->eta());
+	  genpart_phi.push_back(gen_iter->phi());
+	  genpart_m.push_back(gen_iter->mass());
+	  genpart_vx.push_back(gen_iter->vx());
+	  genpart_vy.push_back(gen_iter->vy());
+	  genpart_vz.push_back(gen_iter->vz());
+	  
+	  nmoms = gen_iter->numberOfMothers();
+	  genpart_nmoms.push_back(nmoms);
+	  if(gen_iter->numberOfMothers() > 0) genpart_mompdg.push_back(gen_iter->mother(0)->pdgId());
+	  
+	  genpart_fromHardProcessBeforeFSR.push_back(gen_iter->fromHardProcessBeforeFSR());
+	  genpart_fromHardProcessDecayed.push_back(gen_iter->fromHardProcessDecayed());
+	  genpart_fromHardProcessFS.push_back(gen_iter->fromHardProcessFinalState());
+	  genpart_isHardProcess.push_back(gen_iter->isHardProcess());
+	  genpart_isLastCopy.push_back(gen_iter->isLastCopy());
+	  genpart_isLastCopyBeforeFSR.push_back(gen_iter->isLastCopyBeforeFSR());
+	  genpart_isPromptFS.push_back(gen_iter->isPromptFinalState());
+	  genpart_isPromptDec.push_back(gen_iter->isPromptDecayed());
+	  genpart_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
+	  
+	  n_gen++;
+	} //end if gen lepton
 	
-	nmoms = gen_iter->numberOfMothers();
-	genpart_nmoms.push_back(nmoms);
-	if(gen_iter->numberOfMothers() > 0) genpart_mompdg.push_back(gen_iter->mother(0)->pdgId());
-
-	genpart_fromHardProcessBeforeFSR.push_back(gen_iter->fromHardProcessBeforeFSR());
-	genpart_fromHardProcessDecayed.push_back(gen_iter->fromHardProcessDecayed());
-	genpart_fromHardProcessFS.push_back(gen_iter->fromHardProcessFinalState());
-	genpart_isHardProcess.push_back(gen_iter->isHardProcess());
-	genpart_isLastCopy.push_back(gen_iter->isLastCopy());
-	genpart_isLastCopyBeforeFSR.push_back(gen_iter->isLastCopyBeforeFSR());
-	genpart_isPromptFS.push_back(gen_iter->isPromptFinalState());
-	genpart_isPromptDec.push_back(gen_iter->isPromptDecayed());
-	genpart_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
-
-	n_gen++;
-      } //end if gen lepton
-
-    } //end for genpart loop
-
-  } // end of gensH.isValid()
+      } //end for genpart loop
+      
+    } // end of gensH.isValid()
+  } // end of isMC
   
   n_ele = 0;
 
@@ -483,19 +470,27 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 }
 
 void EGammaOnly_ScoutingNanoAOD::clearVars(){
-  genpart_pdg.clear();
-  genpart_pt.clear();
-  genpart_eta.clear();
-  genpart_phi.clear();
-  genpart_m.clear();
-  genpart_vx.clear();
-  genpart_vy.clear();
-  genpart_vz.clear();
-  genpart_nmoms.clear();
-  genpart_mompdg.clear();
-  genpart_isPromptFS.clear();
-  genpart_isPromptDec.clear();
-  genpart_isDirectPromptTauDecayProdFS.clear();
+  if(isMC) {
+    genpart_pdg.clear();
+    genpart_pt.clear();
+    genpart_eta.clear();
+    genpart_phi.clear();
+    genpart_m.clear();
+    genpart_vx.clear();
+    genpart_vy.clear();
+    genpart_vz.clear();
+    genpart_nmoms.clear();
+    genpart_mompdg.clear();
+    genpart_fromHardProcessBeforeFSR.clear();
+    genpart_fromHardProcessDecayed.clear();
+    genpart_fromHardProcessFS.clear();
+    genpart_isHardProcess.clear();
+    genpart_isLastCopy.clear();
+    genpart_isLastCopyBeforeFSR.clear();
+    genpart_isPromptFS.clear();
+    genpart_isPromptDec.clear();
+    genpart_isDirectPromptTauDecayProdFS.clear();
+  }
   Electron_pt.clear();
   Electron_eta.clear();
   Electron_phi.clear();
