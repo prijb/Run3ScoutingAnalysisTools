@@ -1,6 +1,7 @@
 #include "data_robustanalyzer.hh"
 #include <iostream>
 #include <numeric>
+#include <boost/range/combine.hpp>
 
 #include "TMath.h"
 #include "TVector3.h"
@@ -12,11 +13,13 @@ using namespace std;
 data_robustanalyzer::data_robustanalyzer(TString filename, TString outfilename, bool isDoubleElectron){
 
   isDiEl = isDoubleElectron;
+  isMC = true;
   
   TFile *inpfile = TFile::Open(filename,"READ");
   cout<<"Initializing for file: "<<filename<<endl;
 
   tree = new TTreeReader("mmtree/tree",inpfile);
+  l1Result = new TTreeReaderValue<vector<bool>>((*tree), "l1Result");
   bsx = new TTreeReaderArray<float>((*tree), "beamspot_x");
   bsy = new TTreeReaderArray<float>((*tree), "beamspot_y");
   bsz = new TTreeReaderArray<float>((*tree), "beamspot_z");
@@ -84,52 +87,58 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
   int nosel=0, noselZwind=0, cut1=0, cut1Zwind=0;
 
   // Define the histograms
-  addgenhist("nosel");
+  addgenhist("noselgen");
+  addhist("nosel");
+  addgenmchhist("noselgenAnosel");
+  /*
   addgenhist("ptetaminsel");
   addgenhist("ptminetabarsel");
   addgenhist("narZwindsel");
-  addhist("nosel");
   addhist("noselZwind");
-  addgenmchhist("noselAnosel");
   addgenmchhist("noselAptetaminsel");
   addgenmchhist("noselZwindAptetaminsel");
   addgenmchhist("noselZwindAnarZwindsel");
   addhist("cut1");
   addhist("cut1Zwind");
-
+  */
+  
   // vector of electron indices
   vector<int> noselgenidx;
+  vector<int> noselelidx;
+  /*
   vector<int> ptetaminselgenidx;
   vector<int> ptminetabarselgenidx;
   vector<int> narZwindselgenidx;
-  vector<int> noselelidx;
   vector<int> noselZwindelidx;
   vector<int> cut1elidx;
   vector<int> cut1Zwindelidx;
+  */
   
   // Loop beginning on events
   while(tree->Next()) {
 
     event++;
-    //if(event>100) break;
+    //if(event>1000) break;
     //if(event!=283991 && event!=326114) continue;
     if(event%10000==0) std::cout<<"Processed event: "<<event+1<<std::endl;
 
-    if((*(*n_ele))<0) cout<<"Error!!! Wrong technical event processing. Negative number of electrons in event."<<endl;;
-    if((*(*n_ele))==0) continue;
-    
+    // L1 selection decision
+    bool l1_basicsel = false; // Selection from before any modification
+    l1_basicsel = getL1decision({0},{18});
+  
     // Loop on Gen particles to select good gen electrons from Z
     for(unsigned int gen_ctr=0; gen_ctr<(*(*n_gen)); gen_ctr++) {
 
       // Check that the gen particle is electron coming from a mother Z
+      /*
       bool mincond = true;
       mincond *= TMath::Abs((*gen_pdg)->at(gen_ctr))==11;
-      mincond *= (*gen_nmoms)->at(gen_ctr)==1;
-      mincond *= (*gen_mompdg)->at(gen_ctr)==23;
+      mincond *= isDiEl?true:(*gen_nmoms)->at(gen_ctr)==1;
+      mincond *= isDiEl?true:(*gen_mompdg)->at(gen_ctr)==23;
       if(!mincond) continue;
-
+      */
       noselgenidx.push_back(gen_ctr);
-
+      /*
       double ptetaminselcond = true;
       ptetaminselcond *= (*gen_pt)->at(gen_ctr)>5;
       ptetaminselcond *= TMath::Abs((*gen_eta)->at(gen_ctr))<2.3;
@@ -140,13 +149,18 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
       ptminetabarselcond *= TMath::Abs((*gen_eta)->at(gen_ctr))<1.4 || TMath::Abs((*gen_eta)->at(gen_ctr))>1.6;
       ptminetabarselcond *= TMath::Abs((*gen_eta)->at(gen_ctr))<2.3;
       if(ptminetabarselcond) ptminetabarselgenidx.push_back(gen_ctr);
-    }
-    
+      */
+    } // End of loop on gen electrons
+
+    fillgenhistinevent("noselgen", noselgenidx);
+        
     // Sort the electrons based on their pT
     vector<int> sortedelidx((*(*n_ele)));
     iota(begin(sortedelidx), end(sortedelidx), 0);
     sort(&sortedelidx[0], ele_pt, (*(*n_ele))); // Verified that the algorithm works fine
 
+    if((*(*n_ele))<0) cout<<"Error!!! Wrong technical event processing. Negative number of electrons in event."<<endl;;
+    
     // Loop on electrons in the event loop
     for(unsigned int ele_ctr=0; ele_ctr<(*(*n_ele)); ele_ctr++) {
 
@@ -154,14 +168,15 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
       unsigned int elidx = sortedelidx[ele_ctr];
 
       noselelidx.push_back(elidx);
-
+      /*
       bool cut1elpass = true;
       cut1elpass *= TMath::Abs((*ele_eta)->at(elidx))<2.5;
       cut1elpass *= TMath::Abs((*ele_eta)->at(elidx))<1.479?(*ele_sigmaietaieta)->at(elidx)<0.0126:(*ele_sigmaietaieta)->at(elidx)<0.0457;
       if(cut1elpass) cut1elidx.push_back(elidx);
-      
+      */
     }// End of loop on electrons in the event loop
 
+    /*
     // Event level selection on the electrons
     pair<int,int> noselZwindels = inZwindow(noselelidx);
     if(noselZwindels.first!=-1) {
@@ -174,7 +189,6 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
       cut1Zwindelidx.push_back(cut1Zwindels.second);
     }
         
-    fillgenhistinevent("nosel", noselgenidx);
     if(ptetaminselgenidx.size()==2) fillgenhistinevent("ptetaminsel", ptetaminselgenidx);
     if(ptminetabarselgenidx.size()==2) {
       fillgenhistinevent("ptminetabarsel", ptminetabarselgenidx);
@@ -187,12 +201,13 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
 	narZwindselgenidx.push_back(ptminetabarselgenidx[1]);
       }
     }
-    if(narZwindselgenidx.size()==2) fillgenhistinevent("narZwindsel", narZwindselgenidx);
+    */
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
+    if(noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx);
+    /*
     if(noselZwindelidx.size()>0) noselZwind++;
     fillhistinevent("noselZwind", noselZwindelidx);
-    if(noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselAnosel", noselgenidx, noselelidx);
     if(noselelidx.size()>0 && ptetaminselgenidx.size()==2) fillgenmchhistinevent("noselAptetaminsel", ptetaminselgenidx, noselelidx);
     if(noselZwindelidx.size()>=2 && ptetaminselgenidx.size()==2) fillgenmchhistinevent("noselZwindAptetaminsel", ptetaminselgenidx, noselZwindelidx);
     if(noselZwindelidx.size()>=2 && narZwindselgenidx.size()==2) fillgenmchhistinevent("noselZwindAnarZwindsel", narZwindselgenidx, noselZwindelidx);
@@ -200,16 +215,19 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
     fillhistinevent("cut1", cut1elidx);
     if(cut1Zwindelidx.size()>0) cut1Zwind++;
     fillhistinevent("cut1Zwind", cut1Zwindelidx);
+    */
 
     // Clear all vector
     noselgenidx.clear();
+    noselelidx.clear();
+    /*
     ptetaminselgenidx.clear();
     ptminetabarselgenidx.clear();
     narZwindselgenidx.clear();
-    noselelidx.clear();
     noselZwindelidx.clear();
     cut1elidx.clear();
     cut1Zwindelidx.clear();
+    */
     
   } // End of loop on events
 
@@ -259,21 +277,21 @@ void data_robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> g
   }
   
   // Fill variables after gen match
-  pair< pair<int,int>, pair<int,int> > sctelgenmch = diElecGenMatching(genidx, elidx);
+  vector< pair<int,int> > sctelgenmch = diElecGenMatching(genidx, elidx);
 
-  int el1 = sctelgenmch.first.first;
-  int gen1 = sctelgenmch.first.second;
-  int el2 = sctelgenmch.second.first;
-  int gen2 = sctelgenmch.second.second;
-
+  int gen1 = sctelgenmch[0].first;
+  int el1 = sctelgenmch[0].second;
+  int gen2 = sctelgenmch[1].first;
+  int el2 = sctelgenmch[1].second;
+  
   int genmchfound = 0;
-  if(gen1!=-1) {
+  if(el1!=-1) {
     genmchfound++;
     genelpt->Fill((*gen_pt)->at(gen1));
     geneleta->Fill((*gen_eta)->at(gen1));
     genelphi->Fill((*gen_phi)->at(gen1));
   }
-  if(gen2!=-1) {
+  if(el2!=-1) {
     genmchfound++;
     genelpt->Fill((*gen_pt)->at(gen2));
     geneleta->Fill((*gen_eta)->at(gen2));
@@ -286,7 +304,7 @@ void data_robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> g
     elec2.SetPtEtaPhiM((*gen_pt)->at(gen2),(*gen_eta)->at(gen2),(*gen_phi)->at(gen2),0.0005);
     gendielM->Fill((elec1+elec2).M());
   }
-
+  
   if(el1!=-1) {
     double charge = ((*gen_pdg)->at(gen1))/TMath::Abs((*gen_pdg)->at(gen1));
     if(TMath::Abs((*ele_eta)->at(el1))<1.479) {
@@ -301,6 +319,7 @@ void data_robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> g
     genmchscteleta->Fill((*ele_eta)->at(el1));
     genmchsctelphi->Fill((*ele_phi)->at(el1));
   }
+  
   if(el2!=-1) {
     double charge = ((*gen_pdg)->at(gen2))/TMath::Abs((*gen_pdg)->at(gen2));
     if(TMath::Abs((*ele_eta)->at(el2))<1.479) {
@@ -322,6 +341,7 @@ void data_robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> g
     elec2.SetPtEtaPhiM((*ele_pt)->at(el2),(*ele_eta)->at(el2),(*ele_phi)->at(el2),0.0005);
     genmchsctdielM->Fill((elec1+elec2).M());
   }
+  
 }
 
 // Function to fill a set of histograms for gen particles
@@ -333,25 +353,61 @@ void data_robustanalyzer::fillgenhistinevent(TString selection, vector<int> geni
   TH1F* elpt = (TH1F*) outfile->Get(selection+"gen_elpt");
   TH1F* eleta = (TH1F*) outfile->Get(selection+"gen_eleta");
   TH1F* elphi = (TH1F*) outfile->Get(selection+"gen_elphi");
-  TH1F* dielM = (TH1F*) outfile->Get(selection+"gen_dielM");
 
+  TH1F* leadelpt = (TH1F*) outfile->Get(selection+"gen_lead_elpt");
+  TH1F* leadeleta = (TH1F*) outfile->Get(selection+"gen_lead_eleta");
+  TH1F* leadelphi = (TH1F*) outfile->Get(selection+"gen_lead_elphi");
 
+  TH1F* subleadelpt = (TH1F*) outfile->Get(selection+"gen_sublead_elpt");
+  TH1F* subleadeleta = (TH1F*) outfile->Get(selection+"gen_sublead_eleta");
+  TH1F* subleadelphi = (TH1F*) outfile->Get(selection+"gen_sublead_elphi");
+
+  TH1F* dielM = (TH1F*) outfile->Get(selection+"gen_diel_M");
+  TH1F* dieldeta = (TH1F*) outfile->Get(selection+"gen_diel_deta");
+  TH1F* dieldphi = (TH1F*) outfile->Get(selection+"gen_diel_dphi");
+  TH1F* dieldR = (TH1F*) outfile->Get(selection+"gen_diel_dR");
+
+  unsigned int leadptpos=-1, subleadptpos=-1;
+  
   elmult->Fill(genidx.size());
   for(unsigned int ctr=0; ctr<genidx.size(); ctr++) {
     elpt->Fill((*gen_pt)->at(genidx[ctr]));
     eleta->Fill((*gen_eta)->at(genidx[ctr]));
     elphi->Fill((*gen_phi)->at(genidx[ctr]));
+
+    if(leadptpos==-1 || ( (*gen_pt)->at(genidx[ctr])>(*gen_pt)->at(leadptpos) )) {
+      subleadptpos = leadptpos;
+      leadptpos = genidx[ctr];
+    }
+    if(leadptpos!=genidx[ctr] &&
+       (subleadptpos==-1 || ( (*gen_pt)->at(genidx[ctr])>(*gen_pt)->at(subleadptpos) ) )
+       ) {
+      subleadptpos = genidx[ctr];
+    }
   }
-  if(genidx.size()==2) {
+  if(leadptpos!=-1) {
+    leadelpt->Fill((*gen_pt)->at(genidx[leadptpos]));
+    leadeleta->Fill((*gen_eta)->at(genidx[leadptpos]));
+    leadelphi->Fill((*gen_phi)->at(genidx[leadptpos]));
+  }
+  if(subleadptpos!=-1) {
+    subleadelpt->Fill((*gen_pt)->at(genidx[subleadptpos]));
+    subleadeleta->Fill((*gen_eta)->at(genidx[subleadptpos]));
+    subleadelphi->Fill((*gen_phi)->at(genidx[subleadptpos]));
+  }
+  if(leadptpos!=-1 && subleadptpos!=-1) {
     TLorentzVector el1, el2;
-    el1.SetPtEtaPhiM((*gen_pt)->at(genidx[0]),(*gen_eta)->at(genidx[0]),(*gen_phi)->at(genidx[0]),0.0005);
-    el2.SetPtEtaPhiM((*gen_pt)->at(genidx[1]),(*gen_eta)->at(genidx[1]),(*gen_phi)->at(genidx[1]),0.0005);
+    el1.SetPtEtaPhiM((*gen_pt)->at(leadptpos),(*gen_eta)->at(leadptpos),(*gen_phi)->at(leadptpos),0.0005);
+    el2.SetPtEtaPhiM((*gen_pt)->at(subleadptpos),(*gen_eta)->at(subleadptpos),(*gen_phi)->at(subleadptpos),0.0005);
     dielM->Fill((el1+el2).M());
+    dieldeta->Fill((*gen_eta)->at(leadptpos)-(*gen_eta)->at(subleadptpos));
+    dieldphi->Fill(el1.DeltaPhi(el2));
+    dieldR->Fill(el1.DeltaR(el2));
   }
   else {
     cout<<"Warning!!! Unequal to two electron found in event."<<endl;
   }
-  
+
 }
 
 // Function to fill a set of histograms for scouting electrons
@@ -464,26 +520,26 @@ void data_robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) 
 void data_robustanalyzer::addgenmchhist(TString selection) {
   
   // Variables before gen match
-  all1dhists.push_back(new TH1F(selection+"genelsctbar_dEta","#Delta#eta(gen e, sct. e)",4000,-2,2));
-  all1dhists.push_back(new TH1F(selection+"genelsctbar_qdPhi","q#Delta#phi(gen e, sct. e)",4000,-2,2));
-  all1dhists.push_back(new TH1F(selection+"genelsctee_dEta","#Delta#eta(gen e, sct. e)",4000,-2,2));
-  all1dhists.push_back(new TH1F(selection+"genelsctee_qdPhi","q#Delta#phi(gen e, sct. e)",4000,-2,2));
+  all1dhists.push_back(new TH1F(selection+"genelsctbar_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctbar_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctee_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctee_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
   
   // Variables after gen match
-  all1dhists.push_back(new TH1F(selection+"genelsctmchbar_dEta","#Delta#eta(gen e, sct. e)",4000,-2,2));
-  all1dhists.push_back(new TH1F(selection+"genelsctmchbar_qdPhi","q#Delta#phi(gen e, sct. e)",4000,-2,2));
-  all1dhists.push_back(new TH1F(selection+"genelsctmchee_dEta","#Delta#eta(gen e, sct. e)",4000,-2,2));
-  all1dhists.push_back(new TH1F(selection+"genelsctmchee_qdPhi","q#Delta#phi(gen e, sct. e)",4000,-2,2));
+  all1dhists.push_back(new TH1F(selection+"genelsctmchbar_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmchbar_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmchee_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmchee_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
 
   all1dhists.push_back(new TH1F(selection+"sctmchgenel_elmult","gen N e/#gamma",50,-5,45));
   all1dhists.push_back(new TH1F(selection+"sctmchgenel_elpt","gen e p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sctmchgenel_eleta","gen e #eta",600,-3,3));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_eleta","gen e #eta",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"sctmchgenel_elphi","gen e #phi",66,-3.3,3.3));
   all1dhists.push_back(new TH1F(selection+"sctmchgenel_dielM","M(e,e)",1000,-10,990));
 
   all1dhists.push_back(new TH1F(selection+"genmchsct_elmult","N e",50,-5,45));
   all1dhists.push_back(new TH1F(selection+"genmchsct_elpt","p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"genmchsct_eleta","#eta",600,-3,3));
+  all1dhists.push_back(new TH1F(selection+"genmchsct_eleta","#eta",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"genmchsct_elphi","#phi",66,-3.3,3.3));
   all1dhists.push_back(new TH1F(selection+"genmchsct_dielM","all M(e,e)",1000,-10,990));
 }
@@ -493,9 +549,21 @@ void data_robustanalyzer::addgenhist(TString selection) {
 
   all1dhists.push_back(new TH1F(selection+"gen_elmult","N e",50,-5,45));
   all1dhists.push_back(new TH1F(selection+"gen_elpt","p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"gen_eleta","#eta",600,-3,3));
+  all1dhists.push_back(new TH1F(selection+"gen_eleta","#eta",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"gen_elphi","#phi",66,-3.3,3.3));
-  all1dhists.push_back(new TH1F(selection+"gen_dielM","all M(e,e)",1000,-10,990));
+
+  all1dhists.push_back(new TH1F(selection+"gen_lead_elpt","e_{1} p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"gen_lead_eleta","e_{1} #eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"gen_lead_elphi","e_{1} #phi",66,-3.3,3.3));
+
+  all1dhists.push_back(new TH1F(selection+"gen_sublead_elpt","e_{1} p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"gen_sublead_eleta","e_{1} #eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"gen_sublead_elphi","e_{1} #phi",66,-3.3,3.3));
+
+  all1dhists.push_back(new TH1F(selection+"gen_diel_M","all M(e,e)",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"gen_diel_deta","#Delta#eta(e_{1}, e_{2})",1400,-7,7));
+  all1dhists.push_back(new TH1F(selection+"gen_diel_dphi","#Delta#phi(e_{1}, e_{2})",1400,-7,7));
+  all1dhists.push_back(new TH1F(selection+"gen_diel_dR","#Delta R(e_{1}, e_{2})",1000,0,10));
 
 }
 
@@ -504,7 +572,7 @@ void data_robustanalyzer::addhist(TString selection) {
 
   all1dhists.push_back(new TH1F(selection+"sct_elmult","N e",50,-5,45));
   all1dhists.push_back(new TH1F(selection+"sct_elpt","p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sct_eleta","#eta",600,-3,3));
+  all1dhists.push_back(new TH1F(selection+"sct_eleta","#eta",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"sct_elphi","#phi",66,-3.3,3.3));
   all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",1000,-10,990));
 
@@ -583,86 +651,77 @@ pair<int,int> data_robustanalyzer::inZwindow(vector<int> elidx) {
   return foundZels;
 }
 
-// Function to do gen matching
-// Currently doing genmatching for lead pT only in mueg type events
-// Modify this to return two indices for egeg type events
-pair< pair<int,int>,pair<int,int> > data_robustanalyzer::diElecGenMatching(vector<int> genidx, vector<int> elidx) {
+vector< pair<int,int> > data_robustanalyzer::diElecGenMatching(vector<int> genidx, vector<int> sctelidx) {
 
-  if(genidx.size()>2) { // Less than two is allowed to take care of gen level selections
-    cout<<"Warning. Code can do gen matching for 2e at best. Skipping gen matching."<<endl;
-    return make_pair(make_pair(-1,-1),make_pair(-1,-1));
+  if(genidx.size()!=2) {
+    throw "Error! Analysis code only suitable for 2 gen electrons";
   }
   
-  if(genidx.size()==0 || elidx.size()==0) {
-    return make_pair(make_pair(-1,-1),make_pair(-1,-1));
+  if(!isMC) {
+    throw "Error! Cannot do gen matching. Not MC file.";
   }
-
+  
   // Counter for the total no.of gen matches
   // and 1 history variable for the first gen matched position
-  // Logic does not work with more than 2 gen el.
-  int genmchcnt=0, genpos1=-1;
-  pair< pair<int,int>, pair<int,int> > genelmch = make_pair(make_pair(-1,-1),make_pair(-1,-1));
-
-  // Find the elidx with the best angular match
-  for(unsigned int el=0; el<elidx.size(); el++) {
-
-    // Variable to store the position of gen electron if there is a match
-    int genposhistory = -1;
-    // Variable to store the angle if there is a match
-    double anglediffhistory = 0;
-    
+  // Logic is not made to work with more than 2 gen el.
+  vector< pair<int,int> > *gensctelmch = new vector< pair<int,int> >;
+  gensctelmch->push_back(make_pair(genidx[0],-1));
+  gensctelmch->push_back(make_pair(genidx[1],-1));
+  
+  // Find the sctelidx with the best angular match
+  for(int elidx : sctelidx) {
     // Loop over the gen particles
-    for(unsigned int gen=0; gen<genidx.size(); gen++) {
-      double diffeta = abs((*ele_eta)->at(elidx[el])-(*gen_eta)->at(genidx[gen]));
-      if(gen==genpos1) continue; // Continue to the next gen electron if this electron has already been matched
+    for(auto it=gensctelmch->begin(); it!=gensctelmch->end(); it++) {
 
-      if(abs((*ele_eta)->at(elidx[el]))<1.479) {
-	if(diffeta<0.06) {
-	  if(genposhistory==-1) {
-	    genposhistory = gen;
-	    anglediffhistory = diffeta;
-	    continue;
-	  }
-	  if(genposhistory!=-1 && diffeta<anglediffhistory) {
-	    genposhistory = gen;
-	    anglediffhistory = diffeta;
-	    continue;
-	  }
+      int genidx = (*it).first;
+      int mchsctelidx = (*it).second;
+      if(genidx==-1 || mchsctelidx!=-1) continue;
+
+      double diffeta = abs((*ele_eta)->at(elidx)-(*gen_eta)->at(genidx)); 
+      TLorentzVector vecsctel, vecgen;
+      vecgen.SetPtEtaPhiM((*gen_pt)->at(genidx),(*gen_eta)->at(genidx),(*gen_phi)->at(genidx),0.0005);
+      vecsctel.SetPtEtaPhiM((*ele_pt)->at(elidx),(*ele_eta)->at(elidx),(*ele_phi)->at(elidx),0.0005);
+      double qdiffphi = ( (*gen_pdg)->at(genidx)/abs((*gen_pdg)->at(genidx)) )*( vecgen.DeltaPhi(vecsctel) );
+      // Condition for gen matching
+      if(abs((*ele_eta)->at(elidx))<1.479) {
+	if(diffeta<0.2 && qdiffphi<0.05 && qdiffphi>-0.3) {
+	  (*it).first = genidx;
+	  (*it).second = elidx;
 	}
       }
       else {
-	if(diffeta<0.04) {
-	  if(genposhistory==-1) {
-	    genposhistory = gen;
-	    anglediffhistory = diffeta;
-	    continue;
-	  }
-	  if(genposhistory!=-1 && diffeta<anglediffhistory) {
-	    genposhistory = gen;
-	    anglediffhistory = diffeta;
-	    continue;
-	  }
+	if(diffeta<0.1 && qdiffphi<0.05 && qdiffphi>-0.2) {
+	  (*it).first = genidx;
+	  (*it).second = elidx;
 	}
       }
     } // End of gen loop
+    
+  } // End of unseeded egamma object loop
+  
+  return (*gensctelmch);
+}
 
-    if(genposhistory!=-1) { // Found a gen match
-      genmchcnt++;
-      if(genmchcnt==1) {
-	genelmch.first = make_pair(elidx[el],genidx[genposhistory]);
-	genpos1 = genposhistory;
-      }
-      if(genmchcnt==2) {
-	genelmch.second = make_pair(elidx[el],genidx[genposhistory]);
-      }
-      if(genmchcnt>2) {
-	cout<<"Error! Shouldn't be possible to have more than two gen matches"<<endl;
+// Get the L1 decision based on their position in the l1name variable
+bool data_robustanalyzer::getL1decision(vector<unsigned int> startPos, vector<unsigned int> endPos) {
+  
+  if(startPos.size() != endPos.size()) throw "Error!!! Not matching position vector size for l1 trigger decision";
+  
+  bool decision = false;
+  
+  for(auto tup: boost::combine(startPos, endPos)) {
+    unsigned int start, end;
+    boost::tie(start, end) = tup;
+
+    for(; start<=end && start<=(*l1Result)->size(); start++) {
+      if( (*l1Result)->at(start) == true ) {
+	decision = true;
+	break;
       }
     }
 
-    if(genmchcnt==2) break; // Break if two gen matches are found
-    
-  } // End of scouting electron object loop
-
-  return genelmch;
+    if(decision == true) break;    
+  } // End of check on all sections of L1 triggers
+  
+  return decision;
 }
