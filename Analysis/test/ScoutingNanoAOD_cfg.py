@@ -48,7 +48,7 @@ params.parseArguments()
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -58,12 +58,10 @@ process.options = cms.untracked.PSet(
 )
 
 # How many events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1 ) )
 
 process.source = cms.Source("PoolSource",
-                            fileNames = cms.untracked.vstring([
-                                params.inputFile
-                            ])
+                            fileNames = cms.untracked.vstring(params.inputFile),
                         )
 
 # Load the standard set of configuration modules

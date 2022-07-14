@@ -1,15 +1,12 @@
-executable = jobTemplate.sh
-arguments = $(Step)
+executable            = jobTemplate.sh
+getenv                = True
+should_transfer_files = YES
 
-should_transfer_files = yes
-when_to_transfer_output = ON_EXIT
+arguments             = $(ClusterId) $(ProcId) $(filename)
+output                = output/output_$(ClusterId)_$(ProcId).out
+error                 = error/error_$(ClusterId)_$(ProcId).err
+log                   = log/log_$(ClusterId)_$(ProcId).log
 
-error = err$(Step).Efmrl$(Item)
-output = out$(Step).Efmrl$(Item)
-log = log$(Step).Efmrl$(Item)
++JobFlavour           = "nextweek"
 
-request_cpus = 1
-request_memory = 2048MB
-request_disk = 2048MB
-
-queue 10
+queue filename from dataFileName_All.txt

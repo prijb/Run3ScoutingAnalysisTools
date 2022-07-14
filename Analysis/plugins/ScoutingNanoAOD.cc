@@ -58,7 +58,7 @@
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "HLTrigger/HLTcore/interface/TriggerExpressionData.h"
 #include "HLTrigger/HLTcore/interface/TriggerExpressionEvaluator.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionParser.h"
+//#include "HLTrigger/HLTcore/interface/TriggerExpressionParser.h"
 
 #include <DataFormats/TrackReco/interface/TrackBase.h>
 
@@ -533,8 +533,8 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   Jet_constituents.clear();
   //0.1396
   //built transient tracks, check Vertex fitting
-  edm::ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
+  //edm::ESHandle<TransientTrackBuilder> theB;
+  //iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
 
   vector<TransientTrack> t_tks;
   std::unique_ptr<VertexCollection> vertexCollection(new VertexCollection());
@@ -655,11 +655,11 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       pfcandpt.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->pt())));
       pfcandeta.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->eta())));
       pfcandphi.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->phi())));
-    pfcandm.push_back(pfcands_iter->m());
+      //pfcandm.push_back(pfcands_iter->m());
     pfcandpdgid.push_back(pfcands_iter->pdgId());
     pfcandvertex.push_back(pfcands_iter->vertex());
     PseudoJet temp_jet = PseudoJet(0, 0, 0, 0);
-    temp_jet.reset_PtYPhiM(pfcands_iter->pt(), pfcands_iter->eta(), pfcands_iter->phi(), pfcands_iter->m());
+    temp_jet.reset_PtYPhiM(pfcands_iter->pt(), pfcands_iter->eta(), pfcands_iter->phi(), 0/*pfcands_iter->m()*/);
     temp_jet.set_user_index(pfcands_iter->pdgId());
     fj_part.push_back(temp_jet);
 
