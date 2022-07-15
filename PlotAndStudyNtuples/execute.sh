@@ -29,11 +29,11 @@ echo "Run over. Clean up and combine files."
 rm data_robustanalyzer.out
 
 hadd -f hists_DoubleElectronGunPt1To300.root hists_DoubleElectronGunPt1To300_?.root
-#hadd -f hists_DoubleElectronGunPt1To300Old.root hists_DoubleElectronGunPt1To300Old_?.root
-#hadd -f hists_QCDPt20To30EmEnriched.root hists_QCDPt20To30EmEnriched_?.root
-#hadd -f hists_QCDPt30To50EmEnriched.root hists_QCDPt30To50EmEnriched_?.root
+hadd -f hists_DYToLLM4To50.root hists_DYToLLM4To50_?.root
+hadd -f hists_ZeroBias2018D.root hists_ZeroBias2018D_?.root
+hadd -f hists_Ephemeral1HLTPhysics2018D.root hists_Ephemeral1HLTPhysics2018D_?.root
 
 rm hists_DoubleElectronGunPt1To300_?.root
-#rm hists_DoubleElectronGunPt1To300Old_?.root
-#rm hists_QCDPt20To30EmEnriched_?.root
-#rm hists_QCDPt30To50EmEnriched_?.root
+rm hists_DYToLLM4To50_?.root
+rm hists_ZeroBias2018D_?.root
+rm hists_Ephemeral1HLTPhysics2018D_?.root
