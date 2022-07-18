@@ -1,4 +1,4 @@
-#include "data_robustanalyzer.hh"
+#include "robustanalyzer.hh"
 #include <iostream>
 #include <numeric>
 #include <boost/range/combine.hpp>
@@ -10,29 +10,27 @@
 using namespace std;
 
 // Initialize and open the root file in the constructor
-data_robustanalyzer::data_robustanalyzer(TString filename, TString outfilename, bool isDoubleElectron){
+robustanalyzer::robustanalyzer(TString filename, TString outfilename, bool isDoubleElectron, bool isMC){
 
   isDiEl = isDoubleElectron;
-  isMC = true;
+  isMC = isMC;
   
   TFile *inpfile = TFile::Open(filename,"READ");
   cout<<"Initializing for file: "<<filename<<endl;
 
   tree = new TTreeReader("mmtree/tree",inpfile);
-  l1Result = new TTreeReaderValue<vector<bool>>((*tree), "l1Result");
-  bsx = new TTreeReaderArray<float>((*tree), "beamspot_x");
-  bsy = new TTreeReaderArray<float>((*tree), "beamspot_y");
-  bsz = new TTreeReaderArray<float>((*tree), "beamspot_z");
-  n_gen = new TTreeReaderValue<unsigned int>((*tree), "n_genpart");
-  gen_pdg = new TTreeReaderValue<vector<int>>((*tree), "genpart_pdg");
-  gen_pt = new TTreeReaderValue<vector<float>>((*tree), "genpart_pt");
-  gen_eta = new TTreeReaderValue<vector<float>>((*tree), "genpart_eta");
-  gen_phi = new TTreeReaderValue<vector<float>>((*tree), "genpart_phi");
-  gen_vx = new TTreeReaderValue<vector<float>>((*tree), "genpart_vx");
-  gen_vy = new TTreeReaderValue<vector<float>>((*tree), "genpart_vy");
-  gen_vz = new TTreeReaderValue<vector<float>>((*tree), "genpart_vz");
-  gen_nmoms = new TTreeReaderValue<vector<int>>((*tree), "genpart_nmoms");
-  gen_mompdg = new TTreeReaderValue<vector<int>>((*tree), "genpart_mompdg");
+  if(isMC) {
+    n_gen = new TTreeReaderValue<unsigned int>((*tree), "n_genpart");
+    gen_pdg = new TTreeReaderValue<vector<int>>((*tree), "genpart_pdg");
+    gen_pt = new TTreeReaderValue<vector<float>>((*tree), "genpart_pt");
+    gen_eta = new TTreeReaderValue<vector<float>>((*tree), "genpart_eta");
+    gen_phi = new TTreeReaderValue<vector<float>>((*tree), "genpart_phi");
+    gen_vx = new TTreeReaderValue<vector<float>>((*tree), "genpart_vx");
+    gen_vy = new TTreeReaderValue<vector<float>>((*tree), "genpart_vy");
+    gen_vz = new TTreeReaderValue<vector<float>>((*tree), "genpart_vz");
+    gen_nmoms = new TTreeReaderValue<vector<int>>((*tree), "genpart_nmoms");
+    gen_mompdg = new TTreeReaderValue<vector<int>>((*tree), "genpart_mompdg");
+  }
   n_ele = new TTreeReaderValue<UInt_t>((*tree), "n_ele");
   ele_pt = new TTreeReaderValue<vector<float>>((*tree), "Electron_pt");
   ele_eta = new TTreeReaderValue<vector<float>>((*tree), "Electron_eta");
@@ -61,14 +59,14 @@ data_robustanalyzer::data_robustanalyzer(TString filename, TString outfilename, 
 }
 
 // Fill the root file, close the root file, and handle deletions
-data_robustanalyzer::~data_robustanalyzer() {
+robustanalyzer::~robustanalyzer() {
 
   outfile->Write();
   outfile->Close();
 }
 
 // Analyzer for a single file
-void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to range from 0 to nCores
+void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to range from 0 to nCores
 
   int totEntries = tree->GetEntries();
   cout<<"Total number of entries: "<<totEntries<<endl;
@@ -87,32 +85,15 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
   int nosel=0, noselZwind=0, cut1=0, cut1Zwind=0;
 
   // Define the histograms
-  addgenhist("noselgen");
+  if(isMC) {
+    addgenhist("noselgen");
+    addgenmchhist("noselgenAnosel");
+  }
   addhist("nosel");
-  addgenmchhist("noselgenAnosel");
-  /*
-  addgenhist("ptetaminsel");
-  addgenhist("ptminetabarsel");
-  addgenhist("narZwindsel");
-  addhist("noselZwind");
-  addgenmchhist("noselAptetaminsel");
-  addgenmchhist("noselZwindAptetaminsel");
-  addgenmchhist("noselZwindAnarZwindsel");
-  addhist("cut1");
-  addhist("cut1Zwind");
-  */
   
   // vector of electron indices
   vector<int> noselgenidx;
   vector<int> noselelidx;
-  /*
-  vector<int> ptetaminselgenidx;
-  vector<int> ptminetabarselgenidx;
-  vector<int> narZwindselgenidx;
-  vector<int> noselZwindelidx;
-  vector<int> cut1elidx;
-  vector<int> cut1Zwindelidx;
-  */
   
   // Loop beginning on events
   while(tree->Next()) {
@@ -122,44 +103,21 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
     //if(event!=283991 && event!=326114) continue;
     if(event%10000==0) std::cout<<"Processed event: "<<event+1<<std::endl;
 
-    // L1 selection decision
-    bool l1_basicsel = false; // Selection from before any modification
-    l1_basicsel = getL1decision({0},{18});
-  
-    // Loop on Gen particles to select good gen electrons from Z
-    for(unsigned int gen_ctr=0; gen_ctr<(*(*n_gen)); gen_ctr++) {
-
-      // Check that the gen particle is electron coming from a mother Z
-      /*
-      bool mincond = true;
-      mincond *= TMath::Abs((*gen_pdg)->at(gen_ctr))==11;
-      mincond *= isDiEl?true:(*gen_nmoms)->at(gen_ctr)==1;
-      mincond *= isDiEl?true:(*gen_mompdg)->at(gen_ctr)==23;
-      if(!mincond) continue;
-      */
-      noselgenidx.push_back(gen_ctr);
-      /*
-      double ptetaminselcond = true;
-      ptetaminselcond *= (*gen_pt)->at(gen_ctr)>5;
-      ptetaminselcond *= TMath::Abs((*gen_eta)->at(gen_ctr))<2.3;
-      if(ptetaminselcond) ptetaminselgenidx.push_back(gen_ctr);
-
-      double ptminetabarselcond = true;
-      ptminetabarselcond *= (*gen_pt)->at(gen_ctr)>5;
-      ptminetabarselcond *= TMath::Abs((*gen_eta)->at(gen_ctr))<1.4 || TMath::Abs((*gen_eta)->at(gen_ctr))>1.6;
-      ptminetabarselcond *= TMath::Abs((*gen_eta)->at(gen_ctr))<2.3;
-      if(ptminetabarselcond) ptminetabarselgenidx.push_back(gen_ctr);
-      */
-    } // End of loop on gen electrons
-
-    fillgenhistinevent("noselgen", noselgenidx);
-        
+    // Loop on Gen particles to select good gen electrons
+    if(isMC) {
+      for(unsigned int gen_ctr=0; gen_ctr<(*(*n_gen)); gen_ctr++) {
+	noselgenidx.push_back(gen_ctr);
+      } // End of loop on gen electrons
+      
+      fillgenhistinevent("noselgen", noselgenidx);
+    }
+    
     // Sort the electrons based on their pT
     vector<int> sortedelidx((*(*n_ele)));
     iota(begin(sortedelidx), end(sortedelidx), 0);
     sort(&sortedelidx[0], ele_pt, (*(*n_ele))); // Verified that the algorithm works fine
 
-    if((*(*n_ele))<0) cout<<"Error!!! Wrong technical event processing. Negative number of electrons in event."<<endl;;
+    if((*(*n_ele))<0) throw "Error!!! Wrong technical event processing. Negative number of electrons in event.";
     
     // Loop on electrons in the event loop
     for(unsigned int ele_ctr=0; ele_ctr<(*(*n_ele)); ele_ctr++) {
@@ -168,66 +126,15 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
       unsigned int elidx = sortedelidx[ele_ctr];
 
       noselelidx.push_back(elidx);
-      /*
-      bool cut1elpass = true;
-      cut1elpass *= TMath::Abs((*ele_eta)->at(elidx))<2.5;
-      cut1elpass *= TMath::Abs((*ele_eta)->at(elidx))<1.479?(*ele_sigmaietaieta)->at(elidx)<0.0126:(*ele_sigmaietaieta)->at(elidx)<0.0457;
-      if(cut1elpass) cut1elidx.push_back(elidx);
-      */
     }// End of loop on electrons in the event loop
 
-    /*
-    // Event level selection on the electrons
-    pair<int,int> noselZwindels = inZwindow(noselelidx);
-    if(noselZwindels.first!=-1) {
-      noselZwindelidx.push_back(noselZwindels.first);
-      noselZwindelidx.push_back(noselZwindels.second);
-    }
-    pair<int,int> cut1Zwindels = inZwindow(cut1elidx);
-    if(cut1Zwindels.first!=-1) {
-      cut1Zwindelidx.push_back(cut1Zwindels.first);
-      cut1Zwindelidx.push_back(cut1Zwindels.second);
-    }
-        
-    if(ptetaminselgenidx.size()==2) fillgenhistinevent("ptetaminsel", ptetaminselgenidx);
-    if(ptminetabarselgenidx.size()==2) {
-      fillgenhistinevent("ptminetabarsel", ptminetabarselgenidx);
-      TLorentzVector el1, el2;
-      el1.SetPtEtaPhiM((*gen_pt)->at(ptminetabarselgenidx[0]),(*gen_eta)->at(ptminetabarselgenidx[0]),(*gen_phi)->at(ptminetabarselgenidx[0]),0.0005);
-      el2.SetPtEtaPhiM((*gen_pt)->at(ptminetabarselgenidx[1]),(*gen_eta)->at(ptminetabarselgenidx[1]),(*gen_phi)->at(ptminetabarselgenidx[1]),0.0005);
-      double invM = (el1+el2).M();
-      if(invM>85 && invM<100) {
-	narZwindselgenidx.push_back(ptminetabarselgenidx[0]);
-	narZwindselgenidx.push_back(ptminetabarselgenidx[1]);
-      }
-    }
-    */
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
-    if(noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx);
-    /*
-    if(noselZwindelidx.size()>0) noselZwind++;
-    fillhistinevent("noselZwind", noselZwindelidx);
-    if(noselelidx.size()>0 && ptetaminselgenidx.size()==2) fillgenmchhistinevent("noselAptetaminsel", ptetaminselgenidx, noselelidx);
-    if(noselZwindelidx.size()>=2 && ptetaminselgenidx.size()==2) fillgenmchhistinevent("noselZwindAptetaminsel", ptetaminselgenidx, noselZwindelidx);
-    if(noselZwindelidx.size()>=2 && narZwindselgenidx.size()==2) fillgenmchhistinevent("noselZwindAnarZwindsel", narZwindselgenidx, noselZwindelidx);
-    if(cut1elidx.size()>0) cut1++;
-    fillhistinevent("cut1", cut1elidx);
-    if(cut1Zwindelidx.size()>0) cut1Zwind++;
-    fillhistinevent("cut1Zwind", cut1Zwindelidx);
-    */
+    if(isMC && noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx);
 
     // Clear all vector
     noselgenidx.clear();
     noselelidx.clear();
-    /*
-    ptetaminselgenidx.clear();
-    ptminetabarselgenidx.clear();
-    narZwindselgenidx.clear();
-    noselZwindelidx.clear();
-    cut1elidx.clear();
-    cut1Zwindelidx.clear();
-    */
     
   } // End of loop on events
 
@@ -235,8 +142,10 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
 }
 
 // Fill histograms for gen matching
-void data_robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx, vector<int> elidx) {
+void robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx, vector<int> elidx) {
 
+  if(!isMC) throw "Error!!! Trying to fill gen info. for a non MC file.";
+    
   // Variables before gen match
   TH1F* bardEta = (TH1F*) outfile->Get(selection+"genelsctbar_dEta");
   TH1F* barqdPhi = (TH1F*) outfile->Get(selection+"genelsctbar_qdPhi");
@@ -345,8 +254,10 @@ void data_robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> g
 }
 
 // Function to fill a set of histograms for gen particles
-void data_robustanalyzer::fillgenhistinevent(TString selection, vector<int> genidx) {
+void robustanalyzer::fillgenhistinevent(TString selection, vector<int> genidx) {
 
+  if(!isMC) throw "Error!!! Trying to fill gen info. for a non MC file.";
+    
   if(genidx.size()==0) return;
 
   TH1F* elmult = (TH1F*) outfile->Get(selection+"gen_elmult");
@@ -411,7 +322,7 @@ void data_robustanalyzer::fillgenhistinevent(TString selection, vector<int> geni
 }
 
 // Function to fill a set of histograms for scouting electrons
-void data_robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
+void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
 
   if(elidx.size()==0) return;
 
@@ -517,8 +428,10 @@ void data_robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) 
 }  
 
 // Add histograms for gen matching
-void data_robustanalyzer::addgenmchhist(TString selection) {
+void robustanalyzer::addgenmchhist(TString selection) {
   
+  if(!isMC) throw "Error!!! Trying to define gen hists for a non MC file.";
+    
   // Variables before gen match
   all1dhists.push_back(new TH1F(selection+"genelsctbar_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
   all1dhists.push_back(new TH1F(selection+"genelsctbar_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
@@ -545,8 +458,10 @@ void data_robustanalyzer::addgenmchhist(TString selection) {
 }
 
 // Function to add a set of histograms for gen electrons
-void data_robustanalyzer::addgenhist(TString selection) {
+void robustanalyzer::addgenhist(TString selection) {
 
+  if(!isMC) throw "Error!!! Trying to define gen hists for a non MC file.";
+    
   all1dhists.push_back(new TH1F(selection+"gen_elmult","N e",50,-5,45));
   all1dhists.push_back(new TH1F(selection+"gen_elpt","p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"gen_eleta","#eta",1000,-5,5));
@@ -568,7 +483,7 @@ void data_robustanalyzer::addgenhist(TString selection) {
 }
 
 // Function to add a set of histograms for scouting electrons
-void data_robustanalyzer::addhist(TString selection) {
+void robustanalyzer::addhist(TString selection) {
 
   all1dhists.push_back(new TH1F(selection+"sct_elmult","N e",50,-5,45));
   all1dhists.push_back(new TH1F(selection+"sct_elpt","p_{T} / GeV",1000,-10,990));
@@ -616,7 +531,7 @@ void data_robustanalyzer::addhist(TString selection) {
 }
 
 // Function to sort the indices based on a factor (Usually pT)
-void data_robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *factor, int n) {
+void robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *factor, int n) {
   for(unsigned int i=0; i<n; i++) {
     for(unsigned int j=i+1; j<n; j++) {
       if((*factor)->at((*(idx+j)))>(*factor)->at((*(idx+i)))) { // Sort in decreasing value of factor
@@ -629,7 +544,7 @@ void data_robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *f
 }
 
 // Function to find an electron pair in the Z mass window 80<M<100
-pair<int,int> data_robustanalyzer::inZwindow(vector<int> elidx) {
+pair<int,int> robustanalyzer::inZwindow(vector<int> elidx) {
   
   if(elidx.size()<2) { // Require atleast two electrons
     return make_pair(-1,-1);
@@ -651,7 +566,7 @@ pair<int,int> data_robustanalyzer::inZwindow(vector<int> elidx) {
   return foundZels;
 }
 
-vector< pair<int,int> > data_robustanalyzer::diElecGenMatching(vector<int> genidx, vector<int> sctelidx) {
+vector< pair<int,int> > robustanalyzer::diElecGenMatching(vector<int> genidx, vector<int> sctelidx) {
 
   if(genidx.size()!=2) {
     throw "Error! Analysis code only suitable for 2 gen electrons";
@@ -700,28 +615,4 @@ vector< pair<int,int> > data_robustanalyzer::diElecGenMatching(vector<int> genid
   } // End of unseeded egamma object loop
   
   return (*gensctelmch);
-}
-
-// Get the L1 decision based on their position in the l1name variable
-bool data_robustanalyzer::getL1decision(vector<unsigned int> startPos, vector<unsigned int> endPos) {
-  
-  if(startPos.size() != endPos.size()) throw "Error!!! Not matching position vector size for l1 trigger decision";
-  
-  bool decision = false;
-  
-  for(auto tup: boost::combine(startPos, endPos)) {
-    unsigned int start, end;
-    boost::tie(start, end) = tup;
-
-    for(; start<=end && start<=(*l1Result)->size(); start++) {
-      if( (*l1Result)->at(start) == true ) {
-	decision = true;
-	break;
-      }
-    }
-
-    if(decision == true) break;    
-  } // End of check on all sections of L1 triggers
-  
-  return decision;
 }
