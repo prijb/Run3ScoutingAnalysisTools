@@ -6,11 +6,11 @@ ls
 echo "============ Created the master run folder ============"
 
 cd Job_$1_$2
-cd /afs/cern.ch/work/a/asahasra/private/ScoutingPFRun3_RAW_v1_000_353_706/CMSSW_12_4_0/src
+cd /afs/cern.ch/work/a/asahasra/public/ScoutingStudy/Process13p6data/CMSSW_12_4_0/src/
 eval `scramv1 runtime -sh`
 cd -
 
-cp /afs/cern.ch/work/a/asahasra/private/ScoutingPFRun3_RAW_v1_000_353_706/CMSSW_12_4_0/src/Run3ScoutingAnalysisTools/Analysis/test/ScoutingNanoAOD_cfg.py ./
+cp /afs/cern.ch/work/a/asahasra/public/ScoutingStudy/Process13p6data/CMSSW_12_4_0/src/Run3ScoutingAnalysisTools/Analysis/test/ScoutingNanoAOD_cfg.py ./
 
 ls
 echo "============ Copied the python config file ============"
@@ -21,10 +21,10 @@ ls
 
 echo "============ Running ============"
 
-cmsRun ScoutingNanoAOD_cfg.py isMC=False GlobalTagData=123X_dataRun3_HLT_v7 output=dataNtuple_$1_$2.root inputFile=file:$3
+cmsRun ScoutingNanoAOD_cfg.py isMC=False GlobalTagData=123X_dataRun3_HLT_v14 output=dataNtuple_$1_$2.root inputFile=file:$3
 
 echo "============ Listing the directory contents post cmsRun ============"
 ls
 
-cp dataNtuple_$1_$2.root /afs/cern.ch/work/a/asahasra/private/ScoutingPFRun3_RAW_v1_000_353_706/CMSSW_12_4_0/src/Run3ScoutingAnalysisTools/Analysis/test/SubmitCondor/
+cp dataNtuple_$1_$2.root /eos/user/a/asahasra/Scouting13p6TeVEGammaNtuples/Skim220717
 echo "============ All processes completed. Exiting now.  ============"
