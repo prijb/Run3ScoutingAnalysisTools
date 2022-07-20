@@ -29,11 +29,19 @@ echo "Run over. Clean up and combine files."
 rm data_robustanalyzer.out
 
 hadd -f hists_DoubleElectronGunPt1To300.root hists_DoubleElectronGunPt1To300_?.root
+hadd -f hists_DoubleElectronGunPt1To300_1240V74L1v1.root hists_DoubleElectronGunPt1To300_1240V74L1v1_?.root
+hadd -f hists_DoubleElectronGunPt1To300_1240V74L1v2.root hists_DoubleElectronGunPt1To300_1240V74L1v2_?.root
 hadd -f hists_DYToLLM4To50.root hists_DYToLLM4To50_?.root
-hadd -f hists_ZeroBias2018D.root hists_ZeroBias2018D_?.root
-hadd -f hists_Ephemeral1HLTPhysics2018D.root hists_Ephemeral1HLTPhysics2018D_?.root
+hadd -f hists_DYToLLM4To50_1240V74L1v1.root hists_DYToLLM4To50_1240V74L1v1_?.root
+hadd -f hists_DYToLLM4To50_1240V74L1v2.root hists_DYToLLM4To50_1240V74L1v2_?.root
+#hadd -f hists_ZeroBias2018D.root hists_ZeroBias2018D_?.root
+#hadd -f hists_Ephemeral1HLTPhysics2018D.root hists_Ephemeral1HLTPhysics2018D_?.root
 
 rm hists_DoubleElectronGunPt1To300_?.root
+rm hists_DoubleElectronGunPt1To300_1240V74L1v1_?.root
+rm hists_DoubleElectronGunPt1To300_1240V74L1v2_?.root
 rm hists_DYToLLM4To50_?.root
-rm hists_ZeroBias2018D_?.root
-rm hists_Ephemeral1HLTPhysics2018D_?.root
+rm hists_DYToLLM4To50_1240V74L1v1_?.root
+rm hists_DYToLLM4To50_1240V74L1v2_?.root
+#rm hists_ZeroBias2018D_?.root
+#rm hists_Ephemeral1HLTPhysics2018D_?.root

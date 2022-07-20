@@ -6,7 +6,11 @@
 
 TString cutdeets = "Cut details";
 TFile* sigDoubleElectronPt1To300file = TFile::Open("hists_DoubleElectronGunPt1To300.root","READ");
+TFile* sigDoubleElectronPt1To300l1v1file = TFile::Open("hists_DoubleElectronGunPt1To300_1240V74L1v1.root","READ");
+TFile* sigDoubleElectronPt1To300l1v2file = TFile::Open("hists_DoubleElectronGunPt1To300_1240V74L1v2.root","READ");
 TFile* sigDYToLLM4To50file = TFile::Open("hists_DYToLLM4To50.root","READ");
+TFile* sigDYToLLM4To50l1v1file = TFile::Open("hists_DYToLLM4To50_1240V74L1v1.root","READ");
+TFile* sigDYToLLM4To50l1v2file = TFile::Open("hists_DYToLLM4To50_1240V74L1v2.root","READ");
 TFile* datZeroBiasfile = TFile::Open("hists_ZeroBias2018D.root","READ");
 TFile* datEphemeralfile = TFile::Open("hists_Ephemeral1HLTPhysics2018D.root","READ");
 
@@ -630,8 +634,8 @@ int plotter() {
   scalehist.push_back(1992.985);
   coloropt = color;
   legendEntries = legend;
-  makeratehist(file, cutname, "elminpt", 5, 150, 1, false, (float []){0,5}, (float []){0.4, 0.6, 0.65, 0.85});
-  makeratehist(file, cutname, "elmaxpt", 5, 150, 1, false, (float []){0,5}, (float []){0.4, 0.6, 0.65, 0.85});
+  //makeratehist(file, cutname, "elminpt", 5, 150, 1, false, (float []){0,5}, (float []){0.4, 0.6, 0.65, 0.85});
+  //makeratehist(file, cutname, "elmaxpt", 5, 150, 1, false, (float []){0,5}, (float []){0.4, 0.6, 0.65, 0.85});
 
   /////////////////////////////////////////////////////////////////////
   /////////////////////// EphemeralHLTPhysics /////////////////////////
@@ -693,6 +697,62 @@ int plotter() {
   legendEntries = legend;
   //makeratehist(file, cutname, "elminpt", 5, 150, 1, false, (float []){0,3}, (float []){0.6,0.6,0.85,0.95});
   //makeratehist(file, cutname, "elmaxpt", 5, 150, 1, false, (float []){0,3}, (float []){0.6,0.6,0.85,0.95});
+
+  // For TSG approval
+  file.clear();
+  cutname.clear();
+  color.clear();
+  legend.clear();
+  file.push_back(sigDYToLLM4To50file);
+  cutname.push_back("noselsct");
+  color.push_back(kBlue);
+  legend.push_back("old L1");
+  scalehist.push_back(1);
+  file.push_back(sigDYToLLM4To50l1v1file);
+  cutname.push_back("noselsct");
+  color.push_back(kGreen+2);
+  legend.push_back("new L1v1");
+  scalehist.push_back(1);
+  file.push_back(sigDYToLLM4To50l1v2file);
+  cutname.push_back("noselsct");
+  color.push_back(kRed);
+  legend.push_back("new L1v2");
+  scalehist.push_back(1);
+  coloropt = color;
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "elmult", 5, 10, 1, false, true, true, (float []){0,100}, (float []){0.6,0.7,0.85,0.95}, false, "e multiplicity");  
+  comparesamevariable(file, cutname, "elpt", 5, 75, 1, false, true, true, (float []){0,40}, (float []){0.6,0.7,0.85,0.95}, false, "e p_{T} [GeV]");  
+  comparesamevariable(file, cutname, "eleta", -1, -1, 20, false, true, true, (float []){0,30}, (float []){0.6,0.7,0.85,0.95}, false, "e #eta");  
+  comparesamevariable(file, cutname, "elphi", -1, -1, 3, false, true, true, (float []){0,20}, (float []){0.6,0.7,0.85,0.95}, false, "e #phi");  
+
+  file.clear();
+  cutname.clear();
+  color.clear();
+  legend.clear();
+  file.push_back(sigDoubleElectronPt1To300file);
+  cutname.push_back("noselsct");
+  color.push_back(kBlue);
+  legend.push_back("1240_V74 L1");
+  scalehist.push_back(1);
+  file.push_back(sigDoubleElectronPt1To300l1v1file);
+  cutname.push_back("noselsct");
+  color.push_back(kGreen+2);
+  legend.push_back("add L1 v1");
+  scalehist.push_back(1);
+  file.push_back(sigDoubleElectronPt1To300l1v2file);
+  cutname.push_back("noselsct");
+  color.push_back(kRed);
+  legend.push_back("add L1 v2");
+  scalehist.push_back(1);
+  coloropt = color;
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "elmult", 5, 15, 1, true, true, true, (float []){1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "e multiplicity");  
+  //comparesamevariable(file, cutname, "elpt", 5, 575, 10, false, true, false, (float []){1e-5,8e3}, (float []){0.6,0.7,0.85,0.95}, false, "e p_{T} [GeV]");  
+  //comparesamevariable(file, cutname, "eleta", 200, 800, 10, false, true, true, (float []){1e-3,5e3}, (float []){0.6,0.7,0.85,0.95}, false, "e #eta");  
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 3, false, true, true, (float []){1e-3,1.5e4}, (float []){0.6,0.7,0.85,0.95}, false, "e #phi");  
+  //comparesamevariable(file, cutname, "elminpt", 5, 575, 10, false, true, false, (float []){1e-5,4e3}, (float []){0.6,0.7,0.85,0.95}, false, "e min. p_{T} [GeV]");  
+  //comparesamevariable(file, cutname, "elmaxpt", 5, 575, 10, false, true, false, (float []){1e-5,4e3}, (float []){0.6,0.7,0.85,0.95}, false, "e max. p_{T} [GeV]");  
+  //comparesamevariable(file, cutname, "elleadeta", 200, 800, 10, false, true, true, (float []){1e-3,3e3}, (float []){0.6,0.7,0.85,0.95}, false, "leading e #eta");  
 
   return -1;
 }

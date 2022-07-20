@@ -228,7 +228,7 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
       } // End of loop on gen electrons
       
       fillgenhistinevent("noselgen", noselgenidx);
-      fillgenhistinevent("basicselgen", basicselgenidx);
+      //fillgenhistinevent("basicselgen", basicselgenidx);
     }
     
     // Sort the electrons based on their pT
@@ -245,7 +245,7 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
       unsigned int elidx = sortedelidx[ele_ctr];
 
       bool noselpass = true;
-      noselpass *= l1_nosel>0;
+      //noselpass *= l1_nosel>0;
       noselelidx.push_back(elidx);
       /*
       bool cut1elpass = true;
@@ -255,11 +255,11 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
       */
 
       bool oldL1elpass = true;
-      oldL1elpass *= l1_oldsel>0;
+      //oldL1elpass *= l1_oldsel>0;
       if(oldL1elpass) oldL1selelidx.push_back(elidx);
 	
       bool unpreEGL1elpass = true;
-      unpreEGL1elpass *= l1_unpreEGsel>0;
+      //unpreEGL1elpass *= l1_unpreEGsel>0;
       if(unpreEGL1elpass) unpreEGL1selelidx.push_back(elidx);
 
       bool EG_25_12_L1elpass = true;
@@ -345,7 +345,7 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
     }
     */
     
-    if(noselelidx.size()>0) nosel += l1_nosel;
+    if(noselelidx.size()>0) nosel += 1/*l1_nosel*/;
     if(oldL1selelidx.size()>0) oldL1sel += l1_oldsel;
     if(unpreEGL1selelidx.size()>0) unpreEGL1sel += l1_unpreEGsel;
     if(EG_25_12_L1selelidx.size()>0) EG_25_12_L1sel += l1_EG_25_12_sel;
@@ -360,45 +360,45 @@ void data_robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt 
     if(preEGL1selelidx.size()>0) preEGL1sel += l1_preEGsel;
     if(zeroEGL1selelidx.size()>0) zeroEGL1sel += l1_zeroEGsel;
     if(oldscoutselelidx.size()>0) oldscoutsel += l1_oldsel;
-    fillhistinevent("nosel", noselelidx, l1_nosel);
-    fillhistinevent("oldL1sel", oldL1selelidx, l1_oldsel);
-    fillhistinevent("unpreEGL1sel", unpreEGL1selelidx, l1_unpreEGsel);
-    fillhistinevent("EG_25_12_L1sel", EG_25_12_L1selelidx, l1_EG_25_12_sel);
-    fillhistinevent("EG_25_14_L1sel", EG_25_14_L1selelidx, l1_EG_25_14_sel);
-    fillhistinevent("EG_27_14_L1sel", EG_27_14_L1selelidx, l1_EG_27_14_sel);
-    fillhistinevent("EGLIso_22_12_L1sel", EGLIso_22_12_L1selelidx, l1_EGLIso_22_12_sel);
-    fillhistinevent("EGLIso_25_12_L1sel", EGLIso_25_12_L1selelidx, l1_EGLIso_25_12_sel);
-    fillhistinevent("EG_18_17_8_L1sel", EG_18_17_8_L1selelidx, l1_EG_18_17_8_sel);
-    fillhistinevent("EG_18_18_12_L1sel", EG_18_18_12_L1selelidx, l1_EG_18_18_12_sel);
-    fillhistinevent("EG_16_16_16_L1sel", EG_16_16_16_L1selelidx, l1_EG_16_16_16_sel);
-    fillhistinevent("EG8_HTT300_L1sel", EG8_HTT300_L1selelidx, l1_EG8_HTT300_sel);
-    fillhistinevent("preEGL1sel", preEGL1selelidx, l1_preEGsel);
-    fillhistinevent("zeroEGL1sel", zeroEGL1selelidx, l1_zeroEGsel);
-    fillhistinevent("oldscoutsel", oldscoutselelidx, l1_oldsel);
-    fillhistinevent("oldscoutvetosel", oldscoutvetoselelidx, l1_oldsel);
-    fillhistinevent("randsel", randselelidx, l1_nosel);
-    if(noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx, l1_nosel);
-    if(oldL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAoldL1sel", noselgenidx, oldL1selelidx, l1_oldsel);
-    if(noselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAnosel", basicselgenidx, noselelidx, l1_nosel);
-    if(oldL1selelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAoldL1sel", basicselgenidx, oldL1selelidx, l1_oldsel);
-    if(unpreEGL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAunpreEGL1sel", noselgenidx, unpreEGL1selelidx, l1_unpreEGsel);
-    if(EG_25_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_25_12_L1sel", noselgenidx, EG_25_12_L1selelidx, l1_EG_25_12_sel);
-    if(EG_25_14_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_25_14_L1sel", noselgenidx, EG_25_14_L1selelidx, l1_EG_25_14_sel);
-    if(EG_27_14_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_27_14_L1sel", noselgenidx, EG_27_14_L1selelidx, l1_EG_27_14_sel);
-    if(EGLIso_22_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEGLIso_22_12_L1sel", noselgenidx, EGLIso_22_12_L1selelidx, l1_EGLIso_22_12_sel);
-    if(EGLIso_25_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEGLIso_25_12_L1sel", noselgenidx, EGLIso_25_12_L1selelidx, l1_EGLIso_25_12_sel);
-    if(EG_18_17_8_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_18_17_8_L1sel", noselgenidx, EG_18_17_8_L1selelidx, l1_EG_18_17_8_sel);
-    if(EG_18_18_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_18_18_12_L1sel", noselgenidx, EG_18_18_12_L1selelidx, l1_EG_18_18_12_sel);
-    if(EG_16_16_16_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_16_16_16_L1sel", noselgenidx, EG_16_16_16_L1selelidx, l1_EG_16_16_16_sel);
-    if(EG8_HTT300_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG8_HTT300_L1sel", noselgenidx, EG8_HTT300_L1selelidx, l1_EG8_HTT300_sel);
-    if(preEGL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenApreEGL1sel", noselgenidx, preEGL1selelidx, l1_preEGsel);
-    if(zeroEGL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAzeroEGL1sel", noselgenidx, zeroEGL1selelidx, l1_zeroEGsel);
-    if(oldscoutselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAoldscoutsel", noselgenidx, oldscoutselelidx, l1_oldsel);
-    if(oldscoutselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAoldscoutsel", basicselgenidx, oldscoutselelidx, l1_oldsel);
-    if(oldscoutvetoselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAoldscoutvetosel", noselgenidx, oldscoutvetoselelidx, l1_oldsel);
-    if(oldscoutvetoselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAoldscoutvetosel", basicselgenidx, oldscoutvetoselelidx, l1_oldsel);
-    if(randselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenArandsel", noselgenidx, randselelidx, l1_nosel);
-    if(randselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenArandsel", basicselgenidx, randselelidx, l1_nosel);
+    fillhistinevent("nosel", noselelidx, 1/*l1_nosel*/);
+    //fillhistinevent("oldL1sel", oldL1selelidx, l1_oldsel);
+    //fillhistinevent("unpreEGL1sel", unpreEGL1selelidx, l1_unpreEGsel);
+    //fillhistinevent("EG_25_12_L1sel", EG_25_12_L1selelidx, l1_EG_25_12_sel);
+    //fillhistinevent("EG_25_14_L1sel", EG_25_14_L1selelidx, l1_EG_25_14_sel);
+    //fillhistinevent("EG_27_14_L1sel", EG_27_14_L1selelidx, l1_EG_27_14_sel);
+    //fillhistinevent("EGLIso_22_12_L1sel", EGLIso_22_12_L1selelidx, l1_EGLIso_22_12_sel);
+    //fillhistinevent("EGLIso_25_12_L1sel", EGLIso_25_12_L1selelidx, l1_EGLIso_25_12_sel);
+    //fillhistinevent("EG_18_17_8_L1sel", EG_18_17_8_L1selelidx, l1_EG_18_17_8_sel);
+    //fillhistinevent("EG_18_18_12_L1sel", EG_18_18_12_L1selelidx, l1_EG_18_18_12_sel);
+    //fillhistinevent("EG_16_16_16_L1sel", EG_16_16_16_L1selelidx, l1_EG_16_16_16_sel);
+    //fillhistinevent("EG8_HTT300_L1sel", EG8_HTT300_L1selelidx, l1_EG8_HTT300_sel);
+    //fillhistinevent("preEGL1sel", preEGL1selelidx, l1_preEGsel);
+    //fillhistinevent("zeroEGL1sel", zeroEGL1selelidx, l1_zeroEGsel);
+    //fillhistinevent("oldscoutsel", oldscoutselelidx, l1_oldsel);
+    //fillhistinevent("oldscoutvetosel", oldscoutvetoselelidx, l1_oldsel);
+    //fillhistinevent("randsel", randselelidx, l1_nosel);
+    //if(noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx, l1_nosel);
+    //if(oldL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAoldL1sel", noselgenidx, oldL1selelidx, l1_oldsel);
+    //if(noselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAnosel", basicselgenidx, noselelidx, l1_nosel);
+    //if(oldL1selelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAoldL1sel", basicselgenidx, oldL1selelidx, l1_oldsel);
+    //if(unpreEGL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAunpreEGL1sel", noselgenidx, unpreEGL1selelidx, l1_unpreEGsel);
+    //if(EG_25_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_25_12_L1sel", noselgenidx, EG_25_12_L1selelidx, l1_EG_25_12_sel);
+    //if(EG_25_14_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_25_14_L1sel", noselgenidx, EG_25_14_L1selelidx, l1_EG_25_14_sel);
+    //if(EG_27_14_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_27_14_L1sel", noselgenidx, EG_27_14_L1selelidx, l1_EG_27_14_sel);
+    //if(EGLIso_22_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEGLIso_22_12_L1sel", noselgenidx, EGLIso_22_12_L1selelidx, l1_EGLIso_22_12_sel);
+    //if(EGLIso_25_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEGLIso_25_12_L1sel", noselgenidx, EGLIso_25_12_L1selelidx, l1_EGLIso_25_12_sel);
+    //if(EG_18_17_8_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_18_17_8_L1sel", noselgenidx, EG_18_17_8_L1selelidx, l1_EG_18_17_8_sel);
+    //if(EG_18_18_12_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_18_18_12_L1sel", noselgenidx, EG_18_18_12_L1selelidx, l1_EG_18_18_12_sel);
+    //if(EG_16_16_16_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG_16_16_16_L1sel", noselgenidx, EG_16_16_16_L1selelidx, l1_EG_16_16_16_sel);
+    //if(EG8_HTT300_L1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAEG8_HTT300_L1sel", noselgenidx, EG8_HTT300_L1selelidx, l1_EG8_HTT300_sel);
+    //if(preEGL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenApreEGL1sel", noselgenidx, preEGL1selelidx, l1_preEGsel);
+    //if(zeroEGL1selelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAzeroEGL1sel", noselgenidx, zeroEGL1selelidx, l1_zeroEGsel);
+    //if(oldscoutselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAoldscoutsel", noselgenidx, oldscoutselelidx, l1_oldsel);
+    //if(oldscoutselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAoldscoutsel", basicselgenidx, oldscoutselelidx, l1_oldsel);
+    //if(oldscoutvetoselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAoldscoutvetosel", noselgenidx, oldscoutvetoselelidx, l1_oldsel);
+    //if(oldscoutvetoselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenAoldscoutvetosel", basicselgenidx, oldscoutvetoselelidx, l1_oldsel);
+    //if(randselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenArandsel", noselgenidx, randselelidx, l1_nosel);
+    //if(randselelidx.size()>0 && basicselgenidx.size()>0) fillgenmchhistinevent("basicselgenArandsel", basicselgenidx, randselelidx, l1_nosel);
 
     // Clear all vector
     noselgenidx.clear();
@@ -639,6 +639,7 @@ void data_robustanalyzer::fillhistinevent(TString selection, vector<int> elidx, 
   TH1F* dielM = (TH1F*) outfile->Get(selection+"sct_dielM");
   TH1F* elminpt = (TH1F*) outfile->Get(selection+"sct_elminpt");
   TH1F* elmaxpt = (TH1F*) outfile->Get(selection+"sct_elmaxpt");
+  TH1F* elleadeta = (TH1F*) outfile->Get(selection+"sct_elleadeta");
   
   TH1F* barelpt = (TH1F*) outfile->Get(selection+"sctbar_elpt");
   TH1F* barelm = (TH1F*) outfile->Get(selection+"sctbar_elm");
@@ -735,6 +736,7 @@ void data_robustanalyzer::fillhistinevent(TString selection, vector<int> elidx, 
 
   elminpt->Fill((*ele_pt)->at(elidx[elidx.size()-1]), w);
   elmaxpt->Fill((*ele_pt)->at(elidx[0]), w);
+  elleadeta->Fill((*ele_eta)->at(elidx[0]), w);
 
 }  
 
@@ -801,6 +803,7 @@ void data_robustanalyzer::addhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sct_elminpt","min. p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sct_elmaxpt","max. p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_elleadeta","leading #eta",1000,-5,5));
 
   all1dhists.push_back(new TH1F(selection+"sctbar_elpt","p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sctbar_elm","m / GeV",1000,-1e-5,1e-5));
