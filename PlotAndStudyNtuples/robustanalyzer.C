@@ -3,6 +3,7 @@
 #include <numeric>
 #include <boost/range/combine.hpp>
 
+#include "TChain.h"
 #include "TMath.h"
 #include "TVector3.h"
 #include "TLorentzVector.h"
@@ -14,11 +15,13 @@ robustanalyzer::robustanalyzer(TString filename, TString outfilename, bool isDou
 
   isDiEl = isDoubleElectron;
   isMC = isMonteCarlo;
-  
-  TFile *inpfile = TFile::Open(filename,"READ");
-  cout<<"Initializing for file: "<<filename<<endl;
 
-  tree = new TTreeReader("mmtree/tree",inpfile);
+  cout<<"Initializing for file: "<<filename<<endl;
+  TChain* chain = new TChain("mmtree/tree");
+  chain->Add(filename);
+  cout<<"Total number of entries in chain: "<<chain->GetEntries()<<endl;
+
+  tree = new TTreeReader(chain);
   if(isMC) {
     n_gen = new TTreeReaderValue<unsigned int>((*tree), "n_genpart");
     gen_pdg = new TTreeReaderValue<vector<int>>((*tree), "genpart_pdg");
