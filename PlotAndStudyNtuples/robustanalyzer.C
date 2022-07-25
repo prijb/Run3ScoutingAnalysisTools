@@ -10,10 +10,10 @@
 using namespace std;
 
 // Initialize and open the root file in the constructor
-robustanalyzer::robustanalyzer(TString filename, TString outfilename, bool isDoubleElectron, bool isMC){
+robustanalyzer::robustanalyzer(TString filename, TString outfilename, bool isDoubleElectron, bool isMonteCarlo){
 
   isDiEl = isDoubleElectron;
-  isMC = isMC;
+  isMC = isMonteCarlo;
   
   TFile *inpfile = TFile::Open(filename,"READ");
   cout<<"Initializing for file: "<<filename<<endl;
@@ -55,6 +55,8 @@ robustanalyzer::robustanalyzer(TString filename, TString outfilename, bool isDou
   ele_enemat = new TTreeReaderValue<vector<vector<float>>>((*tree), "Electron_energymatrix");
   ele_timmat = new TTreeReaderValue<vector<vector<float>>>((*tree), "Electron_timingmatrix");
   
+  //rho = new TTreeReaderValue<Double32_t>((*tree), "rho");
+
   outfile = new TFile(outfilename,"RECREATE");
 }
 
@@ -82,7 +84,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   int event = beginevent-1;
 
   // Count events passing certain selections
-  int nosel=0, noselZwind=0, cut1=0, cut1Zwind=0;
+  int nosel=0, vetoidsel=0, looseidsel=0, mediumidsel=0, tightidsel=0, noselZwind=0, cut1=0, cut1Zwind=0;
 
   // Define the histograms
   if(isMC) {
@@ -90,10 +92,18 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     addgenmchhist("noselgenAnosel");
   }
   addhist("nosel");
+  addhist("vetosel");
+  addhist("loosesel");
+  addhist("mediumsel");
+  addhist("tightsel");
   
   // vector of electron indices
   vector<int> noselgenidx;
   vector<int> noselelidx;
+  vector<int> vetoselelidx;
+  vector<int> looseselelidx;
+  vector<int> mediumselelidx;
+  vector<int> tightselelidx;
   
   // Loop beginning on events
   while(tree->Next()) {
@@ -118,6 +128,11 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     sort(&sortedelidx[0], ele_pt, (*(*n_ele))); // Verified that the algorithm works fine
 
     if((*(*n_ele))<0) throw "Error!!! Wrong technical event processing. Negative number of electrons in event.";
+
+    bool vetoselcond = false;
+    bool looseselcond = false;
+    bool mediumselcond = false;
+    bool tightselcond = false;
     
     // Loop on electrons in the event loop
     for(unsigned int ele_ctr=0; ele_ctr<(*(*n_ele)); ele_ctr++) {
@@ -126,15 +141,79 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       unsigned int elidx = sortedelidx[ele_ctr];
 
       noselelidx.push_back(elidx);
+
+      // Get the energy of this electron
+      double ele_energy=0;
+      for(unsigned int ctr=0; ctr<((*ele_enemat)->at(elidx)).size(); ctr++) {
+	//if(((*ele_enemat)->at(elidx))[ctr]<0) throw "Error!!! Negative energy value in the electron energy matrix." ;
+	ele_energy += ((*ele_enemat)->at(elidx))[ctr];
+      }
+
+      vetoselcond = true;
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_sigmaietaieta)->at(elidx)<0.0126):((*ele_sigmaietaieta)->at(elidx)<0.0457);
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_detain)->at(elidx)<0.00463):((*ele_detain)->at(elidx)<0.00814);
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_dphiin)->at(elidx)<0.148):((*ele_dphiin)->at(elidx)<0.19);
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_hoe)->at(elidx)<(0.05+(1.16/ele_energy)/*+(0.0324*(*(*rho))/ele_energy)*/))
+	:((*ele_hoe)->at(elidx)<(0.05+(2.54/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.198+(0.506/(*ele_pt)->at(elidx))))
+	:((*ele_tkiso)->at(elidx)<(0.203+(0.963/(*ele_pt)->at(elidx))));
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.209):((*ele_detain)->at(elidx)<0.132);
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=2):((*ele_mhits)->at(elidx)<=3);
+      if(vetoselcond) vetoselelidx.push_back(elidx);
+      
+      looseselcond = true;
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_sigmaietaieta)->at(elidx)<0.0112):((*ele_sigmaietaieta)->at(elidx)<0.0425);
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_detain)->at(elidx)<0.00377):((*ele_detain)->at(elidx)<0.00674);
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_dphiin)->at(elidx)<0.0884):((*ele_dphiin)->at(elidx)<0.169);
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_hoe)->at(elidx)<(0.05+(1.16/ele_energy)/*+(0.0324*(*(*rho))/ele_energy)*/))
+	:((*ele_hoe)->at(elidx)<(0.0441+(2.54/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.112+(0.506/(*ele_pt)->at(elidx))))
+	:((*ele_tkiso)->at(elidx)<(0.108+(0.963/(*ele_pt)->at(elidx))));
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.193):((*ele_detain)->at(elidx)<0.111);
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=1):((*ele_mhits)->at(elidx)<=1);
+      if(looseselcond) looseselelidx.push_back(elidx);
+      
+      mediumselcond = true;
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_sigmaietaieta)->at(elidx)<0.0106):((*ele_sigmaietaieta)->at(elidx)<0.0387);
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_detain)->at(elidx)<0.0032):((*ele_detain)->at(elidx)<0.00632);
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_dphiin)->at(elidx)<0.0547):((*ele_dphiin)->at(elidx)<0.0394);
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_hoe)->at(elidx)<(0.046+(1.16/ele_energy)/*+(0.0324*(*(*rho))/ele_energy)*/))
+	:((*ele_hoe)->at(elidx)<(0.0275+(2.52/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.0478+(0.506/(*ele_pt)->at(elidx))))
+	:((*ele_tkiso)->at(elidx)<(0.0658+(0.963/(*ele_pt)->at(elidx))));
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.184):((*ele_detain)->at(elidx)<0.0721);
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=1):((*ele_mhits)->at(elidx)<=1);
+      if(mediumselcond) mediumselelidx.push_back(elidx);
+      
+      tightselcond = true;
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_sigmaietaieta)->at(elidx)<0.0104):((*ele_sigmaietaieta)->at(elidx)<0.0353);
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_detain)->at(elidx)<0.00255):((*ele_detain)->at(elidx)<0.00501);
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_dphiin)->at(elidx)<0.022):((*ele_dphiin)->at(elidx)<0.0236);
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_hoe)->at(elidx)<(0.026+(1.15/ele_energy)/*+(0.0324*(*(*rho))/ele_energy)*/))
+	:((*ele_hoe)->at(elidx)<(0.0188+(2.06/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.0287+(0.506/(*ele_pt)->at(elidx))))
+	:((*ele_tkiso)->at(elidx)<(0.0455+(0.963/(*ele_pt)->at(elidx))));
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.159):((*ele_detain)->at(elidx)<0.0197);
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=1):((*ele_mhits)->at(elidx)<=1);
+      if(tightselcond) tightselelidx.push_back(elidx);
+      
     }// End of loop on electrons in the event loop
 
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
+    fillhistinevent("vetosel", vetoselelidx);
+    fillhistinevent("loosesel", looseselelidx);
+    fillhistinevent("mediumsel", mediumselelidx);
+    fillhistinevent("tightsel", tightselelidx);
     if(isMC && noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx);
 
     // Clear all vector
     noselgenidx.clear();
     noselelidx.clear();
+    vetoselelidx.clear();
+    looseselelidx.clear();
+    mediumselelidx.clear();
+    tightselelidx.clear();
     
   } // End of loop on events
 
@@ -489,7 +568,7 @@ void robustanalyzer::addhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"sct_elpt","p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sct_eleta","#eta",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"sct_elphi","#phi",66,-3.3,3.3));
-  all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",100000,-10,990));
 
   all1dhists.push_back(new TH1F(selection+"sctbar_elpt","p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sctbar_elm","m / GeV",1000,-1e-5,1e-5));
