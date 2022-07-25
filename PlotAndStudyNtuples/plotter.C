@@ -11,6 +11,7 @@ double sig1msf = 1.0/19;
 double sig3msf = 1.0/7;
 TString cutdeets = "Cut details";
 TFile* datahistfile = TFile::Open("hists_data.root","READ");
+//TFile* datahistfile = TFile::Open("hists_data_12504363.root","READ");
 
 TString seltext[2] = {"line1", "line2"};
 
@@ -22,10 +23,55 @@ std::vector<int> markersize{10, 10};
 std::vector<TString> legendmarkerstyle{"lep", "l"};
 //std::vector<double> scale{1, 1};
 
-/*
-int autoplotter(std::vector<TFile*> file, std::vector<TString> cutname, ) {
+
+int autoplotter(std::vector<TFile*> file, std::vector<TString> cutname) {
+
+  TString foldername = "";
+  foldername += ((TString)file[0]->GetName()).ReplaceAll(".root","").ReplaceAll("hists_","")+"_"+cutname[0]+"_autoplotted";
+
+  TList* listOfKeys = file[0]->GetListOfKeys(); // Get the list of histograms
+  for(unsigned int ctr=0; ctr<listOfKeys->GetEntries(); ctr++) {
+    TString keyName = listOfKeys->At(ctr)->GetName(); // Get the histogram name
+    bool isWithCut = keyName.BeginsWith(cutname[0]); // Check if the histogram begins with a certain cut
+
+    if(!isWithCut) continue;
+
+    int maxBins = 10000;
+    TH1F* histVar = (TH1F*) file[0]->Get(keyName);
+    histVar->Sumw2();
+    //if(histVar->GetNbinsX()>maxBins) histVar->Rebin(maxBins);
+    /*
+    // Go over the histogram and rebin it based on the contents
+    std::vector<double> binlowedge;
+    binlowedge.push_back(histVar->GetBinLowEdge(1));
+    double maxvalue = histVar->GetMaximum();
+    double binval = 0.0;
+    double cutFracWMax = 0.05;
+    for(unsigned int binctr=1; binctr<histVar->GetNbinsX(); binctr++) {
+      binval += histVar->GetBinContent(binctr);
+      if(binval>cutFracWMax*maxvalue) {
+	binlowedge.push_back(histVar->GetBinLowEdge(binctr+1));
+	binval = 0.0;
+      }
+    }
+    if(binlowedge[binlowedge.size()-1]!=histVar->GetBinLowEdge(histVar->GetNbinsX()+1)) {
+      binlowedge.push_back(histVar->GetBinLowEdge(histVar->GetNbinsX()+1));
+    }
+
+    histVar = histVar->Rebin(binlowedge.size()-1,histVar->GetTitle(),binlowedge)
+    */
+    TCanvas* c1;
+    c1 = new TCanvas();
+    gStyle->SetOptStat(0);
+    //c1->SetLogx(true);
+    histVar->Draw();
+    c1->SaveAs("./dirplots/"+foldername+"/"+keyName+".png");
+    
+  }
+
+  return -1;
 }
-*/
+
 
 int invmee_specialplot(TString selection) {
 
@@ -250,22 +296,30 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("vetoselsct");
+  cutname.push_back("tightselsct");
   coloropt.push_back(kBlack);
-  legend.push_back("2021 Scouting Data");
+  legend.push_back("Scouting");
   histtype.push_back("p e1");
   markerstyle.push_back(20);
   markersize.push_back(2);
   legendmarkerstyle.push_back("lep");
 
   legendEntries = legend;
-  //comparesamevariable(file, cutname, "dielM", -1, 200, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
-  invmee_specialplot("noselsct_dielM");
-  invmee_specialplot("vetoselsct_dielM");
-  invmee_specialplot("looseselsct_dielM");
-  invmee_specialplot("mediumselsct_dielM");
-  invmee_specialplot("tightselsct_dielM");
+  //invmee_specialplot("noselsct_dielM");
+  //invmee_specialplot("vetoselsct_dielM");
+  //invmee_specialplot("looseselsct_dielM");
+  //invmee_specialplot("mediumselsct_dielM");
+  //invmee_specialplot("tightselsct_dielM");
 
+  file.clear();
+  cutname.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("vetoselsct");
+
+  autoplotter(file, cutname);
+  
   return -1;
 }

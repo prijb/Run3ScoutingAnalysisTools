@@ -19,7 +19,6 @@ robustanalyzer::robustanalyzer(TString filename, TString outfilename, int numCor
   cout<<"Initializing for file: "<<filename<<endl;
   TChain* chain = new TChain("mmtree/tree");
   chain->Add(filename);
-  cout<<"Total number of entries in chain: "<<chain->GetEntries()<<endl;
 
   tree = new TTreeReader(chain);
   if(isMC) {
@@ -73,7 +72,7 @@ robustanalyzer::~robustanalyzer() {
 // Analyzer for a single file
 void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to range from 0 to nCores
 
-  int totEntries = tree->GetEntries();
+  int totEntries = tree->GetEntries(true);
   cout<<"Total number of entries: "<<totEntries<<endl;
 
   // Verfied that this logic to parallelize works
