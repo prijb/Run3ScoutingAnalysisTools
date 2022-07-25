@@ -90,7 +90,7 @@ TCanvas* enhance_plotter(vector<TH1F*> histvec, vector<TString> legNam, TString 
   return c1;
   }*/
 
-TCanvas* enhance_plotter(vector<TH1F*> histvec, vector<TString> legNam, TString xtitle, TString ytitle, float legPos[]=(float []){0.7,0.75,0.95,1}, bool logY=false, float yrange[]=(float []){0.1,1}, bool normalize=false) {
+TCanvas* enhance_plotter(vector<TH1F*> histvec, vector<TString> legNam, TString xtitle, TString ytitle, float legPos[]=(float []){0.7,0.75,0.95,1}, bool logY=false, float yrange[]=(float []){0.1,1}, bool normalize=false, vector<TString> histtype={"p", "hist"}, vector<int> markerstyle={20,24}, vector<int> markersize={5, 5}, vector<TString> legendmarkerstyle={"lep", "l"}) {
 
   TCanvas *c1 = new TCanvas("c1","c1",1500,1125);
   TPad *pad1 = new TPad("pad1","pad1",0,0,0.075,0.9);
@@ -161,7 +161,9 @@ TCanvas* enhance_plotter(vector<TH1F*> histvec, vector<TString> legNam, TString 
     if(normalize) histvec[ctr]->Scale(1.0/histvec[ctr]->Integral());
     histvec[ctr]->SetMinimum(yrange[0]);
     histvec[ctr]->SetMaximum(yrange[1]);
-    histvec[ctr]->Draw("hist same e1");
+    histvec[ctr]->SetMarkerStyle(markerstyle[ctr]);
+    histvec[ctr]->SetMarkerSize(markersize[ctr]);
+    histvec[ctr]->Draw(histtype[ctr]);
   }
 
   TLegend* leg = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
@@ -169,7 +171,7 @@ TCanvas* enhance_plotter(vector<TH1F*> histvec, vector<TString> legNam, TString 
   leg->SetTextSize(0.065);
   leg->SetBorderSize(0);
   for(unsigned int ctr=0; ctr<histvec.size(); ctr++) {
-    leg->AddEntry(histvec[ctr],legNam[ctr],"l");
+    leg->AddEntry(histvec[ctr],legNam[ctr],legendmarkerstyle[ctr]);
   }
   leg->Draw();
   
