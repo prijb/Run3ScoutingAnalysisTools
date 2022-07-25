@@ -13,7 +13,7 @@ using namespace std;
 class robustanalyzer {
   
 public:
-  robustanalyzer(TString, TString, bool, bool);
+  robustanalyzer(TString, TString, int, bool, bool);
   ~robustanalyzer();
 
   void analyzersinglefile(int);
@@ -28,7 +28,8 @@ public:
   vector< pair<int,int> > diElecGenMatching(vector<int>, vector<int>);
     
   private:
-  
+
+  int nC;
   bool isDiEl;
   bool isMC;
     

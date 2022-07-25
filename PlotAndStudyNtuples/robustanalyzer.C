@@ -1,7 +1,6 @@
 #include "robustanalyzer.hh"
 #include <iostream>
 #include <numeric>
-#include <boost/range/combine.hpp>
 
 #include "TChain.h"
 #include "TMath.h"
@@ -11,8 +10,9 @@
 using namespace std;
 
 // Initialize and open the root file in the constructor
-robustanalyzer::robustanalyzer(TString filename, TString outfilename, bool isDoubleElectron, bool isMonteCarlo){
+robustanalyzer::robustanalyzer(TString filename, TString outfilename, int numCores, bool isDoubleElectron, bool isMonteCarlo){
 
+  nC = numCores;
   isDiEl = isDoubleElectron;
   isMC = isMonteCarlo;
 
@@ -77,13 +77,14 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   cout<<"Total number of entries: "<<totEntries<<endl;
 
   // Verfied that this logic to parallelize works
-  int nCores = 6; // Assume parallel processing over 7 cores where
+  int nCores = nC;
   // there is a lesser no.of events in the last core
   int beginevent = splitCnt*(totEntries/nCores);
   int endevent = (splitCnt+1)*(totEntries/nCores);
   if(beginevent>=totEntries) return;
   endevent = endevent<totEntries?endevent:totEntries;
   tree->SetEntriesRange(beginevent, endevent);
+  cout<<"Processing events in range: [ "<<beginevent<<" , "<<endevent<<" )"<<endl;
   int event = beginevent-1;
 
   // Count events passing certain selections

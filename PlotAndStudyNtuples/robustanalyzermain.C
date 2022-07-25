@@ -12,10 +12,15 @@ int main(int argc, char* argv[]) {
   int cnt;
   ss >> cnt;
   
+  stringstream ssargv2;
+  ssargv2 << argv[2];
+  int numCores;
+  ssargv2 >> numCores;
+
   try {    
     stringstream ss1;
     ss1<<"hists_data_"<<cnt<<".root";
-    robustanalyzer rana_data("./data/Run3Scouting_singlefile_Skim220717.root",ss1.str(), false, false);
+    robustanalyzer rana_data("./data/Run3Scouting_singlefile_Skim220717.root", ss1.str(), numCores, false, false);
     rana_data.analyzersinglefile(cnt);
   }
   catch (char const* exc) {
