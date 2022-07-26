@@ -23,7 +23,6 @@ std::vector<int> markersize{10, 10};
 std::vector<TString> legendmarkerstyle{"lep", "l"};
 //std::vector<double> scale{1, 1};
 
-
 int autoplotter(std::vector<TFile*> file, std::vector<TString> cutname) {
 
   TString foldername = "";
@@ -209,6 +208,45 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   return -1;
 }
 
+void group_plotter(std::vector<TFile*> file, std::vector<TString> cutname, bool isBar) {
+
+  //all1dhists.push_back(new TH1F(selection+"sctbar_elm","m / GeV",1000,-1e-5,1e-5));
+  //all1dhists.push_back(new TH1F(selection+"sctbar_ellog10d0","log_{10}d_{0} / log_{10}cm",1000,-5,5));
+  //all1dhists.push_back(new TH1F(selection+"sctbar_eldz","d_{z} / cm",4000,-20,20));
+  //all1dhists.push_back(new TH1F(selection+"sctbar_elcharge","charge",5,-2,3));
+  comparesamevariable(file, cutname, "elpt", 5, 200, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron p_{T} [GeV]");
+  comparesamevariable(file, cutname, "eld0", 8500, 11500, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron d_{0} [cm]");
+  comparesamevariable(file, cutname, "eldetain", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#eta(SC seed, track)");
+  if(isBar) {
+    comparesamevariable(file, cutname, "eldphiin", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#phi(SC, track)");
+    comparesamevariable(file, cutname, "elsigmaietaieta", -1, 400, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #sigmai#etai#eta");
+    comparesamevariable(file, cutname, "elhoe", -1, -1, 50, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron H/E");
+    comparesamevariable(file, cutname, "elooemoop", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron E^{-1}-p^{-1} [GeV^{-1}]");
+    comparesamevariable(file, cutname, "elmhits", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron missing hits");
+    comparesamevariable(file, cutname, "elecaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron ECAL iso. [GeV]");
+    comparesamevariable(file, cutname, "elhcaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron HCAL iso. [GeV]");
+    comparesamevariable(file, cutname, "eltkiso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron track iso. [GeV]");
+    comparesamevariable(file, cutname, "elr9", -1, 150, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron r9");
+    comparesamevariable(file, cutname, "elsmin", -1, 1100, 5, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smin");
+    comparesamevariable(file, cutname, "elsmaj", -1, 700, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smaj");
+  }
+  else {
+    comparesamevariable(file, cutname, "eldetain", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#eta(SC seed, track)");
+    comparesamevariable(file, cutname, "eldphiin", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#phi(SC, track)");
+    comparesamevariable(file, cutname, "elsigmaietaieta", -1, 800, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #sigmai#etai#eta");
+    comparesamevariable(file, cutname, "elhoe", -1, -1, 50, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron H/E");
+    comparesamevariable(file, cutname, "elooemoop", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron E^{-1}-p^{-1} [GeV^{-1}]");
+    comparesamevariable(file, cutname, "elmhits", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron missing hits");
+    comparesamevariable(file, cutname, "elecaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron ECAL iso. [GeV]");
+    comparesamevariable(file, cutname, "elhcaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron HCAL iso. [GeV]");
+    comparesamevariable(file, cutname, "eltkiso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron track iso. [GeV]");
+    comparesamevariable(file, cutname, "elr9", -1, 300, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron r9");
+    comparesamevariable(file, cutname, "elsmin", -1, 2200, 5, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smin");
+    comparesamevariable(file, cutname, "elsmaj", -1, 1400, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smaj");
+  }
+    
+}
+
 int plotter() {
 
   std::vector<TFile*> file;
@@ -227,7 +265,7 @@ int plotter() {
   file.push_back(datahistfile);
   cutname.push_back("noselsct");
   coloropt.push_back(kBlack);
-  legend.push_back("2021 Scouting Data");
+  legend.push_back("2022 Scouting Data");
   histtype.push_back("p e1");
   markerstyle.push_back(20);
   markersize.push_back(2);
@@ -236,9 +274,51 @@ int plotter() {
   legendEntries = legend;
   //comparesamevariable(file, cutname, "elmult", 5, 15, 1, true, true, true, (float []){8e-1,1e7}, (float []){0.6,0.7,0.85,0.95}, false, "electron multiplicity");
   //comparesamevariable(file, cutname, "elpt", 5, 200, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "eleta", 200, 800, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #eta");
+  //comparesamevariable(file, cutname, "eleta", 200, 800, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #eta");
   //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #phi");
-  //comparesamevariable(file, cutname, "dielM", -1, 200, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("mediumselsctbar");
+  coloropt.push_back(kBlack);
+  legend.push_back("2022 Scouting Data");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //group_plotter(file, cutname, true);
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("mediumselsctec");
+  coloropt.push_back(kBlack);
+  legend.push_back("2022 Scouting Data");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //group_plotter(file, cutname, false);
 
   file.clear();
   cutname.clear();
@@ -286,6 +366,47 @@ int plotter() {
   //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #phi");
   //comparesamevariable(file, cutname, "dielM", -1, 200, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("looseselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("mediumselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
   file.clear();
   cutname.clear();
   coloropt.clear();
@@ -305,7 +426,7 @@ int plotter() {
   legendmarkerstyle.push_back("lep");
 
   legendEntries = legend;
-  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
   //invmee_specialplot("noselsct_dielM");
   //invmee_specialplot("vetoselsct_dielM");
@@ -319,7 +440,7 @@ int plotter() {
   file.push_back(datahistfile);
   cutname.push_back("vetoselsct");
 
-  autoplotter(file, cutname);
+  //autoplotter(file, cutname);
   
   return -1;
 }

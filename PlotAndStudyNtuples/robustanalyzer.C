@@ -202,6 +202,8 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       
     }// End of loop on electrons in the event loop
 
+    
+    
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
     fillhistinevent("vetosel", vetoselelidx);
@@ -453,6 +455,10 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   TH1F* ecelsmaj = (TH1F*) outfile->Get(selection+"sctec_elsmaj");
 
   elmult->Fill(elidx.size());
+  if(elidx.size()<2) return;
+  //cout<<(*ele_charge)->at(elidx[0])*(*ele_charge)->at(elidx[1])<<endl;
+  if((*ele_charge)->at(elidx[0])*(*ele_charge)->at(elidx[1])>0) return;
+  
   for(unsigned int ctr=0; ctr<elidx.size(); ctr++) {
     elpt->Fill((*ele_pt)->at(elidx[ctr]));
     eleta->Fill((*ele_eta)->at(elidx[ctr]));
@@ -578,11 +584,11 @@ void robustanalyzer::addhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"sctbar_eld0","d_{0} / cm",20000,-10,10));
   all1dhists.push_back(new TH1F(selection+"sctbar_ellog10d0","log_{10}d_{0} / log_{10}cm",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"sctbar_eldz","d_{z} / cm",4000,-20,20));
-  all1dhists.push_back(new TH1F(selection+"sctbar_eldetain","#Delta#eta_{in}",10000,0,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctbar_eldphiin","#Delta#phi_{in}",10000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sctbar_eldetain","#Delta#eta_{in}",200000,-0.1,0.1));
+  all1dhists.push_back(new TH1F(selection+"sctbar_eldphiin","#Delta#phi_{in}",200000,-0.1,0.1));
   all1dhists.push_back(new TH1F(selection+"sctbar_elsigmaietaieta","#sigmai#etai#eta",1000,0,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elhoe","H/E",20000,0,0.2));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elooemoop","1/E-1/p",10000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sctbar_elhoe","H/E",100000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sctbar_elooemoop","1/E-1/p",20000,0,0.2));
   all1dhists.push_back(new TH1F(selection+"sctbar_elmhits","missing hits",10,0,10));
   all1dhists.push_back(new TH1F(selection+"sctbar_elcharge","charge",5,-2,3));
   all1dhists.push_back(new TH1F(selection+"sctbar_elecaliso","ecal. iso.",10000,0,50));
@@ -597,11 +603,11 @@ void robustanalyzer::addhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"sctec_eld0","d_{0} / cm",20000,-10,10));
   all1dhists.push_back(new TH1F(selection+"sctec_ellog10d0","log_{10}d_{0} / log_{10}cm",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"sctec_eldz","d_{z} / cm",4000,-20,20));
-  all1dhists.push_back(new TH1F(selection+"sctec_eldetain","#Delta#eta_{in}",10000,0,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctec_eldphiin","#Delta#phi_{in}",10000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sctec_eldetain","#Delta#eta_{in}",200000,-0.1,0.1));
+  all1dhists.push_back(new TH1F(selection+"sctec_eldphiin","#Delta#phi_{in}",200000,-0.1,0.1));
   all1dhists.push_back(new TH1F(selection+"sctec_elsigmaietaieta","#sigmai#etai#eta",1000,0,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctec_elhoe","H/E",20000,0,0.2));
-  all1dhists.push_back(new TH1F(selection+"sctec_elooemoop","1/E-1/p",10000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sctec_elhoe","H/E",100000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sctec_elooemoop","1/E-1/p",20000,0,0.2));
   all1dhists.push_back(new TH1F(selection+"sctec_elmhits","missing hits",10,0,10));
   all1dhists.push_back(new TH1F(selection+"sctec_elcharge","charge",5,-2,3));
   all1dhists.push_back(new TH1F(selection+"sctec_elecaliso","ecal. iso.",10000,0,50));
