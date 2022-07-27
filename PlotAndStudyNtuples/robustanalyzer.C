@@ -97,8 +97,11 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist("nosel");
   addhist("vetosel");
   addhist("loosesel");
+  addhist("loosesel_Zwind");
   addhist("mediumsel");
+  addhist("mediumsel_Zwind");
   addhist("tightsel");
+  addhist("tightsel_Zwind");
   addhist("tightnonesel");
   addhist("nonetightsel");
   addhist("tightloosesel");
@@ -111,8 +114,11 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   vector<int> noselelidx;
   vector<int> vetoselelidx;
   vector<int> looseselelidx;
+  vector<int> looseZwindselelidx;
   vector<int> mediumselelidx;
+  vector<int> mediumZwindselelidx;
   vector<int> tightselelidx;
+  vector<int> tightZwindselelidx;
   vector<int> tightnoneselelidx;
   vector<int> nonetightselelidx;
   vector<int> tightlooseselelidx;
@@ -214,6 +220,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       
     }// End of loop on electrons in the event loop
 
+    // At least 2 opp. charged electrons in event
     if(noselelidx.size()>=2) {
       if((*ele_charge)->at(noselelidx[0])*(*ele_charge)->at(noselelidx[1])<0) {
       
@@ -324,14 +331,59 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  }
 	}
       }	
-    }
+    } // Atleast 2 opp. charged e in event
+    
+    // At least 2 opp. charged electrons with loose ID in event
+    if(looseselelidx.size()>=2) {
+      if((*ele_charge)->at(looseselelidx[0])*(*ele_charge)->at(looseselelidx[1])<0) {
+	TLorentzVector leadel, subleadel;
+	leadel.SetPtEtaPhiM((*ele_pt)->at(looseselelidx[0]),(*ele_eta)->at(looseselelidx[0]),(*ele_phi)->at(looseselelidx[0]),0.0005);
+	subleadel.SetPtEtaPhiM((*ele_pt)->at(looseselelidx[1]),(*ele_eta)->at(looseselelidx[1]),(*ele_phi)->at(looseselelidx[1]),0.0005);
+	double invM = (leadel+subleadel).M();
+	if(invM>80 && invM<100) {
+	  looseZwindselelidx.push_back(looseselelidx[0]);
+	  looseZwindselelidx.push_back(looseselelidx[1]);
+	}
+      }
+    } // Atleast 2 opp. charged e with loose ID in event
+    
+    // At least 2 opp. charged electrons with medium ID in event
+    if(mediumselelidx.size()>=2) {
+      if((*ele_charge)->at(mediumselelidx[0])*(*ele_charge)->at(mediumselelidx[1])<0) {
+	TLorentzVector leadel, subleadel;
+	leadel.SetPtEtaPhiM((*ele_pt)->at(mediumselelidx[0]),(*ele_eta)->at(mediumselelidx[0]),(*ele_phi)->at(mediumselelidx[0]),0.0005);
+	subleadel.SetPtEtaPhiM((*ele_pt)->at(mediumselelidx[1]),(*ele_eta)->at(mediumselelidx[1]),(*ele_phi)->at(mediumselelidx[1]),0.0005);
+	double invM = (leadel+subleadel).M();
+	if(invM>80 && invM<100) {
+	  mediumZwindselelidx.push_back(mediumselelidx[0]);
+	  mediumZwindselelidx.push_back(mediumselelidx[1]);
+	}
+      }
+    } // Atleast 2 opp. charged e with medium ID in event
+    
+    // At least 2 opp. charged electrons with tight ID in event
+    if(tightselelidx.size()>=2) {
+      if((*ele_charge)->at(tightselelidx[0])*(*ele_charge)->at(tightselelidx[1])<0) {
+	TLorentzVector leadel, subleadel;
+	leadel.SetPtEtaPhiM((*ele_pt)->at(tightselelidx[0]),(*ele_eta)->at(tightselelidx[0]),(*ele_phi)->at(tightselelidx[0]),0.0005);
+	subleadel.SetPtEtaPhiM((*ele_pt)->at(tightselelidx[1]),(*ele_eta)->at(tightselelidx[1]),(*ele_phi)->at(tightselelidx[1]),0.0005);
+	double invM = (leadel+subleadel).M();
+	if(invM>80 && invM<100) {
+	  tightZwindselelidx.push_back(tightselelidx[0]);
+	  tightZwindselelidx.push_back(tightselelidx[1]);
+	}
+      }
+    } // Atleast 2 opp. charged e with tight ID in event
     
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
     fillhistinevent("vetosel", vetoselelidx);
     fillhistinevent("loosesel", looseselelidx);
+    fillhistinevent("loosesel_Zwind", looseZwindselelidx);
     fillhistinevent("mediumsel", mediumselelidx);
+    fillhistinevent("mediumsel_Zwind", mediumZwindselelidx);
     fillhistinevent("tightsel", tightselelidx);
+    fillhistinevent("tightsel_Zwind", tightZwindselelidx);
     fillhistinevent("tightnonesel", tightnoneselelidx);
     fillhistinevent("nonetightsel", nonetightselelidx);
     fillhistinevent("tightloosesel", tightlooseselelidx);
@@ -345,8 +397,11 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     noselelidx.clear();
     vetoselelidx.clear();
     looseselelidx.clear();
+    looseZwindselelidx.clear();
     mediumselelidx.clear();
+    mediumZwindselelidx.clear();
     tightselelidx.clear();
+    tightZwindselelidx.clear();
     tightnoneselelidx.clear();
     nonetightselelidx.clear();
     tightlooseselelidx.clear();

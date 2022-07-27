@@ -12,7 +12,8 @@ double sig3msf = 1.0/7;
 TString cutdeets = "Cut details";
 //TFile* datahistfile = TFile::Open("hists_data.root","READ");
 //TFile* datahistfile = TFile::Open("hists_data_12504363.root","READ");
-TFile* datahistfile = TFile::Open("hists_data_12517349.root","READ");
+//TFile* datahistfile = TFile::Open("hists_data_12517349.root","READ");
+TFile* datahistfile = TFile::Open("hists_data_12521272.root","READ");
 
 TString seltext[2] = {"line1", "line2"};
 
@@ -100,6 +101,7 @@ int fitinvmee(TString selection) {
 
   auto invmeehist = (TH1F*) datahistfile->Get(selection);
 
+  invmeehist->SetTitle("");
   invmeehist->Rebin(100);
   invmeehist->GetXaxis()->SetRange(30,150);
 
@@ -139,19 +141,24 @@ int fitinvmee(TString selection) {
   Zpeak->SetParameters(fitfunc->GetParameter(2), fitfunc->GetParameter(3), fitfunc->GetParameter(4));
   cout<<"Signal integral in the (83.73,92.53): "<<Zpeak->Integral(83.73,92.53)<<endl;
   cout<<"Bkg integral in the (83.73,92.53): "<<fitfunc->Integral(83.73,92.53)-Zpeak->Integral(83.73,92.53)<<endl;
+  cout<<"Signal integral in the (80,100): "<<Zpeak->Integral(80,100)<<endl;
+  cout<<"Bkg integral in the (80,100): "<<fitfunc->Integral(80,100)-Zpeak->Integral(80,100)<<endl;
+  cout<<"Signal integral in the (70,100): "<<Zpeak->Integral(70,100)<<endl;
+  cout<<"Bkg integral in the (70,100): "<<fitfunc->Integral(70,100)-Zpeak->Integral(70,100)<<endl;
   cout<<"Signal integral in the (50,110): "<<Zpeak->Integral(50,110)<<endl;
   cout<<"Bkg integral in the (50,110): "<<fitfunc->Integral(50,110)-Zpeak->Integral(50,110)<<endl;
   cout<<"Signal integral in the (45,115): "<<Zpeak->Integral(45,115)<<endl;
   cout<<"Bkg integral in the (45,115): "<<fitfunc->Integral(45,115)-Zpeak->Integral(45,115)<<endl;
   cout<<"Signal integral in the (40,120): "<<Zpeak->Integral(40,120)<<endl;
   cout<<"Bkg integral in the (40,120): "<<fitfunc->Integral(40,120)-Zpeak->Integral(40,120)<<endl;
-    
+
+  fitfunc->SetLineWidth(3);
+  
   TCanvas* c1;
-  c1 = new TCanvas();
-  gStyle->SetOptStat(0);
-  invmeehist->Draw();
-  fitbkg->Draw("SAME");
-  fitpeak->Draw("SAME");
+  //invmeehist->Draw();
+  //fitbkg->Draw("SAME");
+  //fitpeak->Draw("SAME");
+  c1 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, (float []){0,1500}, false, {"hist"}, {20}, {2}, {"lep"});
   fitfunc->Draw("same");
   c1->SaveAs(selection+"_invmeefit.png");
 
@@ -506,7 +513,84 @@ int plotter() {
 
   //autoplotter(file, cutname);
   
-  fitinvmee("tightselsct_dielM");
+  //fitinvmee("tightselsct_dielM");
+
+  // Today
   
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("tightnoneselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, false, true, true, (float []){0,50}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("tightlooseselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, false, true, true, (float []){8e-1,50}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("tightmediumselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, false, true, true, (float []){8e-1,50}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+
+  fitinvmee("noselsct_leadsublead_dielM");
+  fitinvmee("vetoselsct_leadsublead_dielM");
+  fitinvmee("looseselsct_leadsublead_dielM");
+  fitinvmee("mediumselsct_leadsublead_dielM");
+  fitinvmee("tightselsct_leadsublead_dielM");
+  //fitinvmee("tightnoneselsct_leadsublead_dielM");
+  //fitinvmee("nonetightselsct_leadsublead_dielM");
+  //fitinvmee("tightlooseselsct_leadsublead_dielM");
+  //fitinvmee("loosetightselsct_leadsublead_dielM");
+  //fitinvmee("tightmediumselsct_leadsublead_dielM");
+  //fitinvmee("mediumtightselsct_leadsublead_dielM");
+
   return -1;
 }
