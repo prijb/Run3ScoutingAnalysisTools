@@ -87,7 +87,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   int event = beginevent-1;
 
   // Count events passing certain selections
-  int nosel=0, vetoidsel=0, looseidsel=0, mediumidsel=0, tightidsel=0, noselZwind=0, cut1=0, cut1Zwind=0;
+  int nosel=0, vetoidsel=0, looseidsel=0, mediumidsel=0, tightidsel=0, tightnoneidsel=0, nonetightidsel=0, tightlooseidsel=0, loosetightidsel=0, tightmediumidesl=0, mediumtightidsel=0;
 
   // Define the histograms
   if(isMC) {
@@ -99,6 +99,12 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist("loosesel");
   addhist("mediumsel");
   addhist("tightsel");
+  addhist("tightnonesel");
+  addhist("nonetightsel");
+  addhist("tightloosesel");
+  addhist("loosetightsel");
+  addhist("tightmediumsel");
+  addhist("mediumtightsel");
   
   // vector of electron indices
   vector<int> noselgenidx;
@@ -107,7 +113,13 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   vector<int> looseselelidx;
   vector<int> mediumselelidx;
   vector<int> tightselelidx;
-  
+  vector<int> tightnoneselelidx;
+  vector<int> nonetightselelidx;
+  vector<int> tightlooseselelidx;
+  vector<int> loosetightselelidx;
+  vector<int> tightmediumselelidx;
+  vector<int> mediumtightselelidx;
+    
   // Loop beginning on events
   while(tree->Next()) {
 
@@ -202,7 +214,117 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       
     }// End of loop on electrons in the event loop
 
-    
+    if(noselelidx.size()>=2) {
+      if((*ele_charge)->at(noselelidx[0])*(*ele_charge)->at(noselelidx[1])<0) {
+      
+	bool leadloosecond=false, leadmediumcond=false, leadtightcond=false;
+	bool subleadloosecond=false, subleadmediumcond=false, subleadtightcond=false;
+	
+	double lead_ele_energy=0;
+	for(unsigned int ctr=0; ctr<((*ele_enemat)->at(noselelidx[0])).size(); ctr++) {
+	  //if(((*ele_enemat)->at(noselelidx[0]))[ctr]<0) throw "Error!!! Negative energy value in the electron energy matrix." ;
+	  lead_ele_energy += ((*ele_enemat)->at(noselelidx[0]))[ctr];
+	}
+	
+	double sublead_ele_energy=0;
+	for(unsigned int ctr=0; ctr<((*ele_enemat)->at(noselelidx[1])).size(); ctr++) {
+	  //if(((*ele_enemat)->at(noselelidx[1]))[ctr]<0) throw "Error!!! Negative energy value in the electron energy matrix." ;
+	  sublead_ele_energy += ((*ele_enemat)->at(noselelidx[1]))[ctr];
+	}
+	
+	leadloosecond = true;
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_sigmaietaieta)->at(noselelidx[0])<0.0112):((*ele_sigmaietaieta)->at(noselelidx[0])<0.0425);
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_detain)->at(noselelidx[0])<0.00377):((*ele_detain)->at(noselelidx[0])<0.00674);
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_dphiin)->at(noselelidx[0])<0.0884):((*ele_dphiin)->at(noselelidx[0])<0.169);
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_hoe)->at(noselelidx[0])<(0.05+(1.16/lead_ele_energy)/*+(0.0324*(*(*rho))/lead_ele_energy)*/))
+	  :((*ele_hoe)->at(noselelidx[0])<(0.0441+(2.54/lead_ele_energy)/*+(0.183*(*(*rho))/lead_ele_energy)*/));
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_tkiso)->at(noselelidx[0])<(0.112+(0.506/(*ele_pt)->at(noselelidx[0]))))
+	  :((*ele_tkiso)->at(noselelidx[0])<(0.108+(0.963/(*ele_pt)->at(noselelidx[0]))));
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.193):((*ele_detain)->at(noselelidx[0])<0.111);
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_mhits)->at(noselelidx[0])<=1):((*ele_mhits)->at(noselelidx[0])<=1);
+      
+	leadmediumcond = true;
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_sigmaietaieta)->at(noselelidx[0])<0.0106):((*ele_sigmaietaieta)->at(noselelidx[0])<0.0387);
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_detain)->at(noselelidx[0])<0.0032):((*ele_detain)->at(noselelidx[0])<0.00632);
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_dphiin)->at(noselelidx[0])<0.0547):((*ele_dphiin)->at(noselelidx[0])<0.0394);
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_hoe)->at(noselelidx[0])<(0.046+(1.16/lead_ele_energy)/*+(0.0324*(*(*rho))/lead_ele_energy)*/))
+	  :((*ele_hoe)->at(noselelidx[0])<(0.0275+(2.52/lead_ele_energy)/*+(0.183*(*(*rho))/lead_ele_energy)*/));
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_tkiso)->at(noselelidx[0])<(0.0478+(0.506/(*ele_pt)->at(noselelidx[0]))))
+	  :((*ele_tkiso)->at(noselelidx[0])<(0.0658+(0.963/(*ele_pt)->at(noselelidx[0]))));
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.184):((*ele_detain)->at(noselelidx[0])<0.0721);
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_mhits)->at(noselelidx[0])<=1):((*ele_mhits)->at(noselelidx[0])<=1);
+      
+	leadtightcond = true;
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_sigmaietaieta)->at(noselelidx[0])<0.0104):((*ele_sigmaietaieta)->at(noselelidx[0])<0.0353);
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_detain)->at(noselelidx[0])<0.00255):((*ele_detain)->at(noselelidx[0])<0.00501);
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_dphiin)->at(noselelidx[0])<0.022):((*ele_dphiin)->at(noselelidx[0])<0.0236);
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_hoe)->at(noselelidx[0])<(0.026+(1.15/lead_ele_energy)/*+(0.0324*(*(*rho))/lead_ele_energy)*/))
+	  :((*ele_hoe)->at(noselelidx[0])<(0.0188+(2.06/lead_ele_energy)/*+(0.183*(*(*rho))/lead_ele_energy)*/));
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_tkiso)->at(noselelidx[0])<(0.0287+(0.506/(*ele_pt)->at(noselelidx[0]))))
+	  :((*ele_tkiso)->at(noselelidx[0])<(0.0455+(0.963/(*ele_pt)->at(noselelidx[0]))));
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.159):((*ele_detain)->at(noselelidx[0])<0.0197);
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_mhits)->at(noselelidx[0])<=1):((*ele_mhits)->at(noselelidx[0])<=1);
+
+	subleadloosecond = true;
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_sigmaietaieta)->at(noselelidx[1])<0.0112):((*ele_sigmaietaieta)->at(noselelidx[1])<0.0425);
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_detain)->at(noselelidx[1])<0.00377):((*ele_detain)->at(noselelidx[1])<0.00674);
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_dphiin)->at(noselelidx[1])<0.0884):((*ele_dphiin)->at(noselelidx[1])<0.169);
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_hoe)->at(noselelidx[1])<(0.05+(1.16/sublead_ele_energy)/*+(0.0324*(*(*rho))/sublead_ele_energy)*/))
+	  :((*ele_hoe)->at(noselelidx[1])<(0.0441+(2.54/sublead_ele_energy)/*+(0.183*(*(*rho))/sublead_ele_energy)*/));
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_tkiso)->at(noselelidx[1])<(0.112+(0.506/(*ele_pt)->at(noselelidx[1]))))
+	  :((*ele_tkiso)->at(noselelidx[1])<(0.108+(0.963/(*ele_pt)->at(noselelidx[1]))));
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.193):((*ele_detain)->at(noselelidx[1])<0.111);
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_mhits)->at(noselelidx[1])<=1):((*ele_mhits)->at(noselelidx[1])<=1);
+      
+	subleadmediumcond = true;
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_sigmaietaieta)->at(noselelidx[1])<0.0106):((*ele_sigmaietaieta)->at(noselelidx[1])<0.0387);
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_detain)->at(noselelidx[1])<0.0032):((*ele_detain)->at(noselelidx[1])<0.00632);
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_dphiin)->at(noselelidx[1])<0.0547):((*ele_dphiin)->at(noselelidx[1])<0.0394);
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_hoe)->at(noselelidx[1])<(0.046+(1.16/sublead_ele_energy)/*+(0.0324*(*(*rho))/sublead_ele_energy)*/))
+	  :((*ele_hoe)->at(noselelidx[1])<(0.0275+(2.52/sublead_ele_energy)/*+(0.183*(*(*rho))/sublead_ele_energy)*/));
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_tkiso)->at(noselelidx[1])<(0.0478+(0.506/(*ele_pt)->at(noselelidx[1]))))
+	  :((*ele_tkiso)->at(noselelidx[1])<(0.0658+(0.963/(*ele_pt)->at(noselelidx[1]))));
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.184):((*ele_detain)->at(noselelidx[1])<0.0721);
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_mhits)->at(noselelidx[1])<=1):((*ele_mhits)->at(noselelidx[1])<=1);
+      
+	subleadtightcond = true;
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_sigmaietaieta)->at(noselelidx[1])<0.0104):((*ele_sigmaietaieta)->at(noselelidx[1])<0.0353);
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_detain)->at(noselelidx[1])<0.00255):((*ele_detain)->at(noselelidx[1])<0.00501);
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_dphiin)->at(noselelidx[1])<0.022):((*ele_dphiin)->at(noselelidx[1])<0.0236);
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_hoe)->at(noselelidx[1])<(0.026+(1.15/sublead_ele_energy)/*+(0.0324*(*(*rho))/sublead_ele_energy)*/))
+	  :((*ele_hoe)->at(noselelidx[1])<(0.0188+(2.06/sublead_ele_energy)/*+(0.183*(*(*rho))/sublead_ele_energy)*/));
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_tkiso)->at(noselelidx[1])<(0.0287+(0.506/(*ele_pt)->at(noselelidx[1]))))
+	  :((*ele_tkiso)->at(noselelidx[1])<(0.0455+(0.963/(*ele_pt)->at(noselelidx[1]))));
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.159):((*ele_detain)->at(noselelidx[1])<0.0197);
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_mhits)->at(noselelidx[1])<=1):((*ele_mhits)->at(noselelidx[1])<=1);
+
+	if(leadtightcond) {
+	  tightnoneselelidx.push_back(noselelidx[0]);
+	  tightnoneselelidx.push_back(noselelidx[1]);
+	  if(subleadloosecond) {
+	    tightlooseselelidx.push_back(noselelidx[0]);
+	    tightlooseselelidx.push_back(noselelidx[1]);
+	  }
+	  if(subleadmediumcond) {
+	    tightmediumselelidx.push_back(noselelidx[0]);
+	    tightmediumselelidx.push_back(noselelidx[1]);
+	  }
+	}
+
+	if(subleadtightcond) {
+	  nonetightselelidx.push_back(noselelidx[0]);
+	  nonetightselelidx.push_back(noselelidx[1]);
+	  if(leadloosecond) {
+	    loosetightselelidx.push_back(noselelidx[0]);
+	    loosetightselelidx.push_back(noselelidx[1]);
+	  }
+	  if(leadmediumcond) {
+	    mediumtightselelidx.push_back(noselelidx[0]);
+	    mediumtightselelidx.push_back(noselelidx[1]);
+	  }
+	}
+      }	
+    }
     
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
@@ -210,6 +332,12 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     fillhistinevent("loosesel", looseselelidx);
     fillhistinevent("mediumsel", mediumselelidx);
     fillhistinevent("tightsel", tightselelidx);
+    fillhistinevent("tightnonesel", tightnoneselelidx);
+    fillhistinevent("nonetightsel", nonetightselelidx);
+    fillhistinevent("tightloosesel", tightlooseselelidx);
+    fillhistinevent("loosetightsel", loosetightselelidx);
+    fillhistinevent("tightmediumsel", tightmediumselelidx);
+    fillhistinevent("mediumtightsel", mediumtightselelidx);
     if(isMC && noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx);
 
     // Clear all vector
@@ -219,10 +347,16 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     looseselelidx.clear();
     mediumselelidx.clear();
     tightselelidx.clear();
+    tightnoneselelidx.clear();
+    nonetightselelidx.clear();
+    tightlooseselelidx.clear();
+    loosetightselelidx.clear();
+    tightmediumselelidx.clear();
+    mediumtightselelidx.clear();
     
   } // End of loop on events
 
-  cout<<totEntries<<"\t"<<endevent-beginevent<<"\t"<<nosel<<"\t"<<noselZwind<<"\t"<<cut1<<"\t"<<cut1Zwind<<endl;
+  cout<<totEntries<<"\t"<<endevent-beginevent<<"\t"<<nosel<<endl;
 }
 
 // Fill histograms for gen matching
@@ -415,6 +549,7 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   TH1F* eleta = (TH1F*) outfile->Get(selection+"sct_eleta");
   TH1F* elphi = (TH1F*) outfile->Get(selection+"sct_elphi");
   TH1F* dielM = (TH1F*) outfile->Get(selection+"sct_dielM");
+  TH1F* leadsubleaddielM = (TH1F*) outfile->Get(selection+"sct_leadsublead_dielM");
   
   TH1F* barelpt = (TH1F*) outfile->Get(selection+"sctbar_elpt");
   TH1F* barelm = (TH1F*) outfile->Get(selection+"sctbar_elm");
@@ -459,6 +594,11 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   //cout<<(*ele_charge)->at(elidx[0])*(*ele_charge)->at(elidx[1])<<endl;
   if((*ele_charge)->at(elidx[0])*(*ele_charge)->at(elidx[1])>0) return;
   
+  TLorentzVector leadel, subleadel;
+  leadel.SetPtEtaPhiM((*ele_pt)->at(elidx[0]),(*ele_eta)->at(elidx[0]),(*ele_phi)->at(elidx[0]),0.0005);
+  subleadel.SetPtEtaPhiM((*ele_pt)->at(elidx[1]),(*ele_eta)->at(elidx[1]),(*ele_phi)->at(elidx[1]),0.0005);
+  leadsubleaddielM->Fill((leadel+subleadel).M());
+
   for(unsigned int ctr=0; ctr<elidx.size(); ctr++) {
     elpt->Fill((*ele_pt)->at(elidx[ctr]));
     eleta->Fill((*ele_eta)->at(elidx[ctr]));
@@ -578,6 +718,7 @@ void robustanalyzer::addhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"sct_eleta","#eta",1000,-5,5));
   all1dhists.push_back(new TH1F(selection+"sct_elphi","#phi",66,-3.3,3.3));
   all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",100000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_leadsublead_dielM","M(e_{1},e_{2})",100000,-10,990));
 
   all1dhists.push_back(new TH1F(selection+"sctbar_elpt","p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sctbar_elm","m / GeV",1000,-1e-5,1e-5));

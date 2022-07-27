@@ -10,8 +10,9 @@ double sig30cmsf = 1.0/28;
 double sig1msf = 1.0/19;
 double sig3msf = 1.0/7;
 TString cutdeets = "Cut details";
-TFile* datahistfile = TFile::Open("hists_data.root","READ");
+//TFile* datahistfile = TFile::Open("hists_data.root","READ");
 //TFile* datahistfile = TFile::Open("hists_data_12504363.root","READ");
+TFile* datahistfile = TFile::Open("hists_data_12517349.root","READ");
 
 TString seltext[2] = {"line1", "line2"};
 
@@ -92,6 +93,68 @@ int invmee_specialplot(TString selection) {
   invmeehist->Draw();
   c1->SaveAs(selection+".png");
   
+  return -1;
+}
+
+int fitinvmee(TString selection) {
+
+  auto invmeehist = (TH1F*) datahistfile->Get(selection);
+
+  invmeehist->Rebin(100);
+  invmeehist->GetXaxis()->SetRange(30,150);
+
+  TF1* fitbkg = new TF1("fitbkg","exp([0]+[1]*x)",40,65);
+  fitbkg->SetParameters(5,-0.002);
+  invmeehist->Fit("fitbkg","R");
+  fitbkg->SetLineColor(kBlue);
+  double b0 = fitbkg->GetParameter(0);
+  double be0 = fitbkg->GetParError(0);
+  double b1 = fitbkg->GetParameter(1);
+  double be1 = fitbkg->GetParError(1);
+
+  TF1* fitpeak = new TF1("fitpeak","[0]*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))",80,95);
+  fitpeak->SetParameters(702,91,5);
+  invmeehist->Fit("fitpeak","R");
+  fitpeak->SetLineColor(kGreen+2);
+  double p0 = fitpeak->GetParameter(0);
+  double pe0 = fitpeak->GetParError(0);
+  double p1 = fitpeak->GetParameter(1);
+  double pe1 = fitpeak->GetParError(1);
+  double p2 = fitpeak->GetParameter(2);
+  double pe2 = fitpeak->GetParError(2);
+
+  TF1* fitfunc = new TF1("fitZmass","exp([0]+[1]*x)+[2]*exp(-0.5*((x-[3])/[4])*((x-[3])/[4]))",40,120);
+  fitfunc->SetParameters(b0, b1, p0, p1, p2);
+  fitfunc->SetParLimits(0, b0-10*be0, b0+10*be0);
+  fitfunc->SetParLimits(1, b1-10*be1, b1+10*be1);
+  fitfunc->SetParLimits(2, p0-10*pe0, p0+10*pe0);
+  fitfunc->SetParLimits(3, p1-10*pe1, p1+10*pe1);
+  fitfunc->SetParLimits(4, p2-10*pe2, p2+10*pe2);
+  
+  TFitResultPtr fitres = invmeehist->Fit("fitZmass","RS");
+
+  cout<<"Chi2/Ndf = "<<fitres->Chi2()<<"/"<<fitres->Ndf()<<endl;
+
+  TF1* Zpeak = new TF1("Zpeak","[0]*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))",40,120);
+  Zpeak->SetParameters(fitfunc->GetParameter(2), fitfunc->GetParameter(3), fitfunc->GetParameter(4));
+  cout<<"Signal integral in the (83.73,92.53): "<<Zpeak->Integral(83.73,92.53)<<endl;
+  cout<<"Bkg integral in the (83.73,92.53): "<<fitfunc->Integral(83.73,92.53)-Zpeak->Integral(83.73,92.53)<<endl;
+  cout<<"Signal integral in the (50,110): "<<Zpeak->Integral(50,110)<<endl;
+  cout<<"Bkg integral in the (50,110): "<<fitfunc->Integral(50,110)-Zpeak->Integral(50,110)<<endl;
+  cout<<"Signal integral in the (45,115): "<<Zpeak->Integral(45,115)<<endl;
+  cout<<"Bkg integral in the (45,115): "<<fitfunc->Integral(45,115)-Zpeak->Integral(45,115)<<endl;
+  cout<<"Signal integral in the (40,120): "<<Zpeak->Integral(40,120)<<endl;
+  cout<<"Bkg integral in the (40,120): "<<fitfunc->Integral(40,120)-Zpeak->Integral(40,120)<<endl;
+    
+  TCanvas* c1;
+  c1 = new TCanvas();
+  gStyle->SetOptStat(0);
+  invmeehist->Draw();
+  fitbkg->Draw("SAME");
+  fitpeak->Draw("SAME");
+  fitfunc->Draw("same");
+  c1->SaveAs(selection+"_invmeefit.png");
+
   return -1;
 }
 
@@ -288,7 +351,7 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("mediumselsctbar");
+  cutname.push_back("noselsctbar");
   coloropt.push_back(kBlack);
   legend.push_back("2022 Scouting Data");
   histtype.push_back("p e1");
@@ -385,7 +448,7 @@ int plotter() {
   legendmarkerstyle.push_back("lep");
 
   legendEntries = legend;
-  comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
   file.clear();
   cutname.clear();
@@ -406,7 +469,8 @@ int plotter() {
   legendmarkerstyle.push_back("lep");
 
   legendEntries = legend;
-  comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+
   file.clear();
   cutname.clear();
   coloropt.clear();
@@ -426,7 +490,7 @@ int plotter() {
   legendmarkerstyle.push_back("lep");
 
   legendEntries = legend;
-  comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
   //invmee_specialplot("noselsct_dielM");
   //invmee_specialplot("vetoselsct_dielM");
@@ -441,6 +505,8 @@ int plotter() {
   cutname.push_back("vetoselsct");
 
   //autoplotter(file, cutname);
+  
+  fitinvmee("tightselsct_dielM");
   
   return -1;
 }
