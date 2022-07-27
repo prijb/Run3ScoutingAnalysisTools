@@ -95,6 +95,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     addgenmchhist("noselgenAnosel");
   }
   addhist("nosel");
+  addhist("nosel_Zwind");
   addhist("vetosel");
   addhist("loosesel");
   addhist("loosesel_Zwind");
@@ -112,6 +113,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   // vector of electron indices
   vector<int> noselgenidx;
   vector<int> noselelidx;
+  vector<int> noselZwindelidx;
   vector<int> vetoselelidx;
   vector<int> looseselelidx;
   vector<int> looseZwindselelidx;
@@ -333,6 +335,20 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       }	
     } // Atleast 2 opp. charged e in event
     
+    // At least 2 opp. charged electrons with no sel in event
+    if(noselelidx.size()>=2) {
+      if((*ele_charge)->at(noselelidx[0])*(*ele_charge)->at(noselelidx[1])<0) {
+	TLorentzVector leadel, subleadel;
+	leadel.SetPtEtaPhiM((*ele_pt)->at(noselelidx[0]),(*ele_eta)->at(noselelidx[0]),(*ele_phi)->at(noselelidx[0]),0.0005);
+	subleadel.SetPtEtaPhiM((*ele_pt)->at(noselelidx[1]),(*ele_eta)->at(noselelidx[1]),(*ele_phi)->at(noselelidx[1]),0.0005);
+	double invM = (leadel+subleadel).M();
+	if(invM>80 && invM<100) {
+	  noselZwindelidx.push_back(noselelidx[0]);
+	  noselZwindelidx.push_back(noselelidx[1]);
+	}
+      }
+    } // Atleast 2 opp. charged e with nosel in event
+    
     // At least 2 opp. charged electrons with loose ID in event
     if(looseselelidx.size()>=2) {
       if((*ele_charge)->at(looseselelidx[0])*(*ele_charge)->at(looseselelidx[1])<0) {
@@ -377,6 +393,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
+    fillhistinevent("nosel_Zwind", noselZwindelidx);
     fillhistinevent("vetosel", vetoselelidx);
     fillhistinevent("loosesel", looseselelidx);
     fillhistinevent("loosesel_Zwind", looseZwindselelidx);
@@ -395,6 +412,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     // Clear all vector
     noselgenidx.clear();
     noselelidx.clear();
+    noselZwindelidx.clear();
     vetoselelidx.clear();
     looseselelidx.clear();
     looseZwindselelidx.clear();
