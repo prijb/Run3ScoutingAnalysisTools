@@ -13,7 +13,7 @@ TString cutdeets = "Cut details";
 //TFile* datahistfile = TFile::Open("hists_data.root","READ");
 //TFile* datahistfile = TFile::Open("hists_data_12504363.root","READ");
 //TFile* datahistfile = TFile::Open("hists_data_12517349.root","READ");
-TFile* datahistfile = TFile::Open("hists_data_12521560.root","READ");
+TFile* datahistfile = TFile::Open("hists_data_12522576.root","READ");
 
 TString seltext[2] = {"line1", "line2"};
 
@@ -38,7 +38,8 @@ int autoplotter(std::vector<TFile*> file, std::vector<TString> cutname) {
     if(!isWithCut) continue;
 
     int maxBins = 10000;
-    TH1F* histVar = (TH1F*) file[0]->Get(keyName);
+    TH1F* histVarOrig = (TH1F*) file[0]->Get(keyName);
+    TH1F* histVar = (TH1F*) histVarOrig->Clone(histVarOrig->GetName());
     histVar->Sumw2();
     //if(histVar->GetNbinsX()>maxBins) histVar->Rebin(maxBins);
     /*
@@ -74,14 +75,20 @@ int autoplotter(std::vector<TFile*> file, std::vector<TString> cutname) {
 }
 
 
-int invmee_specialplot(TString selection) {
+int invmee_specialplot(TString selection, double res) {
 
-  auto invmeehist = (TH1F*) datahistfile->Get(selection);
-
+  if(res>1) {
+    cout<<"Resolution input as fraction. Cannot be greater than one. Invalid input to invmee_specialplot()."<<endl;
+    return -1;
+  }
+  
+  auto invmeehistorig = (TH1F*) datahistfile->Get(selection);
+  TH1F* invmeehist = (TH1F*) invmeehistorig->Clone(invmeehistorig->GetName());
+  
   vector<double> xbins;
   xbins.push_back(0.5);
   while(xbins[xbins.size()-1]<100) {
-    double val = ceil(102.0*xbins[xbins.size()-1])/100.0;
+    double val = ceil(100.0*(1+res)*xbins[xbins.size()-1])/100.0;
     xbins.push_back(val);
   }
 
@@ -89,7 +96,7 @@ int invmee_specialplot(TString selection) {
   invmeehist->SetTitle("");
   
   TCanvas* c1;
-  c1 = enhance_plotter({invmeehist}, {"Run 3 Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, (float []){0,1.3e4}, false, {"hist e1"}, {20}, {2}, {"lep"});
+  c1 = enhance_plotter({invmeehist}, {"Run 3 Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, true, false, (float []){0,1.3e4}, false, {"hist e1"}, {20}, {2}, {"lep"});
   c1->SaveAs(selection+".png");
   
   return -1;
@@ -97,7 +104,8 @@ int invmee_specialplot(TString selection) {
 
 int fitinvmee(TString selection) {
 
-  auto invmeehist = (TH1F*) datahistfile->Get(selection);
+  auto invmeehistorig = (TH1F*) datahistfile->Get(selection);
+  TH1F* invmeehist = (TH1F*) invmeehistorig->Clone(invmeehistorig->GetName());
 
   invmeehist->SetTitle("");
   invmeehist->Rebin(100);
@@ -156,7 +164,7 @@ int fitinvmee(TString selection) {
   //invmeehist->Draw();
   //fitbkg->Draw("SAME");
   //fitpeak->Draw("SAME");
-  c1 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, (float []){0,1500}, false, {"hist"}, {20}, {2}, {"lep"});
+  c1 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, false, (float []){0,1500}, false, {"hist"}, {20}, {2}, {"lep"});
   fitfunc->Draw("same");
   c1->SaveAs(selection+"_invmeefit.png");
 
@@ -177,7 +185,8 @@ int comparesamevariable(std::vector<TFile*> file, std::vector<TString> cutname, 
   std::vector<TH1F*> allhists;
   for(unsigned int histctr=0; histctr<cutname.size(); histctr++) {
     TString cutwithvar = cutname[histctr]+"_"+var;
-    allhists.push_back((TH1F*)file[histctr]->Get(cutwithvar));
+    TH1F* temphistholder = (TH1F*) file[histctr]->Get(cutwithvar);
+    allhists.push_back((TH1F*)temphistholder->Clone(temphistholder->GetName()));
     cutname[histctr] += "_"+((TString)file[histctr]->GetName()).ReplaceAll(".root","").ReplaceAll("hists_","");
   }
   
@@ -220,7 +229,7 @@ int comparesamevariable(std::vector<TFile*> file, std::vector<TString> cutname, 
 
   TCanvas* c1;
   c1 = new TCanvas();
-  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(),legPos,logY,yrange,normalize,histtype,markerstyle,markersize,legendmarkerstyle);
+  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(),legPos, false, logY,yrange,normalize,histtype,markerstyle,markersize,legendmarkerstyle);
   c1->SaveAs("./dirplots/"+foldername+"/"+var+".png");
 
   return -1;
@@ -238,8 +247,10 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
 
   for(unsigned int filenum=0; filenum<file.size(); filenum++) {
     
-    TH1F* nosel = (TH1F*) file[filenum]->Get(cutnames[filenum*2]);
-    TH1F* sel = (TH1F*) file[filenum]->Get(cutnames[filenum*2+1]);
+    TH1F* noselorig = (TH1F*) file[filenum]->Get(cutnames[filenum*2]);
+    TH1F* nosel = (TH1F*) noselorig->Clone(noselorig->GetName());
+    TH1F* selorig = (TH1F*) file[filenum]->Get(cutnames[filenum*2+1]);
+    TH1F* sel = (TH1F*) selorig->Clone(selorig->GetName());
     
     nosel = (TH1F*) nosel->Rebin(nbins,"newx",rebin);
     sel = (TH1F*) sel->Rebin(nbins,"newx",rebin);
@@ -266,7 +277,7 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   
   TCanvas* c1;
   c1 = new TCanvas();
-  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(), (float []){0.7,0.65,0.9,0.95},false,(float []){0.0,1.1},false);
+  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(), (float []){0.7,0.65,0.9,0.95},false,false,(float []){0.0,1.1},false);
   auto pad = c1->GetPad(3);
   for(unsigned int filenum=0; filenum<file.size(); filenum++) {
     pEff[filenum]->Draw("same");
@@ -513,8 +524,6 @@ int plotter() {
   
   //fitinvmee("tightselsct_dielM");
 
-  // Today
-  
   file.clear();
   cutname.clear();
   coloropt.clear();
@@ -525,59 +534,17 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("tightnoneselsct");
+  cutname.push_back("noselsct");
   coloropt.push_back(kBlack);
-  legend.push_back("Scouting");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, false, true, true, (float []){0,50}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("tightlooseselsct");
-  coloropt.push_back(kBlack);
-  legend.push_back("Scouting");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-  //comparesamevariable(file, cutname, "dielM", -1, 20000, 100, false, true, true, (float []){8e-1,50}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("noselsctbar");
-  coloropt.push_back(kBlack);
-  legend.push_back("Run 3 Scouting");
+  legend.push_back("All electrons");
   histtype.push_back("hist e1");
   markerstyle.push_back(20);
   markersize.push_back(2);
   legendmarkerstyle.push_back("lep");
   file.push_back(datahistfile);
-  cutname.push_back("nosel_Zwindsctbar");
+  cutname.push_back("mediumsel_Zwindsctbar");
   coloropt.push_back(kRed);
-  legend.push_back("Run 3 Scouting");
+  legend.push_back("(e^{+}, e^{-} in 80<M<100)");
   histtype.push_back("hist e1 same");
   markerstyle.push_back(20);
   markersize.push_back(2);
@@ -585,7 +552,7 @@ int plotter() {
 
   legendEntries = legend;
   
-  comparesamevariable(file, cutname, "elsigmaietaieta", -1, 400, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #sigmai#etai#eta");
+  //comparesamevariable(file, cutname, "elsigmaietaieta", -1, 400, 4, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron #sigmai#etai#eta");
   //comparesamevariable(file, cutname, "dielM", 500, 20000, 100, true, true, true, (float []){8e-1,1e6}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
   //invmee_specialplot("noselsct_dielM");
 
@@ -600,6 +567,86 @@ int plotter() {
   //fitinvmee("loosetightselsct_leadsublead_dielM");
   //fitinvmee("tightmediumselsct_leadsublead_dielM");
   //fitinvmee("mediumtightselsct_leadsublead_dielM");
+
+  //comparesamevariable(file, cutname, "elpt", -1, 150, 2, true, true, true, (float []){8e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "#phi");
+  //comparesamevariable(file, cutname, "eleta", 150, 850, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "#eta");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("mediumsel_Zwindsctbar");
+  coloropt.push_back(kBlack);
+  legend.push_back("Run2022B Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "eld0", 9000, 11000, 5, true, true, true, (float []){8e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "d_{0} [cm]");
+
+
+  //////////////////////// DELETE EVERYTHING BEFORE THIS \\\\\\\\\\\\\\\\\\\\\\\\\\
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("noselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Run2022B Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron multiplicity");
+  //comparesamevariable(file, cutname, "elpt", -1, 70, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "eleta", 500, 670, 1, true, false, false, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
+  //comparesamevariable(file, cutname, "dielM", 500, 20000, 100, true, true, true, (float []){8e-1,1e6}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //invmee_specialplot("noselsct_dielM", 0.02);
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("noselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Run2022B Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron multiplicity");
+  //comparesamevariable(file, cutname, "elpt", -1, 70, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "eleta", 500, 670, 1, true, false, false, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
+  //comparesamevariable(file, cutname, "dielM", 500, 20000, 100, true, true, true, (float []){8e-1,1e6}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //invmee_specialplot("noselsct_dielM", 0.02);
 
   return -1;
 }

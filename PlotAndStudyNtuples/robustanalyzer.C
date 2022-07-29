@@ -95,14 +95,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     addgenmchhist("noselgenAnosel");
   }
   addhist("nosel");
-  addhist("nosel_Zwind");
+  addhist("nosel_Zwind_");
+  addhist("leadepemsel");
+  addhist("leadepem_only_sel");
+  addhist("leadepem_Zwind_sel");
   addhist("vetosel");
   addhist("loosesel");
-  addhist("loosesel_Zwind");
+  addhist("loosesel_Zwind_");
   addhist("mediumsel");
-  addhist("mediumsel_Zwind");
+  addhist("mediumsel_Zwind_");
   addhist("tightsel");
-  addhist("tightsel_Zwind");
+  addhist("tightsel_Zwind_");
   addhist("tightnonesel");
   addhist("nonetightsel");
   addhist("tightloosesel");
@@ -114,6 +117,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   vector<int> noselgenidx;
   vector<int> noselelidx;
   vector<int> noselZwindelidx;
+  vector<int> leadepemselelidx;
+  vector<int> leadepemonlyselelidx;
+  vector<int> leadepemZwindselelidx;
   vector<int> vetoselelidx;
   vector<int> looseselelidx;
   vector<int> looseZwindselelidx;
@@ -132,7 +138,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   while(tree->Next()) {
 
     event++;
-    //if(event>1000) break;
+    //if(event>100) break;
     //if(event!=283991 && event!=326114) continue;
     if(event%10000==0) std::cout<<"Processed event: "<<event+1<<std::endl;
 
@@ -169,9 +175,11 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       double ele_energy=0;
       for(unsigned int ctr=0; ctr<((*ele_enemat)->at(elidx)).size(); ctr++) {
 	//if(((*ele_enemat)->at(elidx))[ctr]<0) throw "Error!!! Negative energy value in the electron energy matrix." ;
-	ele_energy += ((*ele_enemat)->at(elidx))[ctr];
+	if(((*ele_enemat)->at(elidx))[ctr]>0) {
+	  ele_energy += ((*ele_enemat)->at(elidx))[ctr];
+	}
       }
-
+      
       vetoselcond = true;
       vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_sigmaietaieta)->at(elidx)<0.0126):((*ele_sigmaietaieta)->at(elidx)<0.0457);
       vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_detain)->at(elidx)<0.00463):((*ele_detain)->at(elidx)<0.00814);
@@ -225,7 +233,11 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     // At least 2 opp. charged electrons in event
     if(noselelidx.size()>=2) {
       if((*ele_charge)->at(noselelidx[0])*(*ele_charge)->at(noselelidx[1])<0) {
-      
+
+        leadepemselelidx = noselelidx;
+	leadepemonlyselelidx.push_back(leadepemselelidx[0]);
+	leadepemonlyselelidx.push_back(leadepemselelidx[1]);
+	
 	bool leadloosecond=false, leadmediumcond=false, leadtightcond=false;
 	bool subleadloosecond=false, subleadmediumcond=false, subleadtightcond=false;
 	
@@ -334,7 +346,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	}
       }	
     } // Atleast 2 opp. charged e in event
-    
+
     // At least 2 opp. charged electrons with no sel in event
     if(noselelidx.size()>=2) {
       if((*ele_charge)->at(noselelidx[0])*(*ele_charge)->at(noselelidx[1])<0) {
@@ -348,6 +360,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	}
       }
     } // Atleast 2 opp. charged e with nosel in event
+
+    if(leadepemonlyselelidx.size()>2) {
+      TLorentzVector leadel, subleadel;
+      leadel.SetPtEtaPhiM((*ele_pt)->at(leadepemonlyselelidx[0]),(*ele_eta)->at(leadepemonlyselelidx[0]),(*ele_phi)->at(leadepemonlyselelidx[0]),0.0005);
+      subleadel.SetPtEtaPhiM((*ele_pt)->at(leadepemonlyselelidx[1]),(*ele_eta)->at(leadepemonlyselelidx[1]),(*ele_phi)->at(leadepemonlyselelidx[1]),0.0005);
+	double invM = (leadel+subleadel).M();
+	if(invM>80 && invM<100) {
+	  leadepemZwindselelidx.push_back(noselelidx[0]);
+	  leadepemZwindselelidx.push_back(noselelidx[1]);
+	}
+    }
     
     // At least 2 opp. charged electrons with loose ID in event
     if(looseselelidx.size()>=2) {
@@ -393,14 +416,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     
     if(noselelidx.size()>0) nosel++;
     fillhistinevent("nosel", noselelidx);
-    fillhistinevent("nosel_Zwind", noselZwindelidx);
+    fillhistinevent("nosel_Zwind_", noselZwindelidx);
+    fillhistinevent("leadepemsel", leadepemselelidx);
+    fillhistinevent("leadepem_only_sel", leadepemonlyselelidx);
+    fillhistinevent("leadepem_Zwind_sel", leadepemZwindselelidx);
     fillhistinevent("vetosel", vetoselelidx);
     fillhistinevent("loosesel", looseselelidx);
-    fillhistinevent("loosesel_Zwind", looseZwindselelidx);
+    fillhistinevent("loosesel_Zwind_", looseZwindselelidx);
     fillhistinevent("mediumsel", mediumselelidx);
-    fillhistinevent("mediumsel_Zwind", mediumZwindselelidx);
+    fillhistinevent("mediumsel_Zwind_", mediumZwindselelidx);
     fillhistinevent("tightsel", tightselelidx);
-    fillhistinevent("tightsel_Zwind", tightZwindselelidx);
+    fillhistinevent("tightsel_Zwind_", tightZwindselelidx);
     fillhistinevent("tightnonesel", tightnoneselelidx);
     fillhistinevent("nonetightsel", nonetightselelidx);
     fillhistinevent("tightloosesel", tightlooseselelidx);
@@ -413,6 +439,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     noselgenidx.clear();
     noselelidx.clear();
     noselZwindelidx.clear();
+    leadepemselelidx.clear();
+    leadepemonlyselelidx.clear();
+    leadepemZwindselelidx.clear();
     vetoselelidx.clear();
     looseselelidx.clear();
     looseZwindselelidx.clear();
@@ -623,6 +652,7 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   TH1F* elphi = (TH1F*) outfile->Get(selection+"sct_elphi");
   TH1F* dielM = (TH1F*) outfile->Get(selection+"sct_dielM");
   TH1F* leadsubleaddielM = (TH1F*) outfile->Get(selection+"sct_leadsublead_dielM");
+  TH1F* leadsubleadqprod = (TH1F*) outfile->Get(selection+"sct_leadsublead_chargeprod");
   
   TH1F* barelpt = (TH1F*) outfile->Get(selection+"sctbar_elpt");
   TH1F* barelm = (TH1F*) outfile->Get(selection+"sctbar_elm");
@@ -663,14 +693,14 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   TH1F* ecelsmaj = (TH1F*) outfile->Get(selection+"sctec_elsmaj");
 
   elmult->Fill(elidx.size());
-  if(elidx.size()<2) return;
-  //cout<<(*ele_charge)->at(elidx[0])*(*ele_charge)->at(elidx[1])<<endl;
-  if((*ele_charge)->at(elidx[0])*(*ele_charge)->at(elidx[1])>0) return;
-  
-  TLorentzVector leadel, subleadel;
-  leadel.SetPtEtaPhiM((*ele_pt)->at(elidx[0]),(*ele_eta)->at(elidx[0]),(*ele_phi)->at(elidx[0]),0.0005);
-  subleadel.SetPtEtaPhiM((*ele_pt)->at(elidx[1]),(*ele_eta)->at(elidx[1]),(*ele_phi)->at(elidx[1]),0.0005);
-  leadsubleaddielM->Fill((leadel+subleadel).M());
+
+  if(elidx.size()>=2) {
+    TLorentzVector leadel, subleadel;
+    leadel.SetPtEtaPhiM((*ele_pt)->at(elidx[0]),(*ele_eta)->at(elidx[0]),(*ele_phi)->at(elidx[0]),0.0005);
+    subleadel.SetPtEtaPhiM((*ele_pt)->at(elidx[1]),(*ele_eta)->at(elidx[1]),(*ele_phi)->at(elidx[1]),0.0005);
+    leadsubleaddielM->Fill((leadel+subleadel).M());
+    leadsubleadqprod->Fill((*ele_charge)->at(elidx[0])*(*ele_charge)->at(elidx[1]));
+  }
 
   for(unsigned int ctr=0; ctr<elidx.size(); ctr++) {
     elpt->Fill((*ele_pt)->at(elidx[ctr]));
@@ -792,6 +822,7 @@ void robustanalyzer::addhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"sct_elphi","#phi",66,-3.3,3.3));
   all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",100000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sct_leadsublead_dielM","M(e_{1},e_{2})",100000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_leadsublead_chargeprod","q_{e1}*q_{e2}",3,-1,1));
 
   all1dhists.push_back(new TH1F(selection+"sctbar_elpt","p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sctbar_elm","m / GeV",1000,-1e-5,1e-5));
