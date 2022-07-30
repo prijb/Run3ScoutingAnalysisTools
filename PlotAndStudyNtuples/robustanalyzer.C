@@ -98,7 +98,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist("nosel_Zwind_");
   addhist("leadepemsel");
   addhist("leadepem_only_sel");
+  addhist("leadepem_ptgt20_sel");
   addhist("leadepem_Zwind_sel");
+  addhist("leadepem_Zwindptgt20_sel");
   addhist("vetosel");
   addhist("loosesel");
   addhist("loosesel_Zwind_");
@@ -119,7 +121,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   vector<int> noselZwindelidx;
   vector<int> leadepemselelidx;
   vector<int> leadepemonlyselelidx;
+  vector<int> leadepemptgt20selelidx;
   vector<int> leadepemZwindselelidx;
+  vector<int> leadepemZwindptgt20selelidx;
   vector<int> vetoselelidx;
   vector<int> looseselelidx;
   vector<int> looseZwindselelidx;
@@ -237,6 +241,10 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
         leadepemselelidx = noselelidx;
 	leadepemonlyselelidx.push_back(leadepemselelidx[0]);
 	leadepemonlyselelidx.push_back(leadepemselelidx[1]);
+	if((*ele_pt)->at(leadepemselelidx[0])>20 && (*ele_pt)->at(leadepemselelidx[1])>20) {
+	  leadepemptgt20selelidx.push_back(leadepemselelidx[0]);
+	  leadepemptgt20selelidx.push_back(leadepemselelidx[1]);
+	}
 	
 	bool leadloosecond=false, leadmediumcond=false, leadtightcond=false;
 	bool subleadloosecond=false, subleadmediumcond=false, subleadtightcond=false;
@@ -369,6 +377,10 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	if(invM>80 && invM<100) {
 	  leadepemZwindselelidx.push_back(noselelidx[0]);
 	  leadepemZwindselelidx.push_back(noselelidx[1]);
+	  if((*ele_pt)->at(leadepemonlyselelidx[0])>20 && (*ele_pt)->at(leadepemonlyselelidx[1])>20) {
+	    leadepemZwindptgt20selelidx.push_back(noselelidx[0]);
+	    leadepemZwindptgt20selelidx.push_back(noselelidx[1]);
+	  }
 	}
     }
     
@@ -419,7 +431,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     fillhistinevent("nosel_Zwind_", noselZwindelidx);
     fillhistinevent("leadepemsel", leadepemselelidx);
     fillhistinevent("leadepem_only_sel", leadepemonlyselelidx);
+    fillhistinevent("leadepem_ptgt20_sel", leadepemptgt20selelidx);
     fillhistinevent("leadepem_Zwind_sel", leadepemZwindselelidx);
+    fillhistinevent("leadepem_Zwindptgt20_sel", leadepemZwindptgt20selelidx);
     fillhistinevent("vetosel", vetoselelidx);
     fillhistinevent("loosesel", looseselelidx);
     fillhistinevent("loosesel_Zwind_", looseZwindselelidx);
@@ -441,7 +455,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     noselZwindelidx.clear();
     leadepemselelidx.clear();
     leadepemonlyselelidx.clear();
+    leadepemptgt20selelidx.clear();
     leadepemZwindselelidx.clear();
+    leadepemZwindptgt20selelidx.clear();
     vetoselelidx.clear();
     looseselelidx.clear();
     looseZwindselelidx.clear();
