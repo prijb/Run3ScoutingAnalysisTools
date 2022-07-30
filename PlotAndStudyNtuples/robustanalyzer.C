@@ -361,7 +361,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       }
     } // Atleast 2 opp. charged e with nosel in event
 
-    if(leadepemonlyselelidx.size()>2) {
+    if(leadepemonlyselelidx.size()>=2) {
       TLorentzVector leadel, subleadel;
       leadel.SetPtEtaPhiM((*ele_pt)->at(leadepemonlyselelidx[0]),(*ele_eta)->at(leadepemonlyselelidx[0]),(*ele_phi)->at(leadepemonlyselelidx[0]),0.0005);
       subleadel.SetPtEtaPhiM((*ele_pt)->at(leadepemonlyselelidx[1]),(*ele_eta)->at(leadepemonlyselelidx[1]),(*ele_phi)->at(leadepemonlyselelidx[1]),0.0005);
