@@ -9,4 +9,4 @@ log                   = log/log_$(ClusterId)_$(ProcId).log
 
 +JobFlavour           = "workday"
 
-queue filename from dataFileName_All.txt
+queue filename from dataFileName.txt

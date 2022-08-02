@@ -223,7 +223,8 @@ private:
   vector<bool> Photon_rechitzerosuppression;
 
   // Rho
-  double rho;
+  UInt_t n_rhoval;
+  vector<Float16_t> rho;
 
   // TTree carrying the event weight information
   TTree* tree;
@@ -394,7 +395,8 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Photon_rechitzerosuppression", &Photon_rechitzerosuppression);
 
   // Rho
-  tree->Branch("rho", &rho, "rho/d");
+  tree->Branch("n_rhoval", &n_rhoval, "n_rhoval/i");
+  tree->Branch("rho", &rho);
 }
 
 EGammaOnly_ScoutingNanoAOD::~EGammaOnly_ScoutingNanoAOD() {
@@ -429,7 +431,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 
   Handle<double > rhoH;
   iEvent.getByToken(rhoToken, rhoH);
-  //bool rhoValid = rhoH.isValid();
+  bool rhoValid = rhoH.isValid();
 
   run = iEvent.eventAuxiliary().run();
   event = iEvent.eventAuxiliary().event();
@@ -601,9 +603,11 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   } // end phoValid condition
 
   // Rho
-  //if(rhoValid) {
-  rho = *rhoH;
-    //}
+  n_rhoval = 0;
+  if(rhoValid) {
+    rho.push_back(*rhoH);
+    n_rhoval++;
+  }
 
   // Fill L1 seeds
   if(doL1) {
@@ -735,6 +739,7 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Photon_detids.clear();
   Photon_timingmatrix.clear();
   Photon_rechitzerosuppression.clear();
+  rho.clear();
 }
 
 void EGammaOnly_ScoutingNanoAOD::beginJob() {
