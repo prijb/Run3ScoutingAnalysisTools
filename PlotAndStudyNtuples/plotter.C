@@ -13,7 +13,7 @@ TString cutdeets = "Cut details";
 //TFile* datahistfile = TFile::Open("hists_data.root","READ");
 //TFile* datahistfile = TFile::Open("hists_data_12504363.root","READ");
 //TFile* datahistfile = TFile::Open("hists_data_12517349.root","READ");
-TFile* datahistfile = TFile::Open("hists_data_12522576.root","READ");
+TFile* datahistfile = TFile::Open("hists_data_12533070.root","READ");
 
 TString seltext[2] = {"line1", "line2"};
 
@@ -96,7 +96,7 @@ int invmee_specialplot(TString selection, double res) {
   invmeehist->SetTitle("");
   
   TCanvas* c1;
-  c1 = enhance_plotter({invmeehist}, {"Run 3 Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, true, false, (float []){0,1.3e4}, false, {"hist e1"}, {20}, {2}, {"lep"});
+  c1 = enhance_plotter({invmeehist}, {"Run 3 Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, true, false, (float []){0,static_cast<float>(1.5*invmeehist->GetMaximum())}, false, {"hist e1"}, {20}, {2}, {"lep"});
   c1->SaveAs(selection+".png");
   
   return -1;
@@ -225,12 +225,14 @@ int comparesamevariable(std::vector<TFile*> file, std::vector<TString> cutname, 
 
     allhists[histctr]->SetLineWidth(2);
     allhists[histctr]->SetLineColor(coloropt[histctr]);
+    allhists[histctr]->SetMarkerColor(coloropt[histctr]);
   }
 
   TCanvas* c1;
   c1 = new TCanvas();
   c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(),legPos, false, logY,yrange,normalize,histtype,markerstyle,markersize,legendmarkerstyle);
-  c1->SaveAs("./dirplots/"+foldername+"/"+var+".png");
+  if(!normalize) c1->SaveAs("./dirplots/"+foldername+"/"+var+".png");
+  else  c1->SaveAs("./dirplots/"+foldername+"/"+var+"_normed.png");
 
   return -1;
 }
@@ -594,7 +596,50 @@ int plotter() {
   //comparesamevariable(file, cutname, "eld0", 9000, 11000, 5, true, true, true, (float []){8e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "d_{0} [cm]");
 
 
-  //////////////////////// DELETE EVERYTHING BEFORE THIS \\\\\\\\\\\\\\\\\\\\\\\\\\
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("looseselsct");
+  coloropt.push_back(kGreen+2);
+  legend.push_back("loose");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("mediumselsct");
+  coloropt.push_back(kBlue);
+  legend.push_back("medium");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("tightselsct");
+  coloropt.push_back(kRed);
+  legend.push_back("tight");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+
+  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){2e-8,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron multiplicity");
+  //comparesamevariable(file, cutname, "elpt", -1, 150, 1, true, true, true, (float []){2e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "eleta", 230, 770, 1, true, false, false, (float []){2e-8,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron #eta");
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){5e-5,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron #phi");
+
+  //////////////////////// DELETE EVERYTHING BEFORE THIS \\\\\\\\\\\\\\\\\\\\\\\\\ \
 
   file.clear();
   cutname.clear();
@@ -616,11 +661,51 @@ int plotter() {
 
   legendEntries = legend;
   //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron multiplicity");
-  //comparesamevariable(file, cutname, "elpt", -1, 70, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "eleta", 500, 670, 1, true, false, false, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
-  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
-  //comparesamevariable(file, cutname, "dielM", 500, 20000, 100, true, true, true, (float []){8e-1,1e6}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //comparesamevariable(file, cutname, "elpt", -1, 400, 1, true, true, true, (float []){8e-1,2e9}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "eleta", 230, 770, 1, true, false, false, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, false, true, true, (float []){0,5e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
+  //comparesamevariable(file, cutname, "dielM", 500, 20000, 100, true, true, true, (float []){8e-1,1e7}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, true, true, (float []){8e-1,1e4}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
   //invmee_specialplot("noselsct_dielM", 0.02);
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepemselsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Atleast (e_{12}^{+}, e_{12}^{-})");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_only_selsct");
+  coloropt.push_back(kRed);
+  legend.push_back("(e_{12}^{+}, e_{12}^{-}) only");
+  histtype.push_back("same p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_Zwind_selsct");
+  coloropt.push_back(kGreen+2);
+  legend.push_back("80<M(e_{12}^{+}, e_{12}^{-})<100");
+  histtype.push_back("same p");
+  markerstyle.push_back(40);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, true, true, (float []){8e-1,1e4}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
   file.clear();
   cutname.clear();
@@ -634,19 +719,150 @@ int plotter() {
   file.push_back(datahistfile);
   cutname.push_back("noselsct");
   coloropt.push_back(kBlack);
-  legend.push_back("Run2022B Scouting");
+  legend.push_back("no sel. bkg. rich");
   histtype.push_back("p e1");
   markerstyle.push_back(20);
   markersize.push_back(2);
   legendmarkerstyle.push_back("lep");
 
-  legendEntries = legend;
-  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron multiplicity");
-  //comparesamevariable(file, cutname, "elpt", -1, 70, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "eleta", 500, 670, 1, true, false, false, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
-  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
-  //comparesamevariable(file, cutname, "dielM", 500, 20000, 100, true, true, true, (float []){8e-1,1e6}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-  //invmee_specialplot("noselsct_dielM", 0.02);
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_Zwind_selsct");
+  coloropt.push_back(kGreen+2);
+  legend.push_back("80<M(e_{12}^{+}, e_{12}^{-})<100");
+  histtype.push_back("same p");
+  markerstyle.push_back(40);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
 
+  legendEntries = legend;
+
+  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){2e-8,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron multiplicity");
+  //comparesamevariable(file, cutname, "elpt", -1, 150, 1, true, true, true, (float []){2e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "eleta", 230, 770, 1, true, false, false, (float []){2e-8,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron #eta");
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){5e-5,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron #phi");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_Zwindptgt20_selsct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Z wind., p_{T}>20");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_ptgt20_selsct");
+  coloropt.push_back(kGreen+2);
+  legend.push_back("(e_{12}^{+}, e_{12}^{-}), p_{T}>20");
+  histtype.push_back("same p");
+  markerstyle.push_back(40);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+
+  //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, true, true, (float []){8e-1,1.5e3}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_ptgt20_selsctbar");
+  coloropt.push_back(kBlack);
+  legend.push_back("(e_{12}^{+}, e_{12}^{-}), p_{T}>20");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_Zwindptgt20_selsctbar");
+  coloropt.push_back(kRed);
+  legend.push_back("Z wind., p_{T}>20");
+  histtype.push_back("same p");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("noselsctbar");
+  coloropt.push_back(kGreen+2);
+  legend.push_back("no selection, bkg.");
+  histtype.push_back("same p");
+  markerstyle.push_back(40);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+
+  //comparesamevariable(file, cutname, "elsigmaietaieta", -1, 400, 4, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron #sigmai#etai#eta");
+  //comparesamevariable(file, cutname, "elhoe", -1, 20000, 200, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron H/E");
+  //comparesamevariable(file, cutname, "eltkiso", -1, -1, 200, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron track iso. [GeV]");
+  //comparesamevariable(file, cutname, "elsmin", -1, 1500, 5, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron smin");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_ptgt20_selsctec");
+  coloropt.push_back(kBlack);
+  legend.push_back("(e_{12}^{+}, e_{12}^{-}), p_{T}>20");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("leadepem_Zwindptgt20_selsctec");
+  coloropt.push_back(kRed);
+  legend.push_back("Z wind., p_{T}>20");
+  histtype.push_back("same p");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  file.push_back(datahistfile);
+  cutname.push_back("noselsctec");
+  coloropt.push_back(kGreen+2);
+  legend.push_back("no selection, bkg.");
+  histtype.push_back("same p");
+  markerstyle.push_back(40);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+
+  //comparesamevariable(file, cutname, "elsigmaietaieta", -1, 800, 4, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron #sigmai#etai#eta");
+  //comparesamevariable(file, cutname, "elhoe", -1, 20000, 200, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron H/E");
+  //comparesamevariable(file, cutname, "eltkiso", -1, -1, 200, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron track iso. [GeV]");
+  //comparesamevariable(file, cutname, "elsmin", -1, 1000, 5, true, true, true, (float []){1e-5,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron smin");
+
+  //invmee_specialplot("noselsct_leadsublead_dielM", 0.02);
+  //invmee_specialplot("vetoselsct_leadsublead_dielM", 0.02);
+  //invmee_specialplot("looseselsct_leadsublead_dielM", 0.02);
+  //invmee_specialplot("mediumselsct_leadsublead_dielM", 0.02);
+  //invmee_specialplot("tightselsct_leadsublead_dielM", 0.02);
+  
   return -1;
 }

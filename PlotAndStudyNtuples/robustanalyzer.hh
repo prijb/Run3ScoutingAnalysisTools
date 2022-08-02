@@ -67,8 +67,8 @@ public:
   TTreeReaderValue<vector<unsigned int>> *ele_seedid;
   TTreeReaderValue<vector<vector<float>>> *ele_enemat;
   TTreeReaderValue<vector<vector<float>>> *ele_timmat;
-
-  //TTreeReaderValue<Double32_t> *rho;
+  TTreeReaderValue<UInt_t> *n_rho;
+  TTreeReaderValue<vector<float>> *rho;
   
   TFile* outfile;
 

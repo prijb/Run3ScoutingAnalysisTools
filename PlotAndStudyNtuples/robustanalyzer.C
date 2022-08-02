@@ -56,8 +56,8 @@ robustanalyzer::robustanalyzer(TString filename, TString outfilename, int numCor
   ele_seedid = new TTreeReaderValue<vector<unsigned int>>((*tree), "Electron_seedid");
   ele_enemat = new TTreeReaderValue<vector<vector<float>>>((*tree), "Electron_energymatrix");
   ele_timmat = new TTreeReaderValue<vector<vector<float>>>((*tree), "Electron_timingmatrix");
-  
-  //rho = new TTreeReaderValue<Double32_t>((*tree), "rho");
+  n_rho = new TTreeReaderValue<UInt_t>((*tree), "n_rhoval");
+  rho = new TTreeReaderValue<vector<float>>((*tree), "rho");
 
   outfile = new TFile(outfilename,"RECREATE");
 }
@@ -662,6 +662,7 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
 
   if(elidx.size()==0) return;
 
+  TH1F* rhohist = (TH1F*) outfile->Get(selection+"sct_rho");
   TH1F* elmult = (TH1F*) outfile->Get(selection+"sct_elmult");
   TH1F* elpt = (TH1F*) outfile->Get(selection+"sct_elpt");
   TH1F* eleta = (TH1F*) outfile->Get(selection+"sct_eleta");
@@ -708,6 +709,7 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   TH1F* ecelsmin = (TH1F*) outfile->Get(selection+"sctec_elsmin");
   TH1F* ecelsmaj = (TH1F*) outfile->Get(selection+"sctec_elsmaj");
 
+  rhohist->Fill((*rho)->at(0));
   elmult->Fill(elidx.size());
 
   if(elidx.size()>=2) {
@@ -832,6 +834,7 @@ void robustanalyzer::addgenhist(TString selection) {
 // Function to add a set of histograms for scouting electrons
 void robustanalyzer::addhist(TString selection) {
 
+  all1dhists.push_back(new TH1F(selection+"sct_rho","rho",10000,-10,90));
   all1dhists.push_back(new TH1F(selection+"sct_elmult","N e",50,-5,45));
   all1dhists.push_back(new TH1F(selection+"sct_elpt","p_{T} / GeV",1000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sct_eleta","#eta",1000,-5,5));

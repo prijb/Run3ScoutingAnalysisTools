@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
   try {    
     stringstream ss1;
     ss1<<"hists_data_"<<cnt<<".root";
-    robustanalyzer rana_data("./data/Run3Scouting_singlefile_Skim220717.root", ss1.str(), numCores, false, false);
+    robustanalyzer rana_data("./data/scoutingNTuple.root", ss1.str(), numCores, false, false);
     rana_data.analyzersinglefile(cnt);
   }
   catch (char const* exc) {
