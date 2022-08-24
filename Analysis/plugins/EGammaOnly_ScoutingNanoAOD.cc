@@ -415,7 +415,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 
   Handle<vector<Run3ScoutingVertex> > pVtxH;
   iEvent.getByToken(pVtxToken, pVtxH);
-  //bool pVtxValid = pVtxH.isValid();
+  bool pVtxValid = pVtxH.isValid();
 
   Handle<vector<Run3ScoutingMuon> > muonsH;
   iEvent.getByToken(muonsToken, muonsH);
@@ -482,7 +482,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 
   // Primary Vertex
   n_pVtx = 0;
-  //if(pVtxValid) {
+  if(pVtxValid) {
     for (auto &pVtx : *pVtxH) {
       auto *pVtx_iter = &pVtx;
       pVtx_x.push_back(pVtx_iter->x());
@@ -497,7 +497,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       pVtx_isvalidvtx.push_back(pVtx_iter->isValidVtx());
       n_pVtx++;
     } // end primary vertex loop
-    //} // end pVtxValid condition
+  } // end pVtxValid condition
 
   // Muons
   n_mu = 0;
