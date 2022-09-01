@@ -7,6 +7,7 @@
 #include "TTreeReader.h"
 #include "TTreeReaderValue.h"
 #include "TTreeReaderArray.h"
+#include "TLorentzVector.h"
 
 using namespace std;
 
@@ -24,13 +25,14 @@ public:
   void fillgenhistinevent(TString, vector<int>);
   void fillgenmchhistinevent(TString, vector<int>, vector<int>);
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
-  pair<int,int> inZwindow(vector<int>);
+  bool inZwind(TLorentzVector, TLorentzVector);
+  bool inSideBand(TLorentzVector, TLorentzVector);
   vector< pair<int,int> > diElecGenMatching(vector<int>, vector<int>);
     
   private:
 
   int nC;
-  bool isDiEl;
+  bool isDY;
   bool isMC;
     
   TTreeReader* tree;
@@ -44,6 +46,7 @@ public:
   TTreeReaderValue<vector<float>> *gen_vz;
   TTreeReaderValue<vector<int>> *gen_nmoms;
   TTreeReaderValue<vector<int>> *gen_mompdg;
+  TTreeReaderValue<vector<bool>> *gen_islastcopy;
   TTreeReaderValue<UInt_t> *n_ele;
   TTreeReaderValue<vector<float>> *ele_pt;
   TTreeReaderValue<vector<float>> *ele_eta;
