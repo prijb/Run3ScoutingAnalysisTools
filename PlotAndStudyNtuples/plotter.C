@@ -637,7 +637,7 @@ int plotter() {
   //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, false, false, (float []){8e-1,1.5e3}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
   //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
   fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0});
-  //fitinvmee_roofit("tightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0});
+  fitinvmee_roofit("tightselsct_leadecsubleadec_dielM", (double []){55.0, 140.0});
   //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
   //fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM");
   //fitinvmee("tightselsct_leadecsubleadec_dielM");
