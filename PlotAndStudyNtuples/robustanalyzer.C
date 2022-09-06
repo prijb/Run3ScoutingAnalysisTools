@@ -1136,7 +1136,7 @@ vector< pair<int,int> > robustanalyzer::diElecGenMatching(vector<int> genidx, ve
 bool robustanalyzer::inZwind(TLorentzVector lead, TLorentzVector sublead) {
 
   double invm = (lead+sublead).M();
-  if(invm>86 && invm<95) {
+  if(invm>86 && invm<97) {
     return true;
   }
   else {

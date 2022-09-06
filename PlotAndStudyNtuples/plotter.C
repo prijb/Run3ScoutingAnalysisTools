@@ -10,7 +10,7 @@ double sig30cmsf = 1.0/28;
 double sig1msf = 1.0/19;
 double sig3msf = 1.0/7;
 TString cutdeets = "Cut details";
-TFile* datahistfile = TFile::Open("hists_data.root","READ");
+TFile* datahistfile = TFile::Open("hists_data_large.root","READ");
 TFile* dym50histfile = TFile::Open("hists_DYToLLM50.root","READ");
 //TFile* qcdpt30To50histfile = TFile::Open("hists_QCDPt30To50.root","READ");
 TFile* qcdhistfile = TFile::Open("hists_QCD.root","READ");
@@ -110,10 +110,10 @@ int fitinvmee(TString selection) {
 
   invmeehist->SetTitle("");
   invmeehist->Rebin(100);
-  invmeehist->GetXaxis()->SetRange(30,150);
+  invmeehist->GetXaxis()->SetRange(71,150);
 
   //TF1* fitbkg = new TF1("fitbkg","exp([0]+[1]*x)",40,65);
-  TF1* fitbkg = new TF1("fitbkg","exp([0]+[1]*x)",120,140);
+  TF1* fitbkg = new TF1("fitbkg","exp([0]+[1]*x)",60,65);
   fitbkg->SetParameters(5,-0.002);
   invmeehist->Fit("fitbkg","R");
   fitbkg->SetLineColor(kBlue);
@@ -122,7 +122,7 @@ int fitinvmee(TString selection) {
   double b1 = fitbkg->GetParameter(1);
   double be1 = fitbkg->GetParError(1);
 
-  TF1* fitpeak = new TF1("fitpeak","[0]*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))",80,95);
+  TF1* fitpeak = new TF1("fitpeak","[0]*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))",80,100);
   fitpeak->SetParameters(702,91,5);
   invmeehist->Fit("fitpeak","R");
   fitpeak->SetLineColor(kGreen+2);
@@ -145,7 +145,7 @@ int fitinvmee(TString selection) {
 
   cout<<"Chi2/Ndf = "<<fitres->Chi2()<<"/"<<fitres->Ndf()<<endl;
 
-  TF1* Zpeak = new TF1("Zpeak","[0]*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))",40,120);
+  TF1* Zpeak = new TF1("Zpeak","[0]*exp(-0.5*((x-[1])/[2])*((x-[1])/[2]))",60,140);
   Zpeak->SetParameters(fitfunc->GetParameter(2), fitfunc->GetParameter(3), fitfunc->GetParameter(4));
   cout<<"Signal integral in the (83.73,92.53): "<<Zpeak->Integral(83.73,92.53)<<endl;
   cout<<"Bkg integral in the (83.73,92.53): "<<fitfunc->Integral(83.73,92.53)-Zpeak->Integral(83.73,92.53)<<endl;
@@ -185,7 +185,7 @@ int fitinvmee(TString selection) {
   //invmeehist->Draw();
   //fitbkg->Draw("SAME");
   //fitpeak->Draw("SAME");
-  c1 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, false, (float []){0,static_cast<float>(1.5*invmeehist->GetMaximum())}, false, {"hist"}, {20}, {2}, {"lep"});
+  c1 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, false, (float []){0,/*static_cast<float>(1.5*invmeehist->GetMaximum())*/2750}, false, {"hist"}, {20}, {2}, {"lep"});
   fitfunc->Draw("same");
   c1->SaveAs(selection+"_invmeefit.png");
 
@@ -196,7 +196,7 @@ int fitinvmee(TString selection) {
   return -1;
 }
 
-int fitinvmee_roofit(TString selection) {
+int fitinvmee_roofit(TString selection, double fitrange[2]) {
   using namespace RooFit;
 
   auto invmeehistorig = (TH1F*) datahistfile->Get(selection);
@@ -208,7 +208,7 @@ int fitinvmee_roofit(TString selection) {
   invmeehist->SetDirectory(0);
 
   // Declare observable x
-  RooRealVar x("x", "x", 60.0, 140.0);
+  RooRealVar x("x", "x", 45.0, 150.0);
   // Create a binned dataset that imports contents of TH1 and associates its contents to observable
   RooDataHist dh("dh", "dh", x, Import(*invmeehist));
 
@@ -217,47 +217,58 @@ int fitinvmee_roofit(TString selection) {
   RooPlot *frame2 = x.frame(Title("CrystalBall"));
   dh.plotOn(frame1, Name("data"), DataError(RooAbsData::SumW2));
   dh.plotOn(frame2, Name("data"), DataError(RooAbsData::SumW2));
-   
+
+  // Build a Gaussian pdf
+  RooRealVar meanG("meanG", "meanG", -2, -10, -0.1);
+  RooRealVar sigma("sigma", "sigma", 2.34, 1, 11);
+  RooGaussian Gaus("gaus", "Gaussian", x, meanG, sigma);
+  
   // Build a skewed Gaussian pdf 
-  RooRealVar mean("mean", "mean", 91, 81, 101);
-  RooRealVar sigma("sigma", "sigma", 10, 1, 21);
+  RooRealVar meanSKG("meanSKG", "meanSKG", 91, 81, 101);
+  RooRealVar sigmaSKG("sigmaSKG", "sigmaSKG", 10, 1, 21);
   RooRealVar tail("tail", "tail", 0, -4, 4);
-  RooNovosibirsk SkGaus("SkGaus", "SkewedGaussian",x,mean,sigma,tail);
+  RooNovosibirsk SkGaus("SkGaus", "SkewedGaussian", x, meanSKG, sigmaSKG, tail);
 
   // Build a crystall ball pdf
-  RooRealVar a("a", "alpha", 90);
-  RooRealVar n("n", "n", 5, 0, 20);
-  RooCBShape CBShape("CBShape", "Crystal_Ball", x, mean, sigma, a, n);
+  RooRealVar a("a", "alpha", 1, 0.1, 10);
+  RooRealVar n("n", "n", 1, 0, 20);
+  RooCBShape CBShape("CBShape", "Crystal_Ball", x, meanG, sigma, a, n);
 
   // Build a breit-wigner pdf
+  RooRealVar mean("mean", "mean", 91, 80, 100);
+  RooRealVar width("width", "width", 5, 1, 10);
+  RooBreitWigner bwMassPeak("bwMassPeak", "BreitWigner", x, mean, width);
+
+  // Build a Voigtian pdf
+  RooVoigtian voigt("voigt", "voigt", x, mean, width, sigma);
+  
+  // Build convolution for signal
+  x.setBins(10000, "cache");
+  //RooFFTConvPdf sig("sig", "BW(x)G", x, bwMassPeak, Gaus);
+  RooFFTConvPdf sig("sig", "BW(x)CB", x, bwMassPeak, CBShape);
   
   // Build Exponential pdf
-  RooRealVar expoA("expoA", "expoA", 2.1);
-  RooRealVar decay("decay", "decay", -2, -1e3, -1e-5);
+  RooRealVar decay("decay", "decay", -0.05, -0.1, -1e-4);
   RooExponential bkg("bkg", "Exponential", x, decay);
   
   // Build composite pdf
-  RooRealVar bkgfrac("bkgfrac", "fraction of background", 0.3, 0., 1.);
-  RooAddPdf model("model", "SkGaus+bkg", RooArgList(bkg, SkGaus), bkgfrac);
-  RooAddPdf model2("model2", "CBShape+bkg", RooArgList(bkg, CBShape), bkgfrac);
+  RooRealVar bkgfrac("bkgfrac", "fraction of background", 0.19, 0.0, 1.0);
+  //RooAddPdf model("model", "sig+bkg", RooArgList(bkg, voigt), bkgfrac);
+  RooAddPdf model("model", "sig+bkg", RooArgList(bkg, sig), bkgfrac);
   
-  x.setRange("R1",60.0,140.0) ;
+  x.setRange("R1",fitrange[0],fitrange[1]) ;
   
   model.fitTo(dh,Range("R1"));
   model.plotOn(frame1, Name("Background"), Components(bkg), LineStyle(kDashed), LineColor(kRed));
-  model.plotOn(frame1, Name("Skewed_Gauss"), Components(SkGaus), LineStyle(10), LineColor(kBlack));
+  //model.plotOn(frame1, Name("Signal"), Components(voigt), LineStyle(10), LineColor(kBlack));
+  model.plotOn(frame1, Name("Signal"), Components(sig), LineStyle(10), LineColor(kBlack));
   model.plotOn(frame1, Name("Model"), Components("model"), LineColor(kBlue));
-  /*  
-  model2.fitTo(dh,Range("R1"));
-  model2.plotOn(frame2, Name("Background"), Components(bkg), LineStyle(kDashed), LineColor(kRed));
-  model2.plotOn(frame2, Name("Signal"), Components(CBShape), LineStyle(10), LineColor(kBlack));
-  model2.plotOn(frame2, Name("Model"), Components("model2"), LineColor(kBlue));
-  */
+
   TCanvas* c1;
   c1 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, false, (float []){0,1500}, false, {"hist"}, {20}, {2}, {"lep"});
   frame1->Draw();
   c1->SaveAs(selection+"_roofit1_invmeefit.png");
-
+  
   // Make signal significance plot
   double sigmafrommean[1000], signalsignificance[1000];
   int maxcnt = 1000, maxsignificance=-1;
@@ -265,7 +276,7 @@ int fitinvmee_roofit(TString selection) {
     double xval = 0.01+xctr*0.01;
     sigmafrommean[xctr] = xval;
     x.setRange("xvalsigma",mean.getValV()-xval*sigma.getValV(), mean.getValV()+xval*sigma.getValV());
-    RooAbsReal* scnt = SkGaus.createIntegral(x, NormSet(x), Range("xvalsigma"));
+    RooAbsReal* scnt = sig.createIntegral(x, NormSet(x), Range("xvalsigma"));
     RooAbsReal* bcnt = bkg.createIntegral(x, NormSet(x), Range("xvalsigma"));
     signalsignificance[xctr] = (scnt->getValV()/sqrt(bcnt->getValV()));
     if(xctr!=0) {
@@ -281,12 +292,6 @@ int fitinvmee_roofit(TString selection) {
   signalsig_graph->Draw("AC*");
   c2->SaveAs(selection+"_roofit1_signalsignificance.png");
 
-  /*
-  TCanvas* c2;
-  c2 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, false, (float []){0,1500}, false, {"hist"}, {20}, {2}, {"lep"});
-  frame2->Draw();
-  c2->SaveAs(selection+"_roofit2_invmeefit.png");
-  */
   return -1;
 }
 
@@ -630,9 +635,9 @@ int plotter() {
   legendEntries = legend;
 
   //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, false, false, (float []){8e-1,1.5e3}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-  fitinvmee("tightselsct_leadbarsubleadbar_dielM");
-  fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM");
-  fitinvmee_roofit("tightselsct_leadecsubleadec_dielM");
+  //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
+  fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0});
+  //fitinvmee_roofit("tightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0});
   //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
   //fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM");
   //fitinvmee("tightselsct_leadecsubleadec_dielM");
