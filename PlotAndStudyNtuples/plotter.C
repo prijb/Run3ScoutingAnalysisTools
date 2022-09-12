@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include "enhance_plotter.C"
+#include "RooMsgService.h"
 
 double datasf = 1.09/19; // Data rate - 1.1 Hz, 22 events from parent trigger selection
 double sig3cmsf = 1.0/15;
@@ -196,7 +197,7 @@ int fitinvmee(TString selection) {
   return -1;
 }
 
-int fitinvmee_roofit(TString selection, double fitrange[2]) {
+int fitinvmee_roofit(TString selection, double fitrange[2], double *SpBinSpB, double *BinSpB, double SpBrange[2]) {
   using namespace RooFit;
 
   auto invmeehistorig = (TH1F*) datahistfile->Get(selection);
@@ -207,20 +208,23 @@ int fitinvmee_roofit(TString selection, double fitrange[2]) {
 
   invmeehist->SetDirectory(0);
 
+  // Set RooFit message service level
+  RooMsgService::instance().setStreamStatus(1,false);
+  RooMsgService::instance().setStreamStatus(0,false);
+  
   // Declare observable x
-  RooRealVar x("x", "x", 45.0, 150.0);
+  double invm_min = 0.0, invm_max=150.0;
+  RooRealVar x("x", "x", invm_min, invm_max);
   // Create a binned dataset that imports contents of TH1 and associates its contents to observable
   RooDataHist dh("dh", "dh", x, Import(*invmeehist));
-
+  
   // Make plot of binned dataset showing Poisson error bars (RooFit default)
   RooPlot *frame1 = x.frame(Title("Signal(CB)+Bkg(exp)"));
-  RooPlot *frame2 = x.frame(Title("CrystalBall"));
+  //RooPlot *frame2 = x.frame(Title("CrystalBall"));
   dh.plotOn(frame1, Name("data"), DataError(RooAbsData::SumW2));
-  dh.plotOn(frame2, Name("data"), DataError(RooAbsData::SumW2));
-
+  //dh.plotOn(frame2, Name("data"), DataError(RooAbsData::SumW2));
+  /*
   // Build a Gaussian pdf
-  RooRealVar meanG("meanG", "meanG", -2, -10, -0.1);
-  RooRealVar sigma("sigma", "sigma", 2.34, 1, 11);
   RooGaussian Gaus("gaus", "Gaussian", x, meanG, sigma);
   
   // Build a skewed Gaussian pdf 
@@ -228,8 +232,11 @@ int fitinvmee_roofit(TString selection, double fitrange[2]) {
   RooRealVar sigmaSKG("sigmaSKG", "sigmaSKG", 10, 1, 21);
   RooRealVar tail("tail", "tail", 0, -4, 4);
   RooNovosibirsk SkGaus("SkGaus", "SkewedGaussian", x, meanSKG, sigmaSKG, tail);
-
+  */
+  
   // Build a crystall ball pdf
+  RooRealVar meanG("meanG", "meanG", -2, -10, -0.1);
+  RooRealVar sigma("sigma", "sigma", 2.34, 1, 11);
   RooRealVar a("a", "alpha", 1, 0.1, 10);
   RooRealVar n("n", "n", 1, 0, 20);
   RooCBShape CBShape("CBShape", "Crystal_Ball", x, meanG, sigma, a, n);
@@ -240,35 +247,47 @@ int fitinvmee_roofit(TString selection, double fitrange[2]) {
   RooBreitWigner bwMassPeak("bwMassPeak", "BreitWigner", x, mean, width);
 
   // Build a Voigtian pdf
-  RooVoigtian voigt("voigt", "voigt", x, mean, width, sigma);
+  //RooVoigtian voigt("voigt", "voigt", x, mean, width, sigma);
   
   // Build convolution for signal
   x.setBins(10000, "cache");
   //RooFFTConvPdf sig("sig", "BW(x)G", x, bwMassPeak, Gaus);
-  RooFFTConvPdf sig("sig", "BW(x)CB", x, bwMassPeak, CBShape);
+  RooFFTConvPdf sig("SigFitModel", "BW(x)CB", x, bwMassPeak, CBShape);
   
   // Build Exponential pdf
   RooRealVar decay("decay", "decay", -0.05, -0.1, -1e-4);
-  RooExponential bkg("bkg", "Exponential", x, decay);
+  RooExponential bkg("BkgFitModel", "Exponential", x, decay);
   
   // Build composite pdf
   RooRealVar bkgfrac("bkgfrac", "fraction of background", 0.19, 0.0, 1.0);
   //RooAddPdf model("model", "sig+bkg", RooArgList(bkg, voigt), bkgfrac);
-  RooAddPdf model("model", "sig+bkg", RooArgList(bkg, sig), bkgfrac);
+  RooAddPdf model("SigPBkgFitModel", "sig+bkg", RooArgList(bkg, sig), bkgfrac);
   
   x.setRange("R1",fitrange[0],fitrange[1]) ;
-  
-  model.fitTo(dh,Range("R1"));
+
+  //RooCmdArg arg = RooCmdArg::PrintLevel(-1);
+  model.fitTo(dh,Range("R1"), PrintLevel(-1));
   model.plotOn(frame1, Name("Background"), Components(bkg), LineStyle(kDashed), LineColor(kRed));
   //model.plotOn(frame1, Name("Signal"), Components(voigt), LineStyle(10), LineColor(kBlack));
   model.plotOn(frame1, Name("Signal"), Components(sig), LineStyle(10), LineColor(kBlack));
-  model.plotOn(frame1, Name("Model"), Components("model"), LineColor(kBlue));
+  model.plotOn(frame1, Name("SigPBkgFitModel"), Components("SigPBkgFitModel"), LineColor(kBlue));
 
+  x.setRange("SpBRange", SpBrange[0], SpBrange[1]);
+  RooAbsReal* spbcnt = model.createIntegral(x, NormSet(x), Range("SpBRange"));
+  RooAbsReal* bcnt = bkg.createIntegral(x, NormSet(x), Range("SpBRange"));
+  double evtcnt = invmeehist->Integral(invmeehist->FindBin(invm_min), invmeehist->FindBin(invm_max-0.0001));
+  *SpBinSpB = spbcnt->getValV()*evtcnt;
+  *BinSpB = bcnt->getValV()*bkgfrac.getValV()*evtcnt;
+
+  //tempfile->WriteObject(&model,selection+"_"+model.GetName());
+
+  // Optional plotting of the invariant mass distribution
+  // And the signal significance plot when required. 
   TCanvas* c1;
   c1 = enhance_plotter({invmeehist}, {"Scouting"}, "M(e,e)", "number of events", (float []){0.15,0.7,0.4,0.9}, false, false, (float []){0,1500}, false, {"hist"}, {20}, {2}, {"lep"});
   frame1->Draw();
   c1->SaveAs(selection+"_roofit1_invmeefit.png");
-  
+  /*  
   // Make signal significance plot
   double sigmafrommean[1000], signalsignificance[1000];
   int maxcnt = 1000, maxsignificance=-1;
@@ -291,6 +310,92 @@ int fitinvmee_roofit(TString selection, double fitrange[2]) {
   TCanvas* c2 = new TCanvas();
   signalsig_graph->Draw("AC*");
   c2->SaveAs(selection+"_roofit1_signalsignificance.png");
+  */
+
+  return -1;
+}
+
+int subtractsideband(TFile* histfile, TString SpBhistname, double scaleSpB, TString Bhistname, double scaleB, int xbinlow, int xbinhigh, int rebin, TString xaxistitle, TString yaxistitle, bool logY, float yrange[]=(float []){0.1,100}, float legPos[]=(float []){0.7,0.75,0.95,1}) {
+
+  TString foldername = "";
+  foldername += ((TString)histfile->GetName()).ReplaceAll(".root","_noB").ReplaceAll("hists_","");
+
+  TH1F* temphistholder = (TH1F*) histfile->Get(SpBhistname);
+  TH1F* hist_SpB = (TH1F*)temphistholder->Clone(temphistholder->GetName());
+  temphistholder = (TH1F*) histfile->Get(Bhistname);
+  TH1F* hist_B = (TH1F*)temphistholder->Clone(temphistholder->GetName());
+
+  cout<<"Normalisation factor for SpB histo. (should be close to 1): "<<scaleSpB/hist_SpB->Integral()<<endl;
+  hist_SpB->Scale(scaleSpB/hist_SpB->Integral());
+  hist_B->Scale(scaleB/hist_B->Integral());
+  TH1F* hist_S = (TH1F*) hist_SpB->Clone(SpBhistname.ReplaceAll("Zwind","Zsignal"));
+  hist_S->Add(hist_B, -1.0);
+
+  tempfile->WriteObject(hist_SpB,hist_S->GetName());  
+
+  coloropt.clear();
+  legendEntries.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+  scale.clear();
+  
+  std::vector<TH1F*> allhists;
+
+  TString SpBCloneName = hist_SpB->GetName();
+  SpBCloneName.Append("_clone");
+  allhists.push_back((TH1F*) hist_SpB->Clone(SpBCloneName));
+  coloropt.push_back(kMagenta);
+  legendEntries.push_back("SpB");
+  histtype.push_back("hist e1");
+  markerstyle.push_back(0);
+  markersize.push_back(0);
+  legendmarkerstyle.push_back("f");
+  scale.push_back(1);
+  
+  TString BCloneName = hist_B->GetName();
+  BCloneName.Append("_clone");
+  allhists.push_back((TH1F*) hist_B->Clone(BCloneName));
+  coloropt.push_back(kRed);
+  legendEntries.push_back("B");
+  histtype.push_back("same hist e1");
+  markerstyle.push_back(0);
+  markersize.push_back(0);
+  legendmarkerstyle.push_back("f");
+  scale.push_back(1);
+  
+  TString SCloneName = hist_S->GetName();
+  SCloneName.Append("_clone");
+  allhists.push_back((TH1F*) hist_S->Clone(SCloneName));
+  coloropt.push_back(kBlue);
+  legendEntries.push_back("S");
+  histtype.push_back("same hist e1");
+  markerstyle.push_back(0);
+  markersize.push_back(0);
+  legendmarkerstyle.push_back("f");
+  scale.push_back(1);
+  
+  if(rebin==-1) rebin = 1;
+  //xbinlow = xbinlow==-1?(underflow?0:1):xbinlow;
+  //xbinhigh = xbinhigh==-1?(overflow?allhists[0]->GetNbinsX()+1:allhists[0]->GetNbinsX()):xbinhigh;
+  xbinlow = xbinlow==-1?1:xbinlow;
+  xbinhigh = xbinhigh==-1?allhists[0]->GetNbinsX():xbinhigh;
+  xbinlow = xbinlow/rebin;
+  xbinhigh = xbinhigh/rebin;
+  for(unsigned int histctr=0; histctr<allhists.size(); histctr++) {
+    if(rebin!=1) allhists[histctr]->Rebin(rebin);
+    allhists[histctr]->SetTitle("");
+    allhists[histctr]->GetXaxis()->SetRange(xbinlow, xbinhigh);
+    allhists[histctr]->SetLineWidth(2);
+    allhists[histctr]->SetLineColor(coloropt[histctr]);
+    allhists[histctr]->SetMarkerColor(coloropt[histctr]);
+  }
+
+  TCanvas* c1;
+  c1 = new TCanvas();
+  c1 = enhance_plotter(allhists, legendEntries, xaxistitle, yaxistitle, legPos, false, logY, yrange, false, histtype, markerstyle, markersize, legendmarkerstyle);
+  c1->SaveAs("./dirplots/"+foldername+"/"+hist_S->GetName()+".png");
 
   return -1;
 }
@@ -361,35 +466,6 @@ int comparesamevariable(std::vector<TFile*> file, std::vector<TString> cutname, 
   if(!normalize) c1->SaveAs("./dirplots/"+foldername+"/"+var+".png");
   else  c1->SaveAs("./dirplots/"+foldername+"/"+var+"_normed.png");
 
-  return -1;
-}
-
-int subtractsideband(TFile* file, std::vector<TString> cutnames) {
-
-  // Check if the size of file vector is same as the cutnames
-  if(cutnames.size()!=2) {
-    cout<<"Error! Size of vector cutnames should be exactly 2 when using subtract side band. It is now: "<<cutnames.size()<<endl;
-    return -1;
-  }
-  if(scale.size()!=2) {
-    cout<<"Error! Size of vector scale should be exactly 2 when using subtractsideband(). It is now: "<<scale.size()<<endl;
-    return -1;
-  }
-
-  TString foldername = "";
-  foldername += ((TString)file->GetName()).ReplaceAll(".root","_noB").ReplaceAll("hists_","")+"_"+cutnames[0]+"_"+cutnames[1]+"_";
-
-  TH1F* temphistholder = (TH1F*) file->Get(cutnames[0]);
-  TH1F* hist_sig = (TH1F*)temphistholder->Clone(temphistholder->GetName());
-  temphistholder = (TH1F*) file->Get(cutnames[1]);
-  TH1F* hist_bkg = (TH1F*)temphistholder->Clone(temphistholder->GetName());
-
-  hist_sig->Scale(scale[0]);
-  hist_bkg->Scale(scale[1]);
-  hist_sig->Add(hist_bkg,-1);
-
-  tempfile->WriteObject(hist_sig,hist_sig->GetName());
-  
   return -1;
 }
 
@@ -636,8 +712,6 @@ int plotter() {
 
   //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, false, false, (float []){8e-1,1.5e3}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
   //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
-  fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0});
-  fitinvmee_roofit("tightselsct_leadecsubleadec_dielM", (double []){55.0, 140.0});
   //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
   //fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM");
   //fitinvmee("tightselsct_leadecsubleadec_dielM");
@@ -928,6 +1002,59 @@ int plotter() {
   legendEntries = legend;
   //comparesamevariable(file, cutname, "leadsublead_dielM", 1250, 1470, 5, false, true, true, (float []){0,400}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("tightsel_Zwind_sct");
+  coloropt.push_back(kBlack);
+  legend.push_back("Run2022B Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron multiplicity");
+  //comparesamevariable(file, cutname, "elpt", -1, 150, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "eleta", 230, 770, 1, true, false, false, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
+  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datahistfile);
+  cutname.push_back("tightsel");
+  coloropt.push_back(kBlack);
+  legend.push_back("Run2022B Scouting");
+  histtype.push_back("p e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("lep");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "Zwind_sctbar_elpt", -1, 150, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "SideBand_sctbar_elpt", -1, 150, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
+
+  double SpBinSpB = 0.0, BinSpB = 0.0;
+  fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
+  cout<<"Integral counts: "<<SpBinSpB<<"\t"<<BinSpB<<endl;
+  subtractsideband(datahistfile, "tightsel_Zwind_sctbar_elpt", SpBinSpB, "tightsel_SideBand_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95});
+  fitinvmee_roofit("tightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){79.0, 98.0});
+  cout<<"Integral counts: "<<SpBinSpB<<"\t"<<BinSpB<<endl;
+  
   tempfile->Close();
   return -1;
 }

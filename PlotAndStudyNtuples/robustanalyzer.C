@@ -1158,7 +1158,7 @@ bool robustanalyzer::inZwind(TLorentzVector lead, TLorentzVector sublead) {
 bool robustanalyzer::inSideBand(TLorentzVector lead, TLorentzVector sublead) {
 
   double invm = (lead+sublead).M();
-  if(invm<70 || invm>110) {
+  if((invm>30 && invm<60) || invm>120) {
     return true;
   }
   else {
