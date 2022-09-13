@@ -109,25 +109,39 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist("mediumsel_Zwind_");
   addhist("tightsel");
   addhist("tightsel_Zwind_");
-  addhist("tightsel_SideBand_");
+  addhist("tightsel_SideBand1_");
+  addhist("tightsel_SideBand2_");
+  addhist("tightsel_SideBand3_");
   addhist("tightnonesel");
   addhist("tightnonesel_Zwind_");
-  addhist("tightnonesel_SideBand_");
+  addhist("tightnonesel_SideBand1_");
+  addhist("tightnonesel_SideBand2_");
+  addhist("tightnonesel_SideBand3_");
   addhist("nonetightsel");
   addhist("nonetightsel_Zwind_");
-  addhist("nonetightsel_SideBand_");
+  addhist("nonetightsel_SideBand1_");
+  addhist("nonetightsel_SideBand2_");
+  addhist("nonetightsel_SideBand3_");
   addhist("tightloosesel");
   addhist("tightloosesel_Zwind_");
-  addhist("tightloosesel_SideBand_");
+  addhist("tightloosesel_SideBand1_");
+  addhist("tightloosesel_SideBand2_");
+  addhist("tightloosesel_SideBand3_");
   addhist("loosetightsel");
   addhist("loosetightsel_Zwind_");
-  addhist("loosetightsel_SideBand_");
+  addhist("loosetightsel_SideBand1_");
+  addhist("loosetightsel_SideBand2_");
+  addhist("loosetightsel_SideBand3_");
   addhist("tightmediumsel");
   addhist("tightmediumsel_Zwind_");
-  addhist("tightmediumsel_SideBand_");
+  addhist("tightmediumsel_SideBand1_");
+  addhist("tightmediumsel_SideBand2_");
+  addhist("tightmediumsel_SideBand3_");
   addhist("mediumtightsel");
   addhist("mediumtightsel_Zwind_");
-  addhist("mediumtightsel_SideBand_");
+  addhist("mediumtightsel_SideBand1_");
+  addhist("mediumtightsel_SideBand2_");
+  addhist("mediumtightsel_SideBand3_");
   
   // vector of electron indices
   vector<int> noselgenidx;
@@ -145,25 +159,39 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   vector<int> mediumselZwindelidx;
   vector<int> tightselelidx;
   vector<int> tightselZwindelidx;
-  vector<int> tightselSideBandelidx;
+  vector<int> tightselSideBand1elidx;
+  vector<int> tightselSideBand2elidx;
+  vector<int> tightselSideBand3elidx;
   vector<int> tightnoneselelidx;
   vector<int> tightnoneselZwindelidx;
-  vector<int> tightnoneselSideBandelidx;
+  vector<int> tightnoneselSideBand1elidx;
+  vector<int> tightnoneselSideBand2elidx;
+  vector<int> tightnoneselSideBand3elidx;
   vector<int> nonetightselelidx;
   vector<int> nonetightselZwindelidx;
-  vector<int> nonetightselSideBandelidx;
+  vector<int> nonetightselSideBand1elidx;
+  vector<int> nonetightselSideBand2elidx;
+  vector<int> nonetightselSideBand3elidx;
   vector<int> tightlooseselelidx;
   vector<int> tightlooseselZwindelidx;
-  vector<int> tightlooseselSideBandelidx;
+  vector<int> tightlooseselSideBand1elidx;
+  vector<int> tightlooseselSideBand2elidx;
+  vector<int> tightlooseselSideBand3elidx;
   vector<int> loosetightselelidx;
   vector<int> loosetightselZwindelidx;
-  vector<int> loosetightselSideBandelidx;
+  vector<int> loosetightselSideBand1elidx;
+  vector<int> loosetightselSideBand2elidx;
+  vector<int> loosetightselSideBand3elidx;
   vector<int> tightmediumselelidx;
   vector<int> tightmediumselZwindelidx;
-  vector<int> tightmediumselSideBandelidx;
+  vector<int> tightmediumselSideBand1elidx;
+  vector<int> tightmediumselSideBand2elidx;
+  vector<int> tightmediumselSideBand3elidx;
   vector<int> mediumtightselelidx;
   vector<int> mediumtightselZwindelidx;
-  vector<int> mediumtightselSideBandelidx;
+  vector<int> mediumtightselSideBand1elidx;
+  vector<int> mediumtightselSideBand2elidx;
+  vector<int> mediumtightselSideBand3elidx;
     
   // Loop beginning on events
   while(tree->Next()) {
@@ -455,9 +483,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  tightselZwindelidx.push_back(tightselelidx[0]);
 	  tightselZwindelidx.push_back(tightselelidx[1]);
 	}
-	if(inSideBand(leadel, subleadel)) {
-	  tightselSideBandelidx.push_back(tightselelidx[0]);
-	  tightselSideBandelidx.push_back(tightselelidx[1]);
+	if(inSideBand1(leadel, subleadel)) {
+	  tightselSideBand1elidx.push_back(tightselelidx[0]);
+	  tightselSideBand1elidx.push_back(tightselelidx[1]);
+	}
+	if(inSideBand2(leadel, subleadel)) {
+	  tightselSideBand2elidx.push_back(tightselelidx[0]);
+	  tightselSideBand2elidx.push_back(tightselelidx[1]);
+	}
+	if(inSideBand3(leadel, subleadel)) {
+	  tightselSideBand3elidx.push_back(tightselelidx[0]);
+	  tightselSideBand3elidx.push_back(tightselelidx[1]);
 	}
       }
     } // Atleast 2 opp. charged e with tight ID in event
@@ -472,9 +508,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  tightnoneselZwindelidx.push_back(tightnoneselelidx[0]);
 	  tightnoneselZwindelidx.push_back(tightnoneselelidx[1]);
 	}
-	if(inSideBand(leadel, subleadel)) {
-	  tightnoneselSideBandelidx.push_back(tightnoneselelidx[0]);
-	  tightnoneselSideBandelidx.push_back(tightnoneselelidx[1]);
+	if(inSideBand1(leadel, subleadel)) {
+	  tightnoneselSideBand1elidx.push_back(tightnoneselelidx[0]);
+	  tightnoneselSideBand1elidx.push_back(tightnoneselelidx[1]);
+	}
+	if(inSideBand2(leadel, subleadel)) {
+	  tightnoneselSideBand2elidx.push_back(tightnoneselelidx[0]);
+	  tightnoneselSideBand2elidx.push_back(tightnoneselelidx[1]);
+	}
+	if(inSideBand3(leadel, subleadel)) {
+	  tightnoneselSideBand3elidx.push_back(tightnoneselelidx[0]);
+	  tightnoneselSideBand3elidx.push_back(tightnoneselelidx[1]);
 	}
       }
     } // Lead tight Sub-lead none in event
@@ -489,9 +533,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  nonetightselZwindelidx.push_back(nonetightselelidx[0]);
 	  nonetightselZwindelidx.push_back(nonetightselelidx[1]);
 	}
-	if(inSideBand(leadel, subleadel)) {
-	  nonetightselSideBandelidx.push_back(nonetightselelidx[0]);
-	  nonetightselSideBandelidx.push_back(nonetightselelidx[1]);
+	if(inSideBand1(leadel, subleadel)) {
+	  nonetightselSideBand1elidx.push_back(nonetightselelidx[0]);
+	  nonetightselSideBand1elidx.push_back(nonetightselelidx[1]);
+	}
+	if(inSideBand2(leadel, subleadel)) {
+	  nonetightselSideBand2elidx.push_back(nonetightselelidx[0]);
+	  nonetightselSideBand2elidx.push_back(nonetightselelidx[1]);
+	}
+	if(inSideBand3(leadel, subleadel)) {
+	  nonetightselSideBand3elidx.push_back(nonetightselelidx[0]);
+	  nonetightselSideBand3elidx.push_back(nonetightselelidx[1]);
 	}
       }
     } // Lead none Sub-lead tight in event
@@ -506,9 +558,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  tightlooseselZwindelidx.push_back(tightlooseselelidx[0]);
 	  tightlooseselZwindelidx.push_back(tightlooseselelidx[1]);
 	}
-	if(inSideBand(leadel, subleadel)) {
-	  tightlooseselSideBandelidx.push_back(tightlooseselelidx[0]);
-	  tightlooseselSideBandelidx.push_back(tightlooseselelidx[1]);
+	if(inSideBand1(leadel, subleadel)) {
+	  tightlooseselSideBand1elidx.push_back(tightlooseselelidx[0]);
+	  tightlooseselSideBand1elidx.push_back(tightlooseselelidx[1]);
+	}
+	if(inSideBand2(leadel, subleadel)) {
+	  tightlooseselSideBand2elidx.push_back(tightlooseselelidx[0]);
+	  tightlooseselSideBand2elidx.push_back(tightlooseselelidx[1]);
+	}
+	if(inSideBand3(leadel, subleadel)) {
+	  tightlooseselSideBand3elidx.push_back(tightlooseselelidx[0]);
+	  tightlooseselSideBand3elidx.push_back(tightlooseselelidx[1]);
 	}
       }
     } // Lead tight Sub-lead loose in event
@@ -523,9 +583,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  loosetightselZwindelidx.push_back(loosetightselelidx[0]);
 	  loosetightselZwindelidx.push_back(loosetightselelidx[1]);
 	}
-	if(inSideBand(leadel, subleadel)) {
-	  loosetightselSideBandelidx.push_back(loosetightselelidx[0]);
-	  loosetightselSideBandelidx.push_back(loosetightselelidx[1]);
+	if(inSideBand1(leadel, subleadel)) {
+	  loosetightselSideBand1elidx.push_back(loosetightselelidx[0]);
+	  loosetightselSideBand1elidx.push_back(loosetightselelidx[1]);
+	}
+	if(inSideBand2(leadel, subleadel)) {
+	  loosetightselSideBand2elidx.push_back(loosetightselelidx[0]);
+	  loosetightselSideBand2elidx.push_back(loosetightselelidx[1]);
+	}
+	if(inSideBand3(leadel, subleadel)) {
+	  loosetightselSideBand3elidx.push_back(loosetightselelidx[0]);
+	  loosetightselSideBand3elidx.push_back(loosetightselelidx[1]);
 	}
       }
     } // Lead loose Sub-lead tight in event
@@ -540,9 +608,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  tightmediumselZwindelidx.push_back(tightmediumselelidx[0]);
 	  tightmediumselZwindelidx.push_back(tightmediumselelidx[1]);
 	}
-	if(inSideBand(leadel, subleadel)) {
-	  tightmediumselSideBandelidx.push_back(tightmediumselelidx[0]);
-	  tightmediumselSideBandelidx.push_back(tightmediumselelidx[1]);
+	if(inSideBand1(leadel, subleadel)) {
+	  tightmediumselSideBand1elidx.push_back(tightmediumselelidx[0]);
+	  tightmediumselSideBand1elidx.push_back(tightmediumselelidx[1]);
+	}
+	if(inSideBand2(leadel, subleadel)) {
+	  tightmediumselSideBand2elidx.push_back(tightmediumselelidx[0]);
+	  tightmediumselSideBand2elidx.push_back(tightmediumselelidx[1]);
+	}
+	if(inSideBand3(leadel, subleadel)) {
+	  tightmediumselSideBand3elidx.push_back(tightmediumselelidx[0]);
+	  tightmediumselSideBand3elidx.push_back(tightmediumselelidx[1]);
 	}
       }
     } // Lead tight Sub-lead medium in event
@@ -557,9 +633,17 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  mediumtightselZwindelidx.push_back(mediumtightselelidx[0]);
 	  mediumtightselZwindelidx.push_back(mediumtightselelidx[1]);
 	}
-	if(inSideBand(leadel, subleadel)) {
-	  mediumtightselSideBandelidx.push_back(mediumtightselelidx[0]);
-	  mediumtightselSideBandelidx.push_back(mediumtightselelidx[1]);
+	if(inSideBand1(leadel, subleadel)) {
+	  mediumtightselSideBand1elidx.push_back(mediumtightselelidx[0]);
+	  mediumtightselSideBand1elidx.push_back(mediumtightselelidx[1]);
+	}
+	if(inSideBand2(leadel, subleadel)) {
+	  mediumtightselSideBand2elidx.push_back(mediumtightselelidx[0]);
+	  mediumtightselSideBand2elidx.push_back(mediumtightselelidx[1]);
+	}
+	if(inSideBand3(leadel, subleadel)) {
+	  mediumtightselSideBand3elidx.push_back(mediumtightselelidx[0]);
+	  mediumtightselSideBand3elidx.push_back(mediumtightselelidx[1]);
 	}
       }
     } // Lead medium Sub-lead tight in event
@@ -579,25 +663,39 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     fillhistinevent("mediumsel_Zwind_", mediumselZwindelidx);
     fillhistinevent("tightsel", tightselelidx);
     fillhistinevent("tightsel_Zwind_", tightselZwindelidx);
-    fillhistinevent("tightsel_SideBand_", tightselSideBandelidx);
+    fillhistinevent("tightsel_SideBand1_", tightselSideBand1elidx);
+    fillhistinevent("tightsel_SideBand2_", tightselSideBand2elidx);
+    fillhistinevent("tightsel_SideBand3_", tightselSideBand3elidx);
     fillhistinevent("tightnonesel", tightnoneselelidx);
     fillhistinevent("tightnonesel_Zwind_", tightnoneselZwindelidx);
-    fillhistinevent("tightnonesel_SideBand_", tightnoneselSideBandelidx);
+    fillhistinevent("tightnonesel_SideBand1_", tightnoneselSideBand1elidx);
+    fillhistinevent("tightnonesel_SideBand2_", tightnoneselSideBand2elidx);
+    fillhistinevent("tightnonesel_SideBand3_", tightnoneselSideBand3elidx);
     fillhistinevent("nonetightsel", nonetightselelidx);
     fillhistinevent("nonetightsel_Zwind_", nonetightselZwindelidx);
-    fillhistinevent("nonetightsel_SideBand_", nonetightselSideBandelidx);
+    fillhistinevent("nonetightsel_SideBand1_", nonetightselSideBand1elidx);
+    fillhistinevent("nonetightsel_SideBand2_", nonetightselSideBand2elidx);
+    fillhistinevent("nonetightsel_SideBand3_", nonetightselSideBand3elidx);
     fillhistinevent("tightloosesel", tightlooseselelidx);
     fillhistinevent("tightloosesel_Zwind_", tightlooseselZwindelidx);
-    fillhistinevent("tightloosesel_SideBand_", tightlooseselSideBandelidx);
+    fillhistinevent("tightloosesel_SideBand1_", tightlooseselSideBand1elidx);
+    fillhistinevent("tightloosesel_SideBand2_", tightlooseselSideBand2elidx);
+    fillhistinevent("tightloosesel_SideBand3_", tightlooseselSideBand3elidx);
     fillhistinevent("loosetightsel", loosetightselelidx);
     fillhistinevent("loosetightsel_Zwind_", loosetightselZwindelidx);
-    fillhistinevent("loosetightsel_SideBand_", loosetightselSideBandelidx);
+    fillhistinevent("loosetightsel_SideBand1_", loosetightselSideBand1elidx);
+    fillhistinevent("loosetightsel_SideBand2_", loosetightselSideBand2elidx);
+    fillhistinevent("loosetightsel_SideBand3_", loosetightselSideBand3elidx);
     fillhistinevent("tightmediumsel", tightmediumselelidx);
     fillhistinevent("tightmediumsel_Zwind_", tightmediumselZwindelidx);
-    fillhistinevent("tightmediumsel_SideBand_", tightmediumselSideBandelidx);
+    fillhistinevent("tightmediumsel_SideBand1_", tightmediumselSideBand1elidx);
+    fillhistinevent("tightmediumsel_SideBand2_", tightmediumselSideBand2elidx);
+    fillhistinevent("tightmediumsel_SideBand3_", tightmediumselSideBand3elidx);
     fillhistinevent("mediumtightsel", mediumtightselelidx);
     fillhistinevent("mediumtightsel_Zwind_", mediumtightselZwindelidx);
-    fillhistinevent("mediumtightsel_SideBand_", mediumtightselSideBandelidx);
+    fillhistinevent("mediumtightsel_SideBand1_", mediumtightselSideBand1elidx);
+    fillhistinevent("mediumtightsel_SideBand2_", mediumtightselSideBand2elidx);
+    fillhistinevent("mediumtightsel_SideBand3_", mediumtightselSideBand3elidx);
     //if(isMC && noselelidx.size()>0 && noselgenidx.size()>0) fillgenmchhistinevent("noselgenAnosel", noselgenidx, noselelidx);
 
     // Clear all vector
@@ -616,25 +714,39 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     mediumselZwindelidx.clear();
     tightselelidx.clear();
     tightselZwindelidx.clear();
-    tightselSideBandelidx.clear();
+    tightselSideBand1elidx.clear();
+    tightselSideBand2elidx.clear();
+    tightselSideBand3elidx.clear();
     tightnoneselelidx.clear();
     tightnoneselZwindelidx.clear();
-    tightnoneselSideBandelidx.clear();
+    tightnoneselSideBand1elidx.clear();
+    tightnoneselSideBand2elidx.clear();
+    tightnoneselSideBand3elidx.clear();
     nonetightselelidx.clear();
     nonetightselZwindelidx.clear();
-    nonetightselSideBandelidx.clear();
+    nonetightselSideBand1elidx.clear();
+    nonetightselSideBand2elidx.clear();
+    nonetightselSideBand3elidx.clear();
     tightlooseselelidx.clear();
     tightlooseselZwindelidx.clear();
-    tightlooseselSideBandelidx.clear();
+    tightlooseselSideBand1elidx.clear();
+    tightlooseselSideBand2elidx.clear();
+    tightlooseselSideBand3elidx.clear();
     loosetightselelidx.clear();
     loosetightselZwindelidx.clear();
-    loosetightselSideBandelidx.clear();
+    loosetightselSideBand1elidx.clear();
+    loosetightselSideBand2elidx.clear();
+    loosetightselSideBand3elidx.clear();
     tightmediumselelidx.clear();
     tightmediumselZwindelidx.clear();
-    tightmediumselSideBandelidx.clear();
+    tightmediumselSideBand1elidx.clear();
+    tightmediumselSideBand2elidx.clear();
+    tightmediumselSideBand3elidx.clear();
     mediumtightselelidx.clear();
     mediumtightselZwindelidx.clear();
-    mediumtightselSideBandelidx.clear();
+    mediumtightselSideBand1elidx.clear();
+    mediumtightselSideBand2elidx.clear();
+    mediumtightselSideBand3elidx.clear();
     
   } // End of loop on events
 
@@ -1155,10 +1267,34 @@ bool robustanalyzer::inZwind(TLorentzVector lead, TLorentzVector sublead) {
 }
 
 // Return if selection in side-band
-bool robustanalyzer::inSideBand(TLorentzVector lead, TLorentzVector sublead) {
+bool robustanalyzer::inSideBand1(TLorentzVector lead, TLorentzVector sublead) {
 
   double invm = (lead+sublead).M();
-  if((invm>30 && invm<60) || invm>120) {
+  if((invm>40 && invm<60) || invm>120) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+// Return if selection in side-band
+bool robustanalyzer::inSideBand2(TLorentzVector lead, TLorentzVector sublead) {
+
+  double invm = (lead+sublead).M();
+  if((invm>45 && invm<60) || invm>120) {
+    return true;
+  }
+  else {
+    return false;
+  }
+}
+
+// Return if selection in side-band
+bool robustanalyzer::inSideBand3(TLorentzVector lead, TLorentzVector sublead) {
+
+  double invm = (lead+sublead).M();
+  if((invm>50 && invm<60) || invm>120) {
     return true;
   }
   else {

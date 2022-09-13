@@ -26,7 +26,9 @@ public:
   void fillgenmchhistinevent(TString, vector<int>, vector<int>);
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
   bool inZwind(TLorentzVector, TLorentzVector);
-  bool inSideBand(TLorentzVector, TLorentzVector);
+  bool inSideBand1(TLorentzVector, TLorentzVector);
+  bool inSideBand2(TLorentzVector, TLorentzVector);
+  bool inSideBand3(TLorentzVector, TLorentzVector);
   vector< pair<int,int> > diElecGenMatching(vector<int>, vector<int>);
     
   private:

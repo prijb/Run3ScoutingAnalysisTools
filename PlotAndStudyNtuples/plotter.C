@@ -1051,9 +1051,10 @@ int plotter() {
   double SpBinSpB = 0.0, BinSpB = 0.0;
   fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
   cout<<"Integral counts: "<<SpBinSpB<<"\t"<<BinSpB<<endl;
-  subtractsideband(datahistfile, "tightsel_Zwind_sctbar_elpt", SpBinSpB, "tightsel_SideBand_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95});
+  subtractsideband(datahistfile, "tightsel_Zwind_sctbar_elpt", SpBinSpB, "tightsel_SideBand_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
   fitinvmee_roofit("tightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){79.0, 98.0});
   cout<<"Integral counts: "<<SpBinSpB<<"\t"<<BinSpB<<endl;
+  subtractsideband(datahistfile, "tightsel_Zwind_sctec_elpt", SpBinSpB, "tightsel_SideBand_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-5e2,1e3}, (float []){0.55,0.7,0.75,0.95});
   
   tempfile->Close();
   return -1;
