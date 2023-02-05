@@ -32,13 +32,13 @@ echo "Run over. Clean up and combine files."
 rm robustanalyzer.out
 
 hadd -f hists_data.root hists_data_?.root
-#hadd -f hists_DoubleElectronGunPt1To300.root hists_DoubleElectronGunPt1To300_?.root
-#hadd -f hists_DoubleElectronGunPt1To300Old.root hists_DoubleElectronGunPt1To300Old_?.root
-#hadd -f hists_QCDPt20To30EmEnriched.root hists_QCDPt20To30EmEnriched_?.root
-#hadd -f hists_QCDPt30To50EmEnriched.root hists_QCDPt30To50EmEnriched_?.root
+#hadd -f hists_DYToLLM50.root hists_DYToLLM50_?.root
+#hadd -f hists_QCDPt30To50.root hists_QCDPt30To50_?.root
+#hadd -f hists_QCDPt50To80.root hists_QCDPt50To80_?.root
+#hadd -f hists_QCDPt80To120.root hists_QCDPt80To120_?.root
 
 rm hists_data_?.root
-#rm hists_DoubleElectronGunPt1To300_?.root
-#rm hists_DoubleElectronGunPt1To300Old_?.root
-#rm hists_QCDPt20To30EmEnriched_?.root
-#rm hists_QCDPt30To50EmEnriched_?.root
+#rm hists_DYToLLM50_?.root
+#rm hists_QCDPt30To50_?.root
+#rm hists_QCDPt50To80_?.root
+#rm hists_QCDPt80To120_?.root
