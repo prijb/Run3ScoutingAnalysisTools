@@ -55,7 +55,7 @@ params.parseArguments()
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -100,16 +100,17 @@ L1Info = ['L1_DoubleMu_12_5', 'L1_DoubleMu_15_7', 'L1_HTT200er', 'L1_HTT255er', 
 process.mmtree = cms.EDAnalyzer('EGammaOnly_ScoutingNanoAOD',
                                 isMC = cms.bool(params.isMC),
                                 gens = cms.InputTag("genParticles"),
-                                primaryVtx = cms.InputTag("hltScoutingPrimaryVertexPacker:primaryVtx"),
-                                muons = cms.InputTag("hltScoutingMuonPacker"),
-                                electrons = cms.InputTag("hltScoutingEgammaPacker"),
-                                photons = cms.InputTag("hltScoutingEgammaPacker"),
+                                primaryVtx = cms.InputTag("hltScoutingPrimaryVertexPacker:primaryVtx:HLTScouting"),
+                                muons = cms.InputTag("hltScoutingMuonPacker::HLTScouting"),
+                                electrons = cms.InputTag("hltScoutingEgammaPacker::HLTScouting"),
+                                photons = cms.InputTag("hltScoutingEgammaPacker::HLTScouting"),
                                 rho = cms.InputTag("hltScoutingPFPacker:rho"),
-                                doL1 = cms.bool(True),
+                                doL1 = cms.bool(False),
                                 AlgInputTag       = cms.InputTag("gtStage2Digis"),
                                 l1tAlgBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1tExtBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1Seeds           = cms.vstring(L1Info),
                             )
 
-process.p = cms.Path( process.gtStage2Digis*process.mmtree )
+#process.p = cms.Path( process.gtStage2Digis*process.mmtree )
+process.p = cms.Path( process.mmtree )
