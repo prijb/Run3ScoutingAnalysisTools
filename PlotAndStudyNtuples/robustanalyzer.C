@@ -257,7 +257,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	:((*ele_hoe)->at(elidx)<(0.05+(2.54/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
       vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.198+(0.506/(*ele_pt)->at(elidx))))
 	:((*ele_tkiso)->at(elidx)<(0.203+(0.963/(*ele_pt)->at(elidx))));
-      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.209):((*ele_detain)->at(elidx)<0.132);
+      vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.209):((*ele_ooemoop)->at(elidx)<0.132);
       vetoselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=2):((*ele_mhits)->at(elidx)<=3);
       if(vetoselcond) vetoselelidx.push_back(elidx);
       
@@ -269,7 +269,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	:((*ele_hoe)->at(elidx)<(0.0441+(2.54/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
       looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.112+(0.506/(*ele_pt)->at(elidx))))
 	:((*ele_tkiso)->at(elidx)<(0.108+(0.963/(*ele_pt)->at(elidx))));
-      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.193):((*ele_detain)->at(elidx)<0.111);
+      looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.193):((*ele_ooemoop)->at(elidx)<0.111);
       looseselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=1):((*ele_mhits)->at(elidx)<=1);
       if(looseselcond) looseselelidx.push_back(elidx);
       
@@ -281,7 +281,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	:((*ele_hoe)->at(elidx)<(0.0275+(2.52/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
       mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.0478+(0.506/(*ele_pt)->at(elidx))))
 	:((*ele_tkiso)->at(elidx)<(0.0658+(0.963/(*ele_pt)->at(elidx))));
-      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.184):((*ele_detain)->at(elidx)<0.0721);
+      mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.184):((*ele_ooemoop)->at(elidx)<0.0721);
       mediumselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=1):((*ele_mhits)->at(elidx)<=1);
       if(mediumselcond) mediumselelidx.push_back(elidx);
       
@@ -293,7 +293,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	:((*ele_hoe)->at(elidx)<(0.0188+(2.06/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
       tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_tkiso)->at(elidx)<(0.0287+(0.506/(*ele_pt)->at(elidx))))
 	:((*ele_tkiso)->at(elidx)<(0.0455+(0.963/(*ele_pt)->at(elidx))));
-      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.159):((*ele_detain)->at(elidx)<0.0197);
+      tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_ooemoop)->at(elidx)<0.159):((*ele_ooemoop)->at(elidx)<0.0197);
       tightselcond *= (abs((*ele_eta)->at(elidx))<1.479)?((*ele_mhits)->at(elidx)<=1):((*ele_mhits)->at(elidx)<=1);
       if(tightselcond) tightselelidx.push_back(elidx);
       
@@ -334,7 +334,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  :((*ele_hoe)->at(noselelidx[0])<(0.0441+(2.54/lead_ele_energy)/*+(0.183*(*(*rho))/lead_ele_energy)*/));
 	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_tkiso)->at(noselelidx[0])<(0.112+(0.506/(*ele_pt)->at(noselelidx[0]))))
 	  :((*ele_tkiso)->at(noselelidx[0])<(0.108+(0.963/(*ele_pt)->at(noselelidx[0]))));
-	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.193):((*ele_detain)->at(noselelidx[0])<0.111);
+	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.193):((*ele_ooemoop)->at(noselelidx[0])<0.111);
 	leadloosecond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_mhits)->at(noselelidx[0])<=1):((*ele_mhits)->at(noselelidx[0])<=1);
       
 	leadmediumcond = true;
@@ -345,7 +345,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  :((*ele_hoe)->at(noselelidx[0])<(0.0275+(2.52/lead_ele_energy)/*+(0.183*(*(*rho))/lead_ele_energy)*/));
 	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_tkiso)->at(noselelidx[0])<(0.0478+(0.506/(*ele_pt)->at(noselelidx[0]))))
 	  :((*ele_tkiso)->at(noselelidx[0])<(0.0658+(0.963/(*ele_pt)->at(noselelidx[0]))));
-	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.184):((*ele_detain)->at(noselelidx[0])<0.0721);
+	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.184):((*ele_ooemoop)->at(noselelidx[0])<0.0721);
 	leadmediumcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_mhits)->at(noselelidx[0])<=1):((*ele_mhits)->at(noselelidx[0])<=1);
       
 	leadtightcond = true;
@@ -356,7 +356,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  :((*ele_hoe)->at(noselelidx[0])<(0.0188+(2.06/lead_ele_energy)/*+(0.183*(*(*rho))/lead_ele_energy)*/));
 	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_tkiso)->at(noselelidx[0])<(0.0287+(0.506/(*ele_pt)->at(noselelidx[0]))))
 	  :((*ele_tkiso)->at(noselelidx[0])<(0.0455+(0.963/(*ele_pt)->at(noselelidx[0]))));
-	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.159):((*ele_detain)->at(noselelidx[0])<0.0197);
+	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_ooemoop)->at(noselelidx[0])<0.159):((*ele_ooemoop)->at(noselelidx[0])<0.0197);
 	leadtightcond *= (abs((*ele_eta)->at(noselelidx[0]))<1.479)?((*ele_mhits)->at(noselelidx[0])<=1):((*ele_mhits)->at(noselelidx[0])<=1);
 
 	subleadloosecond = true;
@@ -367,7 +367,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  :((*ele_hoe)->at(noselelidx[1])<(0.0441+(2.54/sublead_ele_energy)/*+(0.183*(*(*rho))/sublead_ele_energy)*/));
 	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_tkiso)->at(noselelidx[1])<(0.112+(0.506/(*ele_pt)->at(noselelidx[1]))))
 	  :((*ele_tkiso)->at(noselelidx[1])<(0.108+(0.963/(*ele_pt)->at(noselelidx[1]))));
-	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.193):((*ele_detain)->at(noselelidx[1])<0.111);
+	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.193):((*ele_ooemoop)->at(noselelidx[1])<0.111);
 	subleadloosecond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_mhits)->at(noselelidx[1])<=1):((*ele_mhits)->at(noselelidx[1])<=1);
       
 	subleadmediumcond = true;
@@ -378,7 +378,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  :((*ele_hoe)->at(noselelidx[1])<(0.0275+(2.52/sublead_ele_energy)/*+(0.183*(*(*rho))/sublead_ele_energy)*/));
 	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_tkiso)->at(noselelidx[1])<(0.0478+(0.506/(*ele_pt)->at(noselelidx[1]))))
 	  :((*ele_tkiso)->at(noselelidx[1])<(0.0658+(0.963/(*ele_pt)->at(noselelidx[1]))));
-	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.184):((*ele_detain)->at(noselelidx[1])<0.0721);
+	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.184):((*ele_ooemoop)->at(noselelidx[1])<0.0721);
 	subleadmediumcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_mhits)->at(noselelidx[1])<=1):((*ele_mhits)->at(noselelidx[1])<=1);
       
 	subleadtightcond = true;
@@ -389,7 +389,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	  :((*ele_hoe)->at(noselelidx[1])<(0.0188+(2.06/sublead_ele_energy)/*+(0.183*(*(*rho))/sublead_ele_energy)*/));
 	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_tkiso)->at(noselelidx[1])<(0.0287+(0.506/(*ele_pt)->at(noselelidx[1]))))
 	  :((*ele_tkiso)->at(noselelidx[1])<(0.0455+(0.963/(*ele_pt)->at(noselelidx[1]))));
-	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.159):((*ele_detain)->at(noselelidx[1])<0.0197);
+	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_ooemoop)->at(noselelidx[1])<0.159):((*ele_ooemoop)->at(noselelidx[1])<0.0197);
 	subleadtightcond *= (abs((*ele_eta)->at(noselelidx[1]))<1.479)?((*ele_mhits)->at(noselelidx[1])<=1):((*ele_mhits)->at(noselelidx[1])<=1);
 
 	if(leadtightcond) {
