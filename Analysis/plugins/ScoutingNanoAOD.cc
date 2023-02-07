@@ -533,8 +533,8 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   Jet_constituents.clear();
   //0.1396
   //built transient tracks, check Vertex fitting
-  edm::ESHandle<TransientTrackBuilder> theB;
-  iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
+  //edm::ESHandle<TransientTrackBuilder> theB;
+  //iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", theB);
 
   vector<TransientTrack> t_tks;
   std::unique_ptr<VertexCollection> vertexCollection(new VertexCollection());
@@ -648,7 +648,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     
     n_pho++;
   }
-
+  /*
   vector<PseudoJet> fj_part;
   n_pfcand = 0;
     for (auto pfcands_iter = pfcandsH->begin(); pfcands_iter != pfcandsH->end(); ++pfcands_iter) {
@@ -665,7 +665,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
 
     n_pfcand++;
   } 
-
+  */
      n_mu=0;
 for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_iter) {
  	  Muon_pt.push_back(muons_iter->pt());
@@ -729,7 +729,7 @@ for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_ite
     // Jet_constituents.push_back(vector<int16_t>(pfjets_iter->constituents()));
     n_jet++;
   }
-
+   /*
 //FatJet stuff
   JetDefinition ak8_def = JetDefinition(antikt_algorithm, 0.8);
   double sd_z_cut = 0.10;
@@ -773,7 +773,7 @@ for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_ite
     FatJet_tau3.push_back(nSub3.result(j));
     FatJet_tau4.push_back(nSub4.result(j));
   }
-  
+   */
  if (doL1) {
     l1GtUtils_->retrieveL1(iEvent,iSetup,algToken_);
     	for( int r = 0; r<280; r++){
