@@ -13,7 +13,11 @@ int main(int argc, char* argv[]) {
   ss >> cnt;
 
   try {
-    
+    stringstream ssjpsi;
+    ssjpsi<<"hists_JPsi_"<<cnt<<".root";
+    data_robustanalyzer drana_JPsi("./data/Scouting_JPsiToEE_nTuple_220206_100k.root",ssjpsi.str(), true, false, true);
+    drana_JPsi.analyzersinglefile(cnt);
+    /*    
     stringstream ss1;
     ss1<<"hists_DoubleElectronGunPt1To300_"<<cnt<<".root";
     data_robustanalyzer drana_DoubleElectronGunPt1To300("./data/DoubleElectronGun_ScoutingSkimSmall220717.root",ss1.str(), true, false, true);
@@ -43,7 +47,7 @@ int main(int argc, char* argv[]) {
     ss2l1v2<<"hists_DYToLLM4To50_1240V74L1v2_"<<cnt<<".root";
     data_robustanalyzer drana_DYToLLM4To50l1v2("./data/DYToLLM4To50_ScoutingSkimSmall220717_1240V74L1v2.root",ss2l1v2.str(), false, true, true);
     drana_DYToLLM4To50l1v2.analyzersinglefile(cnt);
-
+    */
     //stringstream ssdata;
     //ssdata<<"hists_ZeroBias2018D_"<<cnt<<".root";
     //data_robustanalyzer drana_ZeroBias2018D("./data/ZeroBias2018D_ScoutingSkimSmall220518.root",ssdata.str(), false, false, false);
