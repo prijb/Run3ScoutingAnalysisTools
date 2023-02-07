@@ -1,8 +1,25 @@
+#!/bin/sh
+
 cd /user/asahasra/ProcessScoutingJPsi/CMSSW_13_0_0_pre3/src/
 eval `scram runtime -sh`
 
-cd ./Run3ScoutingAnalysisTools/Analysis/test
+cd $TMPDIR
+mkdir Job_$1_$2
+ls
+echo "============ Created the master run folder ============"
 
+cd Job_$1_$2
+cd /user/asahasra/CMSSW_12_4_4/src/
+eval `scramv1 runtime -sh`
+cd -
+
+cp /user/asahasra/CMSSW_12_4_4/src/Run3ScoutingAnalysisTools/Analysis/test/ScoutingNanoAOD_cfg.py ./
+
+ls
+echo "============ Copied the python config file ============"
+echo $3
+#cp $3 ./
+echo "============ Listing the directory contents pre cmsRun ============"
 ls
 echo "=========== BEGINNING TO RUN THE SCRIPT ================"
 
@@ -21,3 +38,6 @@ done
 
 echo "================= END OF SCRIPT RUN ===================="
 ls
+
+cp Scouting_JPsiToEE_nTuple_220207Full_$1_$num.root /user/asahasra/CMSSW_12_4_4/src/Run3ScoutingAnalysisTools/Analysis/test
+echo "============ All processes completed. Exiting now.  ============"

@@ -1,24 +1,27 @@
 echo "Compiling the C++ files: "
-g++ -I /home/arsahasransu/Software/madgraph/MG5_aMC_v2_7_0/HEPTools/boost/include/ robustanalyzermain.C data_robustanalyzer.C `root-config --cflags --glibs` -o data_robustanalyzer.out
+g++ robustanalyzermain.C robustanalyzer.C `root-config --cflags --glibs` -o robustanalyzer.out
 
 echo "Compiling successful. Begin execution."
 
-./data_robustanalyzer.out 0 &
+./robustanalyzer.out 0 7 &
 proc0=$!
-./data_robustanalyzer.out 1 &
+./robustanalyzer.out 1 7 &
 proc1=$!
-./data_robustanalyzer.out 2 &
+./robustanalyzer.out 2 7 &
 proc2=$!
-./data_robustanalyzer.out 3 &
+./robustanalyzer.out 3 7 &
 proc3=$!
-./data_robustanalyzer.out 4 &
+./robustanalyzer.out 4 7 &
 proc4=$!
-./data_robustanalyzer.out 5 &
+./robustanalyzer.out 5 7 &
 proc5=$!
-./data_robustanalyzer.out 6 &
+./robustanalyzer.out 6 7 &
 proc6=$!
+./robustanalyzer.out 7 7 &
+proc7=$!
 
-while [ -d "/proc/${proc0}" -o -d "/proc/${proc1}" -o -d "/proc/${proc2}" -o -d "/proc/${proc3}" -o -d "/proc/${proc4}" -o -d "/proc/${proc5}" -o -d "/proc/${proc6}" ]
+while [ -d "/proc/${proc0}" -o -d "/proc/${proc1}" -o -d "/proc/${proc2}" -o -d "/proc/${proc3}" -o -d "/proc/${proc4}" -o -d "/proc/${proc5}" -o -d "/proc/${proc6}" -o -d "/proc/${proc7}" ]
+#while [ -d "/proc/${proc0}" -o -d "/proc/${proc1}" -o -d "/proc/${proc2}" -o -d "/proc/${proc3}" ]
 do
     echo "====Still executing===="
     sleep 5
@@ -26,22 +29,16 @@ done
 
 echo "Run over. Clean up and combine files."
 
-rm data_robustanalyzer.out
+rm robustanalyzer.out
 
-hadd -f hists_DoubleElectronGunPt1To300.root hists_DoubleElectronGunPt1To300_?.root
-hadd -f hists_DoubleElectronGunPt1To300_1240V74L1v1.root hists_DoubleElectronGunPt1To300_1240V74L1v1_?.root
-hadd -f hists_DoubleElectronGunPt1To300_1240V74L1v2.root hists_DoubleElectronGunPt1To300_1240V74L1v2_?.root
-hadd -f hists_DYToLLM4To50.root hists_DYToLLM4To50_?.root
-hadd -f hists_DYToLLM4To50_1240V74L1v1.root hists_DYToLLM4To50_1240V74L1v1_?.root
-hadd -f hists_DYToLLM4To50_1240V74L1v2.root hists_DYToLLM4To50_1240V74L1v2_?.root
-#hadd -f hists_ZeroBias2018D.root hists_ZeroBias2018D_?.root
-#hadd -f hists_Ephemeral1HLTPhysics2018D.root hists_Ephemeral1HLTPhysics2018D_?.root
+hadd -f hists_data.root hists_data_?.root
+#hadd -f hists_DYToLLM50.root hists_DYToLLM50_?.root
+#hadd -f hists_QCDPt30To50.root hists_QCDPt30To50_?.root
+#hadd -f hists_QCDPt50To80.root hists_QCDPt50To80_?.root
+#hadd -f hists_QCDPt80To120.root hists_QCDPt80To120_?.root
 
-rm hists_DoubleElectronGunPt1To300_?.root
-rm hists_DoubleElectronGunPt1To300_1240V74L1v1_?.root
-rm hists_DoubleElectronGunPt1To300_1240V74L1v2_?.root
-rm hists_DYToLLM4To50_?.root
-rm hists_DYToLLM4To50_1240V74L1v1_?.root
-rm hists_DYToLLM4To50_1240V74L1v2_?.root
-#rm hists_ZeroBias2018D_?.root
-#rm hists_Ephemeral1HLTPhysics2018D_?.root
+rm hists_data_?.root
+#rm hists_DYToLLM50_?.root
+#rm hists_QCDPt30To50_?.root
+#rm hists_QCDPt50To80_?.root
+#rm hists_QCDPt80To120_?.root

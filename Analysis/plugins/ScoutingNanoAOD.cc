@@ -58,7 +58,7 @@
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
 #include "HLTrigger/HLTcore/interface/TriggerExpressionData.h"
 #include "HLTrigger/HLTcore/interface/TriggerExpressionEvaluator.h"
-#include "HLTrigger/HLTcore/interface/TriggerExpressionParser.h"
+//#include "HLTrigger/HLTcore/interface/TriggerExpressionParser.h"
 
 #include <DataFormats/TrackReco/interface/TrackBase.h>
 
@@ -507,8 +507,8 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   Handle<vector<Run3ScoutingTrack> > tracksH;
   iEvent.getByToken(tracksToken, tracksH);
 
-  Handle<vector<reco::GenParticle> >gensH;
-  iEvent.getByToken(gensToken, gensH);
+  //Handle<vector<reco::GenParticle> >gensH;
+  //iEvent.getByToken(gensToken, gensH);
 
   //Handle<Float_t>gensT0H;
   //iEvent.getByToken(gensT0Token, gensT0H);
@@ -516,7 +516,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   run = iEvent.eventAuxiliary().run();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
 
-
+  cout<<"Does it even enter the event?"<<endl;
   // Which triggers fired
   for (size_t i = 0; i < triggerPathsVector.size(); i++) {
     if (triggerPathsMap[triggerPathsVector[i]] == -1) continue;
@@ -588,7 +588,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
   */
 
   //std::cout<<gensT0H<<std::endl;
-  
+  /*  
   n_gen=0;
   for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
     if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15) && gen_iter->isLastCopy()) {
@@ -606,13 +606,13 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       n_gen++;
       //std::cout<<dght<<": "<<dght->pdgId()<<"\t"<<dght->pt()<<"\t";
       //std::cout<<std::endl;
-    }
+      }
     //if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15) && gen_iter->isLastCopy() ){ 
     //std::cout<<n_gen<<"\t"<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<std::endl;
     //std::cout<<gen_iter->pdgId()<<"\t"<<gen_iter->status()<<"\t"<<gen_iter->pt()<<"\t"<<gen_iter->numberOfDaughters()<<"\t"<<gen_iter->numberOfMothers()<<"\t"<<gen_iter->fromHardProcessBeforeFSR()<<"\t"<<gen_iter->fromHardProcessDecayed()<<"\t"<<gen_iter->fromHardProcessFinalState()<<std::endl;
     //}
   }
-
+  */
   n_ele = 0;
   for (auto electrons_iter = electronsH->begin(); electrons_iter != electronsH->end(); ++electrons_iter) 
     {
@@ -655,11 +655,11 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       pfcandpt.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->pt())));
       pfcandeta.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->eta())));
       pfcandphi.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->phi())));
-    pfcandm.push_back(pfcands_iter->m());
+      //pfcandm.push_back(pfcands_iter->m());
     pfcandpdgid.push_back(pfcands_iter->pdgId());
     pfcandvertex.push_back(pfcands_iter->vertex());
     PseudoJet temp_jet = PseudoJet(0, 0, 0, 0);
-    temp_jet.reset_PtYPhiM(pfcands_iter->pt(), pfcands_iter->eta(), pfcands_iter->phi(), pfcands_iter->m());
+    temp_jet.reset_PtYPhiM(pfcands_iter->pt(), pfcands_iter->eta(), pfcands_iter->phi(), 0/*pfcands_iter->m()*/);
     temp_jet.set_user_index(pfcands_iter->pdgId());
     fj_part.push_back(temp_jet);
 
@@ -773,8 +773,13 @@ for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_ite
     FatJet_tau3.push_back(nSub3.result(j));
     FatJet_tau4.push_back(nSub4.result(j));
   }
+<<<<<<< HEAD
    */
  if (doL1) {
+  
+   //cout<<"Doin pre L1"<<endl;
+  if (doL1) {
+    //cout<<"Doin L1"<<endl;
     l1GtUtils_->retrieveL1(iEvent,iSetup,algToken_);
     	for( int r = 0; r<280; r++){
 	string name ("empty");
