@@ -20,8 +20,8 @@ int main(int argc, char* argv[]) {
   try {
     stringstream ssjpsi;
     ssjpsi<<"hists_JPsi_"<<cnt<<".root";
-    data_robustanalyzer drana_JPsi("./data/Scouting_JPsiToEE_nTuple_220206_100k.root",ssjpsi.str(), true, false, true);
-    drana_JPsi.analyzersinglefile(cnt);
+    robustanalyzer rana_JPsi("./data/Scouting_JPsiToEE_nTuple_220207Full.root", ssjpsi.str(), numCores, false, true, true);
+    rana_JPsi.analyzersinglefile(cnt);
     /*    
     stringstream ss1;
     ss1<<"hists_data_"<<cnt<<".root";

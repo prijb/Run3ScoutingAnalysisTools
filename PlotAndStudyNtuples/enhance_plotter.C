@@ -46,7 +46,7 @@ TCanvas* enhance_plotter(vector<TH1F*> histvec, vector<TString> legNam, TString 
   lat4_r.SetTextSize(0.5);
   lat4_r.SetTextFont(132);
   lat4_r.SetTextAlign(32);
-  lat4_r.DrawLatex(1,0.5,"Scouting 2022B, #sqrt{s} = 13.6 TeV");
+  //lat4_r.DrawLatex(1,0.5,"Scouting 2022B, #sqrt{s} = 13.6 TeV");
 
   pad3->cd();
   gStyle->SetOptStat(0);
@@ -137,7 +137,7 @@ TCanvas* enhance_plotter_rate(vector<TH1F*> histvec, vector<TString> legNam, TSt
   lat4_r.SetTextSize(0.5);
   lat4_r.SetTextFont(132);
   lat4_r.SetTextAlign(32);
-  lat4_r.DrawLatex(1,0.5,"Scouting 2022B, #sqrt{s} = 13.6 TeV");
+  //lat4_r.DrawLatex(1,0.5,"Scouting 2022B, #sqrt{s} = 13.6 TeV");
 
   pad3->cd();
   gStyle->SetOptStat(0);

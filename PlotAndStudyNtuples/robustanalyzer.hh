@@ -14,15 +14,15 @@ using namespace std;
 class robustanalyzer {
   
 public:
-  robustanalyzer(TString, TString, int, bool, bool);
+  robustanalyzer(TString, TString, int, bool, bool, bool);
   ~robustanalyzer();
 
   void analyzersinglefile(int);
   void addhist(TString);
   void addgenhist(TString);
   void addgenmchhist(TString);
-  void fillhistinevent(TString, vector<int>, double);
-  void fillgenhistinevent(TString, vector<int>);
+  void fillhistinevent(TString, vector<int>);
+  void fillgenhistinevent(TString, vector<int>, vector<int>);
   void fillgenmchhistinevent(TString, vector<int>, vector<int>, double);
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
   bool inZwind(TLorentzVector, TLorentzVector);
@@ -36,24 +36,35 @@ public:
   int nC;
   bool isDY;
   bool isMC;
+  bool isJP;
     
   TTreeReader* tree;
-  TTreeReaderValue<unsigned int> *n_gen;
-  TTreeReaderValue<vector<int>> *gen_pdg;
-  TTreeReaderValue<vector<float>> *gen_pt;
-  TTreeReaderValue<vector<float>> *gen_eta;
-  TTreeReaderValue<vector<float>> *gen_phi;
-  TTreeReaderValue<vector<float>> *gen_vx;
-  TTreeReaderValue<vector<float>> *gen_vy;
-  TTreeReaderValue<vector<float>> *gen_vz;
-  TTreeReaderValue<vector<int>> *gen_nmoms;
-  TTreeReaderValue<vector<int>> *gen_mompdg;
-  TTreeReaderValue<vector<bool>> *gen_islastcopy;
+  TTreeReaderValue<unsigned int> *n_genlep;
+  TTreeReaderValue<vector<int>> *genlep_pdg;
+  TTreeReaderValue<vector<float>> *genlep_pt;
+  TTreeReaderValue<vector<float>> *genlep_eta;
+  TTreeReaderValue<vector<float>> *genlep_phi;
+  TTreeReaderValue<vector<float>> *genlep_m;
+  TTreeReaderValue<vector<float>> *genlep_vx;
+  TTreeReaderValue<vector<float>> *genlep_vy;
+  TTreeReaderValue<vector<float>> *genlep_vz;
+  TTreeReaderValue<unsigned int> *n_genjpsi;
+  TTreeReaderValue<vector<int>> *genjpsi_pdg;
+  TTreeReaderValue<vector<float>> *genjpsi_pt;
+  TTreeReaderValue<vector<float>> *genjpsi_eta;
+  TTreeReaderValue<vector<float>> *genjpsi_phi;
+  TTreeReaderValue<vector<float>> *genjpsi_m;
+  TTreeReaderValue<vector<float>> *genjpsi_vx;
+  TTreeReaderValue<vector<float>> *genjpsi_vy;
+  TTreeReaderValue<vector<float>> *genjpsi_vz;
   TTreeReaderValue<UInt_t> *n_ele;
   TTreeReaderValue<vector<float>> *ele_pt;
   TTreeReaderValue<vector<float>> *ele_eta;
   TTreeReaderValue<vector<float>> *ele_phi;
   TTreeReaderValue<vector<float>> *ele_m;
+  TTreeReaderValue<vector<float>> *ele_trkpt;
+  TTreeReaderValue<vector<float>> *ele_trketa;
+  TTreeReaderValue<vector<float>> *ele_trkphi;
   TTreeReaderValue<vector<float>> *ele_d0;
   TTreeReaderValue<vector<float>> *ele_dz;
   TTreeReaderValue<vector<float>> *ele_detain;
@@ -72,8 +83,6 @@ public:
   TTreeReaderValue<vector<unsigned int>> *ele_seedid;
   TTreeReaderValue<vector<vector<float>>> *ele_enemat;
   TTreeReaderValue<vector<vector<float>>> *ele_timmat;
-  TTreeReaderValue<UInt_t> *n_rho;
-  TTreeReaderValue<vector<float>> *rho;
   
   TFile* outfile;
 
