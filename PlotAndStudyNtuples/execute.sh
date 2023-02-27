@@ -29,16 +29,8 @@ echo "Run over. Clean up and combine files."
 
 rm robustanalyzer.out
 
-#hadd -f hists_data.root hists_data_?.root
-#hadd -f hists_DYToLLM50.root hists_DYToLLM50_?.root
-#hadd -f hists_QCDPt30To50.root hists_QCDPt30To50_?.root
-#hadd -f hists_QCDPt50To80.root hists_QCDPt50To80_?.root
-#hadd -f hists_QCDPt80To120.root hists_QCDPt80To120_?.root
-hadd -f hists_JPsi.root hists_JPsi_?.root
+hadd -f hists_Eph02022G.root hists_Eph02022G_?.root
+#hadd -f hists_JPsi.root hists_JPsi_?.root
 
-#rm hists_data_?.root
-#rm hists_DYToLLM50_?.root
-#rm hists_QCDPt30To50_?.root
-#rm hists_QCDPt50To80_?.root
-#rm hists_QCDPt80To120_?.root
-rm hists_JPsi_?.root
+rm hists_Eph02022G_?.root
+#rm hists_JPsi_?.root
