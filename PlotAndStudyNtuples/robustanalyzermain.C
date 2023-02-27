@@ -20,7 +20,7 @@ int main(int argc, char* argv[]) {
   try {
     stringstream ssjpsi;
     ssjpsi<<"hists_JPsi_"<<cnt<<".root";
-    robustanalyzer rana_JPsi("./data/Scouting_JPsiToEE_nTuple_220207Full.root", ssjpsi.str(), numCores, false, true, true);
+    robustanalyzer rana_JPsi("/user/asahasra/ProcessScoutingJPsi/CMSSW_13_0_0_pre3/src/Run3ScoutingAnalysisTools/Analysis/test/ScoutingNTuple_Eph02022G_230224trial.root", ssjpsi.str(), numCores, false, false, false);
     rana_JPsi.analyzersinglefile(cnt);
     /*    
     stringstream ss1;
