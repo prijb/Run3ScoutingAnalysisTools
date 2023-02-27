@@ -635,7 +635,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     }
 
   n_pho = 0;
-
+  
   for (auto photons_iter = photonsH->begin(); photons_iter != photonsH->end(); ++photons_iter) {
     Photon_pt.push_back(photons_iter->pt());
     Photon_eta.push_back(photons_iter->eta());
@@ -649,40 +649,40 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
     n_pho++;
   }
   /*
-  vector<PseudoJet> fj_part;
-  n_pfcand = 0;
+    vector<PseudoJet> fj_part;
+    n_pfcand = 0;
     for (auto pfcands_iter = pfcandsH->begin(); pfcands_iter != pfcandsH->end(); ++pfcands_iter) {
-      pfcandpt.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->pt())));
-      pfcandeta.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->eta())));
-      pfcandphi.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->phi())));
-      //pfcandm.push_back(pfcands_iter->m());
+    pfcandpt.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->pt())));
+    pfcandeta.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->eta())));
+    pfcandphi.push_back(MiniFloatConverter::float16to32(MiniFloatConverter::float32to16(pfcands_iter->phi())));
+    //pfcandm.push_back(pfcands_iter->m());
     pfcandpdgid.push_back(pfcands_iter->pdgId());
     pfcandvertex.push_back(pfcands_iter->vertex());
     PseudoJet temp_jet = PseudoJet(0, 0, 0, 0);
-    temp_jet.reset_PtYPhiM(pfcands_iter->pt(), pfcands_iter->eta(), pfcands_iter->phi(), 0/*pfcands_iter->m()*/);
+    temp_jet.reset_PtYPhiM(pfcands_iter->pt(), pfcands_iter->eta(), pfcands_iter->phi(), pfcands_iter->m());
     temp_jet.set_user_index(pfcands_iter->pdgId());
     fj_part.push_back(temp_jet);
-
+    
     n_pfcand++;
-  } 
+    } 
   */
-     n_mu=0;
-for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_iter) {
- 	  Muon_pt.push_back(muons_iter->pt());
-   	Muon_eta.push_back(muons_iter->eta());
-   	Muon_phi.push_back(muons_iter->phi());
-   	Muon_m.push_back(muons_iter->m());
-   	Muon_ecaliso.push_back(muons_iter->ecalIso());
-   	Muon_hcaliso.push_back(muons_iter->hcalIso());
-   	Muon_trkiso.push_back(muons_iter->trk_chi2());
-   	Muon_chi2.push_back(muons_iter->trk_ndof());
-   	Muon_ndof.push_back(muons_iter->charge());
-   	Muon_charge.push_back(muons_iter->trk_dxy());
-   	Muon_dxy.push_back(muons_iter->trk_dz());
-   	Muon_dz.push_back(muons_iter->nValidRecoMuonHits());
-   	Muon_nvalidmuon_hits.push_back(muons_iter->nValidPixelHits());
-   	Muon_nvalidpixelhits.push_back(muons_iter->nRecoMuonMatchedStations());
-   	Muon_nmatchedstations.push_back(muons_iter->nTrackerLayersWithMeasurement());
+  n_mu=0;
+  for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_iter) {
+    Muon_pt.push_back(muons_iter->pt());
+    Muon_eta.push_back(muons_iter->eta());
+    Muon_phi.push_back(muons_iter->phi());
+    Muon_m.push_back(muons_iter->m());
+    Muon_ecaliso.push_back(muons_iter->ecalIso());
+    Muon_hcaliso.push_back(muons_iter->hcalIso());
+    Muon_trkiso.push_back(muons_iter->trk_chi2());
+    Muon_chi2.push_back(muons_iter->trk_ndof());
+    Muon_ndof.push_back(muons_iter->charge());
+    Muon_charge.push_back(muons_iter->trk_dxy());
+    Muon_dxy.push_back(muons_iter->trk_dz());
+    Muon_dz.push_back(muons_iter->nValidRecoMuonHits());
+    Muon_nvalidmuon_hits.push_back(muons_iter->nValidPixelHits());
+    Muon_nvalidpixelhits.push_back(muons_iter->nRecoMuonMatchedStations());
+    Muon_nmatchedstations.push_back(muons_iter->nTrackerLayersWithMeasurement());
     Muon_type.push_back(muons_iter->type());
     Muon_nvalidstriphits.push_back(muons_iter->nValidStripHits());
     Muon_trkqoverp.push_back(muons_iter->trk_qoverp());
@@ -698,11 +698,11 @@ for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_ite
     Muon_trkdszerror.push_back(muons_iter->trk_dsz());
     Muon_trkdsz.push_back(muons_iter->trk_dszError());
     n_mu++;
- }
+  }
 
 
   n_jet = 0;
-   for (auto pfjets_iter = pfjetsH->begin(); pfjets_iter != pfjetsH->end(); ++pfjets_iter) {
+  for (auto pfjets_iter = pfjetsH->begin(); pfjets_iter != pfjetsH->end(); ++pfjets_iter) {
     Jet_pt.push_back(pfjets_iter->pt());
     Jet_eta.push_back(pfjets_iter->eta());
     Jet_phi.push_back(pfjets_iter->phi());
@@ -772,35 +772,33 @@ for (auto muons_iter = muonsH->begin(); muons_iter != muonsH->end(); ++muons_ite
     FatJet_tau2.push_back(nSub2.result(j));
     FatJet_tau3.push_back(nSub3.result(j));
     FatJet_tau4.push_back(nSub4.result(j));
-  }
-<<<<<<< HEAD
+    }
+    <<<<<<< HEAD
    */
- if (doL1) {
-  
-   //cout<<"Doin pre L1"<<endl;
   if (doL1) {
+    
     //cout<<"Doin L1"<<endl;
     l1GtUtils_->retrieveL1(iEvent,iSetup,algToken_);
-    	for( int r = 0; r<280; r++){
-	string name ("empty");
-	bool algoName_ = false;
-	algoName_ = l1GtUtils_->getAlgNameFromBit(r,name);
-	cout << "getAlgNameFromBit = " << algoName_  << endl;
-	cout << "L1 bit number = " << r << " ; L1 bit name = " << name << endl;
-	}
+    for( int r = 0; r<280; r++){
+      string name ("empty");
+      bool algoName_ = false;
+      algoName_ = l1GtUtils_->getAlgNameFromBit(r,name);
+      cout << "getAlgNameFromBit = " << algoName_  << endl;
+      cout << "L1 bit number = " << r << " ; L1 bit name = " << name << endl;
+    }
     for( unsigned int iseed = 0; iseed < l1Seeds_.size(); iseed++ ) {
       bool l1htbit = 0;	
-			
+      
       l1GtUtils_->getFinalDecisionByName(string(l1Seeds_[iseed]), l1htbit);
       //cout<<string(l1Seeds_[iseed])<<"  "<<l1htbit<<endl;
       l1Result_.push_back( l1htbit );
-      }
- }
-
+    }
+  }
+  
  
-
- tree->Fill();	
- clearVars();
+  
+  tree->Fill();	
+  clearVars();
 
 }
 

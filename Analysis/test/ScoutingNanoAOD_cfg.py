@@ -55,7 +55,7 @@ params.parseArguments()
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
 #process.MessageLogger.destinations = ['cout', 'cerr']
-process.MessageLogger.cerr.FwkReport.reportEvery = 100
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -105,16 +105,11 @@ process.mmtree = cms.EDAnalyzer('EGammaOnly_ScoutingNanoAOD',
                                 electrons = cms.InputTag("hltScoutingEgammaPacker"),
                                 photons = cms.InputTag("hltScoutingEgammaPacker"),
                                 rho = cms.InputTag("hltScoutingPFPacker:rho"),
-                                doL1 = cms.bool(True),
+                                doL1 = cms.bool(False),
                                 AlgInputTag       = cms.InputTag("gtStage2Digis"),
                                 l1tAlgBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1tExtBlkInputTag = cms.InputTag("gtStage2Digis"),
-                                l1Seeds           = cms.vstring(L1Info),
-                                beamspot        = cms.InputTag("hltOnlineBeamSpot"),
-                                electrons        = cms.InputTag("hltScoutingEgammaPacker::HLTScouting"),
-                                photons          = cms.InputTag("hltScoutingEgammaPacker"),
-                                isMC = cms.bool(params.isMC),
-                                gens = cms.InputTag("genParticles")
+                                l1Seeds           = cms.vstring(L1Info)
                             )
 
 process.p = cms.Path( process.gtStage2Digis*process.mmtree )
