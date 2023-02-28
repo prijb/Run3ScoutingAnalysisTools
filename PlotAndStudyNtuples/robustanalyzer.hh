@@ -84,6 +84,8 @@ public:
   TTreeReaderValue<vector<vector<float>>> *ele_enemat;
   TTreeReaderValue<vector<vector<float>>> *ele_timmat;
   
+  TTreeReaderValue<vector<float>> *rho;
+
   TFile* outfile;
 
   std::vector<TH1F*> all1dhists;

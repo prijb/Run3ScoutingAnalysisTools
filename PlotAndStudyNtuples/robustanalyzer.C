@@ -69,6 +69,8 @@ robustanalyzer::robustanalyzer(TString filename, TString outfilename, int numCor
   ele_enemat = new TTreeReaderValue<vector<vector<float>>>((*tree), "Electron_energymatrix");
   ele_timmat = new TTreeReaderValue<vector<vector<float>>>((*tree), "Electron_timingmatrix");
 
+  rho = new TTreeReaderValue<vector<float>>((*tree), "rho");
+
   outfile = new TFile(outfilename,"RECREATE");
 }
 
@@ -104,11 +106,15 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     //addgenmchhist("noselgenAnosel");
   }
   addhist("nosel_");
+  addhist("loosesel_");
+  addhist("mediumsel_");
 
   // vector of electron indices
   vector<int> noselgenjpidx;
   vector<int> noselgenelidx;
   vector<int> noselelidx;
+  vector<int> looseselelidx;
+  vector<int> mediumselelidx;
 
   // Loop beginning on events
   while(tree->Next()) {
@@ -117,6 +123,8 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     //if(event>100) break;
     //if(event!=283991 && event!=326114) continue;
     if(event%100000==0) std::cout<<"Processed event: "<<event+1<<std::endl;
+
+    double evtrho = (*rho)->at(0);
 
     bool noselcond = false;
     // Loop on Gen particles to select good gen electrons
@@ -138,19 +146,57 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       if(noselgenjpidx.size()>=1) fillgenhistinevent("noselgen_", noselgenelidx, noselgenjpidx);
     }
 
+    bool looseselcond_ = false;
+    bool mediumselcond_ = false;
+    
     // Loop on electrons in the event loop
     for(unsigned int ele_ctr=0; ele_ctr<(*(*n_ele)); ele_ctr++) {
+
+      // Get the energy of the electron
+      TLorentzVector el;
+      el.SetPtEtaPhiM((*ele_pt)->at(ele_ctr),(*ele_eta)->at(ele_ctr),(*ele_phi)->at(ele_ctr),0.0005);
+      double ele_energy = el.E();
+
+      // Get the isolation with effective area of the electron
       
       noselelidx.push_back(ele_ctr);
+
+      looseselcond_ = true;
+      looseselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_sigmaietaieta)->at(ele_ctr)<0.0107):((*ele_sigmaietaieta)->at(ele_ctr)<0.0275);
+      looseselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_detain)->at(ele_ctr)<0.00691):((*ele_detain)->at(ele_ctr)<0.0121);
+      looseselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_dphiin)->at(ele_ctr)<0.175):((*ele_dphiin)->at(ele_ctr)<0.228);
+      looseselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_hoe)->at(ele_ctr)<(0.05+(1.28/ele_energy)+(0.0422*evtrho/ele_energy)))
+	:((*ele_hoe)->at(ele_ctr)<(0.05+(2.3/ele_energy)+(0.262*evtrho/ele_energy)));
+      //looseselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_tkiso)->at(ele_ctr)<(0.0478+(0.506/(*ele_pt)->at(ele_ctr))))
+      //:((*ele_tkiso)->at(ele_ctr)<(0.0658+(0.963/(*ele_pt)->at(ele_ctr))));
+      looseselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_ooemoop)->at(ele_ctr)<0.138):((*ele_ooemoop)->at(ele_ctr)<0.127);
+      //looseselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_mhits)->at(ele_ctr)<=1):((*ele_mhits)->at(ele_ctr)<=1);
+      if(looseselcond_) looseselelidx.push_back(ele_ctr);
+      
+      mediumselcond_ = true;
+      mediumselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_sigmaietaieta)->at(ele_ctr)<0.0103):((*ele_sigmaietaieta)->at(ele_ctr)<0.0272);
+      mediumselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_detain)->at(ele_ctr)<0.00481):((*ele_detain)->at(ele_ctr)<0.00951);
+      mediumselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_dphiin)->at(ele_ctr)<0.127):((*ele_dphiin)->at(ele_ctr)<0.221);
+      mediumselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_hoe)->at(ele_ctr)<(0.0241+(1.28/ele_energy)+(0.0422*evtrho/ele_energy)))
+	:((*ele_hoe)->at(ele_ctr)<(0.05+(2.3/ele_energy)+(0.262*evtrho/ele_energy)));
+      //mediumselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_tkiso)->at(ele_ctr)<(0.0478+(0.506/(*ele_pt)->at(ele_ctr))))
+      //:((*ele_tkiso)->at(ele_ctr)<(0.0658+(0.963/(*ele_pt)->at(ele_ctr))));
+      mediumselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_ooemoop)->at(ele_ctr)<0.0966):((*ele_ooemoop)->at(ele_ctr)<0.111);
+      //mediumselcond_ *= (abs((*ele_eta)->at(ele_ctr))<1.479)?((*ele_mhits)->at(ele_ctr)<=1):((*ele_mhits)->at(ele_ctr)<=1);
+      if(mediumselcond_) mediumselelidx.push_back(ele_ctr);
       
     } // End of loop on electrons in the event loop
     
     if(noselelidx.size()>=1) fillhistinevent("nosel_", noselelidx);
+    if(looseselelidx.size()>=1) fillhistinevent("loosesel_", looseselelidx);
+    if(mediumselelidx.size()>=1) fillhistinevent("mediumsel_", mediumselelidx);
     
     // Clear all vector
     noselgenjpidx.clear();
     noselgenelidx.clear();
     noselelidx.clear();
+    looseselelidx.clear();
+    mediumselelidx.clear();
     
   } // End of a single event loop
 
