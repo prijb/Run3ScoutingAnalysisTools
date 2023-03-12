@@ -47,9 +47,9 @@ robustanalyzer::robustanalyzer(TString filename, TString outfilename, int numCor
   ele_eta = new TTreeReaderValue<vector<float>>((*tree), "Electron_eta");
   ele_phi = new TTreeReaderValue<vector<float>>((*tree), "Electron_phi");
   ele_m = new TTreeReaderValue<vector<float>>((*tree), "Electron_m");
-  ele_trkpt = new TTreeReaderValue<vector<float>>((*tree), "Electron_trkpt");
-  ele_trketa = new TTreeReaderValue<vector<float>>((*tree), "Electron_trketa");
-  ele_trkphi = new TTreeReaderValue<vector<float>>((*tree), "Electron_trkphi");
+  //ele_trkpt = new TTreeReaderValue<vector<float>>((*tree), "Electron_trkpt");
+  //ele_trketa = new TTreeReaderValue<vector<float>>((*tree), "Electron_trketa");
+  //ele_trkphi = new TTreeReaderValue<vector<float>>((*tree), "Electron_trkphi");
   ele_d0 = new TTreeReaderValue<vector<float>>((*tree), "Electron_d0");
   ele_dz = new TTreeReaderValue<vector<float>>((*tree), "Electron_dz");
   ele_detain = new TTreeReaderValue<vector<float>>((*tree), "Electron_detain");
@@ -103,7 +103,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   // Define the histograms
   if(isMC) {
     addgenhist("noselgen_");
-    //addgenmchhist("noselgenAnosel");
+    addgenmchhist("noselgenAnosel_");
   }
   addhist("nosel_");
   addhist("loosesel_");
@@ -143,7 +143,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 	}
 	
       } // End of loop on gen electrons
-      if(noselgenjpidx.size()>=1) fillgenhistinevent("noselgen_", noselgenelidx, noselgenjpidx);
+      if(noselgenjpidx.size()==1) fillgenhistinevent("noselgen_", noselgenelidx, noselgenjpidx);
     }
 
     bool looseselcond_ = false;
@@ -190,6 +190,10 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     if(noselelidx.size()>=1) fillhistinevent("nosel_", noselelidx);
     if(looseselelidx.size()>=1) fillhistinevent("loosesel_", looseselelidx);
     if(mediumselelidx.size()>=1) fillhistinevent("mediumsel_", mediumselelidx);
+
+    if(isMC) {
+      if(noselelidx.size()>=1 && noselgenelidx.size()==2) fillgenmchhistinevent("noselgenAnosel_", noselgenelidx, noselelidx, 1);
+    }
     
     // Clear all vector
     noselgenjpidx.clear();
@@ -480,18 +484,18 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
     elpt->Fill((*ele_pt)->at(elidx[ctr]));
     eleta->Fill((*ele_eta)->at(elidx[ctr]));
     elphi->Fill((*ele_phi)->at(elidx[ctr]));
-    eltrkpt->Fill((*ele_trkpt)->at(elidx[ctr]));
-    eltrketa->Fill((*ele_trketa)->at(elidx[ctr]));
-    eltrkphi->Fill((*ele_trkphi)->at(elidx[ctr]));
+    //eltrkpt->Fill((*ele_trkpt)->at(elidx[ctr]));
+    //eltrketa->Fill((*ele_trketa)->at(elidx[ctr]));
+    //eltrkphi->Fill((*ele_trkphi)->at(elidx[ctr]));
     for(unsigned int ctr2=ctr+1; ctr2<elidx.size(); ctr2++) {
       TLorentzVector el, el2;
       el.SetPtEtaPhiM((*ele_pt)->at(elidx[ctr]),(*ele_eta)->at(elidx[ctr]),(*ele_phi)->at(elidx[ctr]),0.0005);
       el2.SetPtEtaPhiM((*ele_pt)->at(elidx[ctr2]),(*ele_eta)->at(elidx[ctr2]),(*ele_phi)->at(elidx[ctr2]),0.0005);
       dielM->Fill((el+el2).M());
-      TLorentzVector trkel, trkel2;
-      trkel.SetPtEtaPhiM((*ele_trkpt)->at(elidx[ctr]),(*ele_trketa)->at(elidx[ctr]),(*ele_trkphi)->at(elidx[ctr]),0.0005);
-      trkel2.SetPtEtaPhiM((*ele_trkpt)->at(elidx[ctr2]),(*ele_trketa)->at(elidx[ctr2]),(*ele_trkphi)->at(elidx[ctr2]),0.0005);
-      dieltrkM->Fill((trkel+trkel2).M());
+      //TLorentzVector trkel, trkel2;
+      //trkel.SetPtEtaPhiM((*ele_trkpt)->at(elidx[ctr]),(*ele_trketa)->at(elidx[ctr]),(*ele_trkphi)->at(elidx[ctr]),0.0005);
+      //trkel2.SetPtEtaPhiM((*ele_trkpt)->at(elidx[ctr2]),(*ele_trketa)->at(elidx[ctr2]),(*ele_trkphi)->at(elidx[ctr2]),0.0005);
+      //dieltrkM->Fill((trkel+trkel2).M());
     }
 
     // Segregation in barrel and endcap is based on the calo angular parameters
@@ -499,11 +503,11 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
       barelpt->Fill((*ele_pt)->at(elidx[ctr]));
       bareleta->Fill((*ele_eta)->at(elidx[ctr]));
       barelphi->Fill((*ele_phi)->at(elidx[ctr]));
-      bareltrkpt->Fill((*ele_trkpt)->at(elidx[ctr]));
-      bareltrketa->Fill((*ele_trketa)->at(elidx[ctr]));
-      bareltrkphi->Fill((*ele_trkphi)->at(elidx[ctr]));
-      bareltrkscdeltaeta->Fill( (*ele_trketa)->at(elidx[ctr])-(*ele_eta)->at(elidx[ctr]) );
-      bareltrkscdeltaphi->Fill( (*ele_trkphi)->at(elidx[ctr])-(*ele_phi)->at(elidx[ctr]) );
+      //bareltrkpt->Fill((*ele_trkpt)->at(elidx[ctr]));
+      //bareltrketa->Fill((*ele_trketa)->at(elidx[ctr]));
+      //bareltrkphi->Fill((*ele_trkphi)->at(elidx[ctr]));
+      //bareltrkscdeltaeta->Fill( (*ele_trketa)->at(elidx[ctr])-(*ele_eta)->at(elidx[ctr]) );
+      //bareltrkscdeltaphi->Fill( (*ele_trkphi)->at(elidx[ctr])-(*ele_phi)->at(elidx[ctr]) );
       barelm->Fill((*ele_m)->at(elidx[ctr]));
       bareld0->Fill((*ele_d0)->at(elidx[ctr]));
       barellog10d0->Fill(TMath::Log10(TMath::Abs((*ele_d0)->at(elidx[ctr]))));
@@ -527,11 +531,11 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
       ecelpt->Fill((*ele_pt)->at(elidx[ctr]));
       eceleta->Fill((*ele_eta)->at(elidx[ctr]));
       ecelphi->Fill((*ele_phi)->at(elidx[ctr]));
-      eceltrkpt->Fill((*ele_trkpt)->at(elidx[ctr]));
-      eceltrketa->Fill((*ele_trketa)->at(elidx[ctr]));
-      eceltrkphi->Fill((*ele_trkphi)->at(elidx[ctr]));
-      eceltrkscdeltaeta->Fill( (*ele_trketa)->at(elidx[ctr])-(*ele_eta)->at(elidx[ctr]) );
-      eceltrkscdeltaphi->Fill( (*ele_trkphi)->at(elidx[ctr])-(*ele_phi)->at(elidx[ctr]) );
+      //eceltrkpt->Fill((*ele_trkpt)->at(elidx[ctr]));
+      //eceltrketa->Fill((*ele_trketa)->at(elidx[ctr]));
+      //eceltrkphi->Fill((*ele_trkphi)->at(elidx[ctr]));
+      //eceltrkscdeltaeta->Fill( (*ele_trketa)->at(elidx[ctr])-(*ele_eta)->at(elidx[ctr]) );
+      //eceltrkscdeltaphi->Fill( (*ele_trkphi)->at(elidx[ctr])-(*ele_phi)->at(elidx[ctr]) );
       ecelm->Fill((*ele_m)->at(elidx[ctr]));
       eceld0->Fill((*ele_d0)->at(elidx[ctr]));
       ecellog10d0->Fill(TMath::Log10(TMath::Abs((*ele_d0)->at(elidx[ctr]))));
@@ -619,18 +623,18 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   }
   if(leadeltrkpos!=-1 && subleadeltrkpos!=-1) {
     leadsubleadtrkqprod->Fill(((*ele_charge)->at(leadeltrkpos))*((*ele_charge)->at(subleadeltrkpos)));
-    TLorentzVector leadel, subleadel;
-    leadel.SetPtEtaPhiM((*ele_trkpt)->at(leadeltrkpos),(*ele_trketa)->at(leadeltrkpos),(*ele_trkphi)->at(leadeltrkpos),0.0005);
-    subleadel.SetPtEtaPhiM((*ele_trkpt)->at(subleadeltrkpos),(*ele_trketa)->at(subleadeltrkpos),(*ele_trkphi)->at(subleadeltrkpos),0.0005);
-    leadsubleaddieltrkM->Fill((leadel+subleadel).M());
-    if(abs((*ele_eta)->at(leadeltrkpos))<1.479 && abs((*ele_eta)->at(subleadeltrkpos))<1.479)  {
-      leadbarsubleadbardieltrkM->Fill((leadel+subleadel).M());
-    }
-    if(abs((*ele_eta)->at(leadeltrkpos))>1.479 && abs((*ele_eta)->at(subleadeltrkpos))>1.479){
-      leadecsubleadecdieltrkM->Fill((leadel+subleadel).M());
-    }
+    //TLorentzVector leadel, subleadel;
+    //leadel.SetPtEtaPhiM((*ele_trkpt)->at(leadeltrkpos),(*ele_trketa)->at(leadeltrkpos),(*ele_trkphi)->at(leadeltrkpos),0.0005);
+    //subleadel.SetPtEtaPhiM((*ele_trkpt)->at(subleadeltrkpos),(*ele_trketa)->at(subleadeltrkpos),(*ele_trkphi)->at(subleadeltrkpos),0.0005);
+    //leadsubleaddieltrkM->Fill((leadel+subleadel).M());
+    //if(abs((*ele_eta)->at(leadeltrkpos))<1.479 && abs((*ele_eta)->at(subleadeltrkpos))<1.479)  {
+    //leadbarsubleadbardieltrkM->Fill((leadel+subleadel).M());
+    //}
+    //if(abs((*ele_eta)->at(leadeltrkpos))>1.479 && abs((*ele_eta)->at(subleadeltrkpos))>1.479){
+    //leadecsubleadecdieltrkM->Fill((leadel+subleadel).M());
+    //}
   }
-
+  
 }  
 
 // Add histograms for gen matching
@@ -650,68 +654,218 @@ void robustanalyzer::addgenmchhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"genelsctmchee_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
   all1dhists.push_back(new TH1F(selection+"genelsctmchee_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
 
-  all1dhists.push_back(new TH1F(selection+"sctmchgenel_elmult","gen N e/#gamma",50,-5,45));
-  all1dhists.push_back(new TH1F(selection+"sctmchgenel_elpt","gen e p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sctmchgenel_eleta","gen e #eta",1000,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sctmchgenel_elphi","gen e #phi",66,-3.3,3.3));
-  all1dhists.push_back(new TH1F(selection+"sctmchgenel_dielM","M(e,e)",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_el_mult","gen N e/#gamma",50,-5,45));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_el_pt","gen e p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_el_eta","gen e #eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_el_phi","gen e #phi",66,-3.3,3.3));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_diel_M","M(e,e)",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_lead_el_pt","gen e p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sctmchgenel_sublead_el_pt","gen e p_{T} / GeV",1000,-10,990));
 
-  all1dhists.push_back(new TH1F(selection+"genmchsct_elmult","N e",50,-5,45));
-  all1dhists.push_back(new TH1F(selection+"genmchsct_elpt","p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"genmchsct_eleta","#eta",1000,-5,5));
-  all1dhists.push_back(new TH1F(selection+"genmchsct_elphi","#phi",66,-3.3,3.3));
-  all1dhists.push_back(new TH1F(selection+"genmchsct_dielM","all M(e,e)",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"genmchsct_el_mult","N e",50,-5,45));
+  all1dhists.push_back(new TH1F(selection+"genmchsct_el_pt","p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"genmchsct_el_eta","#eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genmchsct_el_phi","#phi",66,-3.3,3.3));
+  all1dhists.push_back(new TH1F(selection+"genmchsct_diel_M","all M(e,e)",1000,-10,990));
 }
 
-  /*
-  addhist("nosel");
-  addhist("nosel_Zwind_");
-  addhist("leadepemsel");
-  addhist("leadepem_only_sel");
-  addhist("leadepem_ptgt20_sel");
-  addhist("leadepem_Zwind_sel");
-  addhist("leadepem_Zwindptgt20_sel");
-  addhist("vetosel");
-  addhist("loosesel");
-  addhist("loosesel_Zwind_");
-  addhist("mediumsel");
-  addhist("mediumsel_Zwind_");
-  addhist("tightsel");
-  addhist("tightsel_Zwind_");
-  addhist("tightsel_SideBand1_");
-  addhist("tightsel_SideBand2_");
-  addhist("tightsel_SideBand3_");
-  addhist("tightnonesel");
-  addhist("tightnonesel_Zwind_");
-  addhist("tightnonesel_SideBand1_");
-  addhist("tightnonesel_SideBand2_");
-  addhist("tightnonesel_SideBand3_");
-  addhist("nonetightsel");
-  addhist("nonetightsel_Zwind_");
-  addhist("nonetightsel_SideBand1_");
-  addhist("nonetightsel_SideBand2_");
-  addhist("nonetightsel_SideBand3_");
-  addhist("tightloosesel");
-  addhist("tightloosesel_Zwind_");
-  addhist("tightloosesel_SideBand1_");
-  addhist("tightloosesel_SideBand2_");
-  addhist("tightloosesel_SideBand3_");
-  addhist("loosetightsel");
-  addhist("loosetightsel_Zwind_");
-  addhist("loosetightsel_SideBand1_");
-  addhist("loosetightsel_SideBand2_");
-  addhist("loosetightsel_SideBand3_");
-  addhist("tightmediumsel");
-  addhist("tightmediumsel_Zwind_");
-  addhist("tightmediumsel_SideBand1_");
-  addhist("tightmediumsel_SideBand2_");
-  addhist("tightmediumsel_SideBand3_");
-  addhist("mediumtightsel");
-  addhist("mediumtightsel_Zwind_");
-  addhist("mediumtightsel_SideBand1_");
-  addhist("mediumtightsel_SideBand2_");
-  addhist("mediumtightsel_SideBand3_");
+// Fill histograms for gen matching
+void robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx, vector<int> elidx, double w) {
+
+  // Variables before gen match
+  TH1F* bardEta = (TH1F*) outfile->Get(selection+"genelsctbar_dEta");
+  TH1F* barqdPhi = (TH1F*) outfile->Get(selection+"genelsctbar_qdPhi");
+  TH1F* eedEta = (TH1F*) outfile->Get(selection+"genelsctee_dEta");
+  TH1F* eeqdPhi = (TH1F*) outfile->Get(selection+"genelsctee_qdPhi");
   
+  // Variables after gen match
+  TH1F* mchbardEta = (TH1F*) outfile->Get(selection+"genelsctmchbar_dEta");
+  TH1F* mchbarqdPhi = (TH1F*) outfile->Get(selection+"genelsctmchbar_qdPhi");
+  TH1F* mcheedEta = (TH1F*) outfile->Get(selection+"genelsctmchee_dEta");
+  TH1F* mcheeqdPhi = (TH1F*) outfile->Get(selection+"genelsctmchee_qdPhi");
+
+  TH1F* genelmult = (TH1F*) outfile->Get(selection+"sctmchgenel_el_mult");
+  TH1F* genelpt = (TH1F*) outfile->Get(selection+"sctmchgenel_el_pt");
+  TH1F* geneleta = (TH1F*) outfile->Get(selection+"sctmchgenel_el_eta");
+  TH1F* genelphi = (TH1F*) outfile->Get(selection+"sctmchgenel_el_phi");
+  TH1F* gendielM = (TH1F*) outfile->Get(selection+"sctmchgenel_diel_M");
+  TH1F* genleadelpt = (TH1F*) outfile->Get(selection+"sctmchgenel_lead_el_pt");
+  TH1F* gensubleadelpt = (TH1F*) outfile->Get(selection+"sctmchgenel_sublead_el_pt");
+
+  TH1F* genmchsctelmult = (TH1F*) outfile->Get(selection+"genmchsct_el_mult");
+  TH1F* genmchsctelpt = (TH1F*) outfile->Get(selection+"genmchsct_el_pt");
+  TH1F* genmchscteleta = (TH1F*) outfile->Get(selection+"genmchsct_el_eta");
+  TH1F* genmchsctelphi = (TH1F*) outfile->Get(selection+"genmchsct_el_phi");
+  TH1F* genmchsctdielM = (TH1F*) outfile->Get(selection+"genmchsct_diel_M");
+
+  // Fill variables before gen match
+  for(unsigned int sct=0; sct<elidx.size(); sct++) {
+    for(unsigned int gen=0; gen<genidx.size(); gen++) {
+      double charge = ((*genlep_pdg)->at(genidx[gen]))/TMath::Abs((*genlep_pdg)->at(genidx[gen]));
+      if(TMath::Abs((*ele_eta)->at(elidx[sct]))<1.479) {
+	bardEta->Fill((*ele_eta)->at(elidx[sct])-(*genlep_eta)->at(genidx[gen]));
+	barqdPhi->Fill(charge*((*ele_phi)->at(elidx[sct])-(*genlep_phi)->at(genidx[gen])));
+      }
+      else {
+	eedEta->Fill((*ele_eta)->at(elidx[sct])-(*genlep_eta)->at(genidx[gen]));
+	eeqdPhi->Fill(charge*((*ele_phi)->at(elidx[sct])-(*genlep_phi)->at(genidx[gen])));
+      }
+    }
+  }
+
+  // Fill variables after gen match
+  vector< pair<int,int> > sctelgenmch = diElecGenMatching(genidx, elidx);
+
+  int gen1 = sctelgenmch[0].first;
+  int el1 = sctelgenmch[0].second;
+  int gen2 = sctelgenmch[1].first;
+  int el2 = sctelgenmch[1].second;
+  
+  unsigned int leadptpos=-1, subleadptpos=-1;
+  if(gen1!=-1 && gen2!=-1) {
+    if((*genlep_pt)->at(gen1) >= (*genlep_pt)->at(gen2)) {
+      leadptpos = gen1;
+      subleadptpos = gen2;
+    }
+    else {
+      leadptpos = gen2;
+      subleadptpos = gen1;
+    }
+  }
+  else if(gen1==-1) {
+    leadptpos = gen1;
+  }
+  else {
+    if(gen2==-1) leadptpos = gen2;
+  }
+  
+  int genmchfound = 0;
+  if(el1!=-1) {
+    genmchfound++;
+    genelpt->Fill((*genlep_pt)->at(gen1), w);
+    geneleta->Fill((*genlep_eta)->at(gen1), w);
+    genelphi->Fill((*genlep_phi)->at(gen1), w);
+  }
+  if(el2!=-1) {
+    genmchfound++;
+    genelpt->Fill((*genlep_pt)->at(gen2), w);
+    geneleta->Fill((*genlep_eta)->at(gen2), w);
+    genelphi->Fill((*genlep_phi)->at(gen2), w);
+  } 
+  genelmult->Fill(genmchfound, w);
+  
+  if(leadptpos!=-1) {
+    genleadelpt->Fill((*genlep_pt)->at(leadptpos), w);
+  }
+  if(subleadptpos!=-1) {
+    gensubleadelpt->Fill((*genlep_pt)->at(subleadptpos), w);
+  }
+  
+  if(genmchfound==2) {
+    TLorentzVector elec1, elec2;
+    elec1.SetPtEtaPhiM((*genlep_pt)->at(gen1),(*genlep_eta)->at(gen1),(*genlep_phi)->at(gen1),0.0005);
+    elec2.SetPtEtaPhiM((*genlep_pt)->at(gen2),(*genlep_eta)->at(gen2),(*genlep_phi)->at(gen2),0.0005);
+    gendielM->Fill((elec1+elec2).M(), w);
+  }
+  
+  if(el1!=-1) {
+    double charge = ((*genlep_pdg)->at(gen1))/TMath::Abs((*genlep_pdg)->at(gen1));
+    if(TMath::Abs((*ele_eta)->at(el1))<1.479) {
+      mchbardEta->Fill((*ele_eta)->at(el1)-(*genlep_eta)->at(gen1));
+      mchbarqdPhi->Fill(charge*((*ele_phi)->at(el1)-(*genlep_phi)->at(gen1)));
+    }
+    else {
+      mcheedEta->Fill((*ele_eta)->at(el1)-(*genlep_eta)->at(gen1));
+      mcheeqdPhi->Fill(charge*((*ele_phi)->at(el1)-(*genlep_phi)->at(gen1)));
+    }
+    genmchsctelpt->Fill((*ele_pt)->at(el1), w);
+    genmchscteleta->Fill((*ele_eta)->at(el1), w);
+    genmchsctelphi->Fill((*ele_phi)->at(el1), w);
+  }
+  
+  if(el2!=-1) {
+    double charge = ((*genlep_pdg)->at(gen2))/TMath::Abs((*genlep_pdg)->at(gen2));
+    if(TMath::Abs((*ele_eta)->at(el2))<1.479) {
+      mchbardEta->Fill((*ele_eta)->at(el2)-(*genlep_eta)->at(gen2));
+      mchbarqdPhi->Fill(charge*((*ele_phi)->at(el2)-(*genlep_phi)->at(gen2)));
+    }
+    else {
+      mcheedEta->Fill((*ele_eta)->at(el2)-(*genlep_eta)->at(gen2));
+      mcheeqdPhi->Fill(charge*((*ele_phi)->at(el2)-(*genlep_phi)->at(gen2)));
+    }
+    genmchsctelpt->Fill((*ele_pt)->at(el2), w);
+    genmchscteleta->Fill((*ele_eta)->at(el2), w);
+    genmchsctelphi->Fill((*ele_phi)->at(el2), w);
+  }
+  genmchsctelmult->Fill(genmchfound, w);
+  if(genmchfound==2){
+    TLorentzVector elec1, elec2;
+    elec1.SetPtEtaPhiM((*ele_pt)->at(el1),(*ele_eta)->at(el1),(*ele_phi)->at(el1),0.0005);
+    elec2.SetPtEtaPhiM((*ele_pt)->at(el2),(*ele_eta)->at(el2),(*ele_phi)->at(el2),0.0005);
+    genmchsctdielM->Fill((elec1+elec2).M(), w);
+  }
+
+}
+
+vector< pair<int,int> > robustanalyzer::diElecGenMatching(vector<int> genidx, vector<int> sctelidx) {
+
+  if(genidx.size()==0) {
+    return { make_pair(-1,-1), make_pair(-1,-1) };
+  }
+  
+  if(genidx.size()>2) {
+    cout<<"Found "<<genidx.size()<<" gen electrons."<<endl;
+    throw "Error! Analysis code only suitable for <=2 gen electrons";
+  }
+  
+  if(!isMC) {
+    throw "Error! Cannot do gen matching. Not MC file.";
+  }
+  
+  vector< pair<int,int> > *gensctelmch = new vector< pair<int,int> >;
+  for(unsigned int ctr=0; ctr<2; ctr++) {
+    if(ctr<genidx.size()) {
+      gensctelmch->push_back(make_pair(genidx[ctr],-1));
+    }
+    else {
+      gensctelmch->push_back(make_pair(-1,-1));
+    }
+  }
+  
+  // Find the sctelidx with the best angular match
+  for(int elidx : sctelidx) {
+    // Loop over the gen particles
+    for(auto it=gensctelmch->begin(); it!=gensctelmch->end(); it++) {
+
+      int geneidx = (*it).first;
+      int mchsctelidx = (*it).second;
+      if(geneidx==-1 || mchsctelidx!=-1) continue;
+
+      double diffeta = abs((*ele_eta)->at(elidx)-(*genlep_eta)->at(geneidx)); 
+      TLorentzVector vecsctel, vecgen;
+      vecgen.SetPtEtaPhiM((*genlep_pt)->at(geneidx),(*genlep_eta)->at(geneidx),(*genlep_phi)->at(geneidx),0.0005);
+      vecsctel.SetPtEtaPhiM((*ele_pt)->at(elidx),(*ele_eta)->at(elidx),(*ele_phi)->at(elidx),0.0005);
+      double qdiffphi = ( (*genlep_pdg)->at(geneidx)/abs((*genlep_pdg)->at(geneidx)) )*( vecgen.DeltaPhi(vecsctel) );
+      // Condition for gen matching
+      if(abs((*ele_eta)->at(elidx))<1.479) {
+	if(diffeta<0.2 && qdiffphi<0.05 && qdiffphi>-0.3) {
+	  (*it).first = geneidx;
+	  (*it).second = elidx;
+	}
+      }
+      else {
+	if(diffeta<0.1 && qdiffphi<0.05 && qdiffphi>-0.2) {
+	  (*it).first = geneidx;
+	  (*it).second = elidx;
+	}
+      }
+    } // End of gen loop
+    
+  } // End of unseeded egamma object loop
+  
+  return (*gensctelmch);
+}
+/*
   vector<int> noselelidx;
   vector<int> noselZwindelidx;
   vector<int> leadepemselelidx;

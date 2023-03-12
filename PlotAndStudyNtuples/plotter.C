@@ -6,6 +6,7 @@
 #include "RooMsgService.h"
 
 TString cutdeets = "Cut details";
+TFile* jpsimodhistfile = TFile::Open("hists_JPsi_mod.root","READ");
 TFile* jpsihistfile = TFile::Open("hists_JPsi.root","READ");
 
 TString seltext[2] = {"line1", "line2"};
@@ -132,6 +133,65 @@ int linearfit(TString selection, TString xaxistitle, TString filesavename) {
   return -1;
 }
 
+int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, float legPos[]=(float []){0.7,0.75,0.95,1}, int nbins=0, double *rebin=0, TString xaxistitle="p_{T} / GeV") {
+
+  if(cutnames.size()/2!=file.size()) {
+    cout<<"Inconsistent entries for file size and cutnames: Suggested cutnameSize = 2* fileSize"<<endl;
+    return -1;
+  }
+  
+  std::vector<TEfficiency*> pEff;
+  TH1F* demo;
+
+  for(unsigned int filenum=0; filenum<file.size(); filenum++) {
+    
+    TH1F* nosel = (TH1F*) file[filenum]->Get(cutnames[filenum*2]);
+    TH1F* sel = (TH1F*) file[filenum]->Get(cutnames[filenum*2+1]);
+    
+    nosel = (TH1F*) nosel->Rebin(nbins,"newx",rebin);
+    sel = (TH1F*) sel->Rebin(nbins,"newx",rebin);
+    if(filenum==0) demo = (TH1F*) sel->Clone();
+    
+    pEff.push_back(0);
+    if(TEfficiency::CheckConsistency((*sel),(*nosel))) {
+      pEff[filenum] = new TEfficiency((*sel),(*nosel));
+    }
+    
+    sel->SetLineColor(kRed);
+    gStyle->SetOptStat(0);
+    pEff[filenum]->SetLineWidth(3);
+    pEff[filenum]->SetLineColor(coloropt[filenum]);
+  }
+  
+  std::vector<TH1F*> allhists;
+  demo->SetTitle("");
+  demo->GetXaxis()->SetTitle(xaxistitle);
+  demo->GetYaxis()->SetTitle("efficiency");
+  demo->SetLineColorAlpha(kWhite,1);
+  demo->SetFillColorAlpha(kWhite,1);
+  allhists.push_back(demo);
+  
+  TCanvas* c1;
+  c1 = new TCanvas();
+  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(), (float []){-1,0.65,0.9,0.95},false,false,(float []){0.0,1.1},false,histtype,markerstyle,markersize,legendmarkerstyle);
+  auto pad = c1->GetPad(3);
+  auto leg = new TLegend(legPos[0], legPos[1], legPos[2], legPos[3]);
+  for(unsigned int filenum=0; filenum<file.size(); filenum++) {
+    pEff[filenum]->Draw("same");
+    leg->AddEntry(pEff[filenum],legendEntries[filenum],"l");
+    leg->SetTextFont(132);
+    leg->SetTextSize(0.065);
+    leg->SetBorderSize(0);
+  }
+  leg->Draw();
+  //TLatex latex;
+  //latex.DrawLatex((*legpos),(*(legpos+1)),seltext[0]);
+  //latex.DrawLatex((*legpos),(*(legpos+1))-0.1,seltext[1]);
+  c1->SaveAs("./dirplots_jpsi/"+((TString)file[0]->GetName()).ReplaceAll(".root","")+"/"+cutnames[0]+"_eff.png");
+  
+  return -1;
+}
+
 int plotter() {
 
   std::vector<TFile*> file;
@@ -247,13 +307,96 @@ int plotter() {
   legendmarkerstyle.push_back("le");
 
   legendEntries = legend;
-  comparesamevariable(file, cutname, "detain", -1, -1, 10, true, true, true, (float []){8e-1,4e6}, (float []){0.65,0.7,0.85,0.95}, false, "value");
+  //comparesamevariable(file, cutname, "detain", -1, -1, 10, true, true, true, (float []){8e-1,4e6}, (float []){0.65,0.7,0.85,0.95}, false, "value");
 
   legend.clear();
   legend.push_back("dPhiIn");
   legend.push_back("#Delta#phi(trk, SC)");
   legendEntries = legend;
-  comparesamevariable(file, cutname, "dphiin", -1, -1, 10, true, true, true, (float []){8e-1,4e6}, (float []){0.55,0.7,0.75,0.95}, false, "value");
+  //comparesamevariable(file, cutname, "dphiin", -1, -1, 10, true, true, true, (float []){8e-1,4e6}, (float []){0.55,0.7,0.75,0.95}, false, "value");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(jpsihistfile);
+  cutname.push_back("noselgen_gen_el");
+  coloropt.push_back(kBlue-2);
+  legend.push_back("2022 gen p_{T}");
+  histtype.push_back("hist e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(jpsihistfile);
+  cutname.push_back("noselgenAnosel_sctmchgenel_el");
+  coloropt.push_back(kBlue);
+  legend.push_back("2022 scouting");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(jpsimodhistfile);
+  cutname.push_back("noselgen_gen_el");
+  coloropt.push_back(kRed-2);
+  legend.push_back("2023 gen p_{T}");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(jpsimodhistfile);
+  cutname.push_back("noselgenAnosel_sctmchgenel_el");
+  coloropt.push_back(kRed);
+  legend.push_back("2023 scouting");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("le");
+
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "pt", -1, 50, 1, true, true, true, (float []){8e-1,4e7}, (float []){0.55,0.7,0.75,0.95}, false, "p_{T} [GeV]");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();  
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(jpsihistfile);
+  cutname.push_back("noselgen_gen_el_pt");
+  cutname.push_back("noselgenAnosel_sctmchgenel_el_pt");
+  coloropt.push_back(kBlue);
+  legend.push_back("2022 scouting (seeded)");
+  histtype.push_back("e1");
+  markerstyle.push_back(104);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("pe");
+  legendmarkerstyle.clear();
+
+  file.push_back(jpsimodhistfile);
+  cutname.push_back("noselgen_gen_el_pt");
+  cutname.push_back("noselgenAnosel_sctmchgenel_el_pt");
+  coloropt.push_back(kRed);
+  legend.push_back("2023 Scouting (unseeded)");
+  histtype.push_back("same e1");
+  markerstyle.push_back(104);
+  markersize.push_back(2);
+  legendmarkerstyle.push_back("pe");
+
+  legendEntries = legend;
+  vector<double> binspt{0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40};
+  vector<float> legpos = {0.35, 0.15, 0.6, 0.35};
+  efficiency(file, cutname, &legpos[0], binspt.size()-1, &binspt[0], "p_{T} / GeV");
 
   return -1;
 }
