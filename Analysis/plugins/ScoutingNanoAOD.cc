@@ -619,7 +619,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       Electron_pt.push_back(electrons_iter->pt());
       Electron_eta.push_back(electrons_iter->eta());
       Electron_phi.push_back(electrons_iter->phi());	
-      Electron_d0.push_back(electrons_iter->d0());
+      //Electron_d0.push_back(electrons_iter->d0());
       Electron_m.push_back(electrons_iter->m());
       Electron_detain.push_back(electrons_iter->dEtaIn());
       Electron_dphiin.push_back(electrons_iter->dPhiIn());
@@ -627,7 +627,7 @@ void ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::EventSetup& i
       Electron_HoE.push_back(electrons_iter->hOverE());	
       Electron_ooEMOop.push_back(electrons_iter->ooEMOop());
       Electron_mHits.push_back(electrons_iter->missingHits());
-      Electron_charge.push_back(electrons_iter->charge());
+      //Electron_charge.push_back(electrons_iter->charge());
       Electron_tkiso.push_back(electrons_iter->trackIso());
       Electron_ecaliso.push_back(electrons_iter->ecalIso());
       Electron_hcaliso.push_back(electrons_iter->hcalIso());
