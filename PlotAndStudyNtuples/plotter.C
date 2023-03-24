@@ -1272,7 +1272,7 @@ int plotter() {
   legendmarkerstyle.push_back("lep");
 
   legendEntries = legend;
-  //comparesamevariable(file, cutname, "leadsublead_dielM", 1250, 1470, 5, false, true, true, (float []){0,400}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  comparesamevariable(file, cutname, "leadsublead_dielM", 1000, 12000, 20, true, true, true, (float []){1e2,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
 
   file.clear();
   cutname.clear();
@@ -1367,7 +1367,7 @@ int plotter() {
   //fitinvmee_roofit("mediumselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &null1, &null2, (double []){76.0, 98.0});
 
   //elEffZsignalEB();
-  elEffZsignalEE();
+  //elEffZsignalEE();
 
   tempfile->Close();
   return -1;
