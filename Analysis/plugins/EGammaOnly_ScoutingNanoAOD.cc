@@ -34,6 +34,7 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
 #include "DataFormats/Common/interface/RefToBase.h"
 #include "DataFormats/HLTReco/interface/TriggerEvent.h"
+#include "DataFormats/HLTReco/interface/TriggerObject.h"
 #include "DataFormats/HLTReco/interface/EgammaObject.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
@@ -49,9 +50,11 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Electron.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
+#include "DataFormats/Common/interface/AssociationMap.h"
 
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h"
 #include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
@@ -81,51 +84,35 @@ private:
   virtual void endLuminosityBlock(edm::LuminosityBlock const&, edm::EventSetup const&) override;
   virtual void clearVars();
 
-  // Flag for simualtion processing
-  Bool_t isMC;
-  const edm::EDGetTokenT<std::vector<reco::GenParticle> > gensToken;
+  const edm::EDGetTokenT<edm::TriggerResults> trgResultsToken;
+
+  const edm::EDGetTokenT<std::vector<reco::Vertex> > oflpVtxToken;
+  const edm::EDGetTokenT<std::vector<pat::Electron> > oflelectronsToken;
+  const edm::EDGetTokenT<double> oflrhoToken;
 
   const edm::EDGetTokenT<std::vector<Run3ScoutingVertex> > pVtxToken;
-  const edm::EDGetTokenT<std::vector<Run3ScoutingMuon> > muonsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingElectron> > electronsToken;
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> > photonsToken;
   const edm::EDGetTokenT<double> rhoToken;
 
-  // For L1 input
-  edm::InputTag algInputTag_;
-  edm::InputTag extInputTag_;
-  edm::EDGetToken algToken_;
-  std::unique_ptr<l1t::L1TGlobalUtil> l1GtUtils_;
-  
-  // L1 trigger branches
-  bool doL1;
-  std::vector<std::string> l1Seeds_;
-  std::vector<bool> l1Result_;
+  // Interesting trigger results
+  Int_t HLT_IsoMu27, HLT_Mu50, DST_Run3PFScouting, DST_HLTMuon_Run3PFScouting, HLT_OtherScoutingPFMonitor;
 
-  // Gen Level Lepton, Neutrino and DM particle
-  UInt_t n_gen;
-  vector<Int_t> genpart_pdg;
-  vector<Float16_t> genpart_pt;
-  vector<Float16_t> genpart_eta;
-  vector<Float16_t> genpart_phi;
-  vector<Float16_t> genpart_m;
-  vector<Float16_t> genpart_vx;
-  vector<Float16_t> genpart_vy;
-  vector<Float16_t> genpart_vz;
-  vector<Int_t> genpart_nmoms;
-  vector<Int_t> genpart_mompdg;
-  vector<Bool_t> genpart_fromHardProcessBeforeFSR;
-  vector<Bool_t> genpart_fromHardProcessDecayed;
-  vector<Bool_t> genpart_fromHardProcessFS;
-  vector<Bool_t> genpart_isHardProcess;
-  vector<Bool_t> genpart_isLastCopy;
-  vector<Bool_t> genpart_isLastCopyBeforeFSR;
-  vector<Bool_t> genpart_isPromptFS;
-  vector<Bool_t> genpart_isPromptDec;
-  vector<Bool_t> genpart_isDirectPromptTauDecayProdFS;
-
+  // Offline Primary Vertex
+  const static int max_oflpv = 1000;
+  UInt_t n_oflpVtx;
+  vector<Float16_t> oflpVtx_x;
+  vector<Float16_t> oflpVtx_y;
+  vector<Float16_t> oflpVtx_z;
+  vector<Float16_t> oflpVtx_xError;
+  vector<Float16_t> oflpVtx_yError;
+  vector<Float16_t> oflpVtx_zError;
+  vector<Int_t> oflpVtx_trksize;
+  vector<Float16_t> oflpVtx_chi2;
+  vector<Int_t> oflpVtx_ndof;
+  vector<Bool_t> oflpVtx_isvalidvtx;
+        
   // Primary Vertex
-  const static int max_pv = 1000;
   UInt_t n_pVtx;
   vector<Float16_t> pVtx_x;
   vector<Float16_t> pVtx_y;
@@ -138,43 +125,27 @@ private:
   vector<Int_t> pVtx_ndof;
   vector<Bool_t> pVtx_isvalidvtx;
         
-  // Muon
-  const static int max_mu = 1000;
-  UInt_t n_mu;
-  vector<Float16_t> Muon_pt;
-  vector<Float16_t> Muon_eta;
-  vector<Float16_t> Muon_phi;
-  vector<Float16_t> Muon_m;
-  vector<unsigned int> Muon_type;
-  vector<Float16_t> Muon_charge;
-  vector<Float16_t> Muon_normchi2;
-  vector<Float16_t> Muon_ecaliso;
-  vector<Float16_t> Muon_hcaliso;
-  vector<Float16_t> Muon_trkiso;
-  vector<int> Muon_nvalidpixelhits;
-  vector<int> Muon_nvalidstriphits;
-  vector<Float16_t> Muon_trkchi2;
-  vector<Float16_t> Muon_ndof;
-  vector<Float16_t> Muon_dxy;
-  vector<Float16_t> Muon_dz;
-  vector<Float16_t> Muon_trkqoverp;
-  vector<Float16_t> Muon_trklambda;
-  vector<Float16_t> Muon_trkpt;
-  vector<Float16_t> Muon_trkphi;
-  vector<Float16_t> Muon_trketa;
-  vector<Float16_t> Muon_dxyError;
-  vector<Float16_t> Muon_dzError;
-  vector<Float16_t> Muon_trkqoverperror;
-  vector<Float16_t> Muon_trklambdaerror;
-  vector<Float16_t> Muon_trkphierror;
-  vector<Float16_t> Muon_trkdsz;
-  vector<Float16_t> Muon_trkdszerror;
-  vector<Float16_t> Muon_vx;
-  vector<Float16_t> Muon_vy;
-  vector<Float16_t> Muon_vz;
+  // Offline Electron
+  UInt_t n_oflele;
+  vector<Float16_t> OflElectron_energy;
+  vector<Float16_t> OflElectron_pt;
+  vector<Float16_t> OflElectron_eta;
+  vector<Float16_t> OflElectron_phi;
+  vector<Float16_t> OflElectron_d0;
+  vector<Float16_t> OflElectron_dz;
+  vector<Float16_t> OflElectron_detain;
+  vector<Float16_t> OflElectron_dphiin;
+  vector<Float16_t> OflElectron_sigmaietaieta;
+  vector<Float16_t> OflElectron_hoe;
+  vector<Float16_t> OflElectron_ooemoop;
+  vector<Int_t> OflElectron_missinghits;
+  vector<Int_t> OflElectron_charge;
+  vector<Float16_t> OflElectron_photoniso;
+  vector<Float16_t> OflElectron_neuthadroniso;
+  vector<Float16_t> OflElectron_chrghadroniso;
+  vector<Bool_t> OflElectron_conversionveto;
 
-  //Electron
-  const static int max_ele = 1000;
+  // Electron
   UInt_t n_ele;
   vector<Float16_t> Electron_pt;
   vector<Float16_t> Electron_eta;
@@ -196,13 +167,9 @@ private:
   vector<Float16_t> Electron_smin;
   vector<Float16_t> Electron_smaj;
   vector<UInt_t> Electron_seedid;
-  vector<vector<Float16_t>> Electron_energymatrix;
-  vector<vector<uint32_t>> Electron_detids;
-  vector<vector<Float16_t>> Electron_timingmatrix;
-  vector<bool> Electron_rechitzerosuppression;
+  vector<Bool_t> Electron_rechitzerosuppression;
 
   //Photon
-  const static int max_pho = 1000;
   UInt_t n_pho;
   vector<Float16_t> Photon_pt;
   vector<Float16_t> Photon_eta;
@@ -217,10 +184,11 @@ private:
   vector<Float16_t> Photon_smin;
   vector<Float16_t> Photon_smaj;
   vector<Float16_t> Photon_seedid;
-  vector<vector<Float16_t>> Photon_energymatrix;
-  vector<vector<uint32_t>> Photon_detids;
-  vector<vector<Float16_t>> Photon_timingmatrix;
-  vector<bool> Photon_rechitzerosuppression;
+  vector<Bool_t> Photon_rechitzerosuppression;
+
+  // Offline Rho
+  UInt_t n_oflrhoval;
+  vector<Float16_t> oflrho;
 
   // Rho
   UInt_t n_rhoval;
@@ -230,37 +198,24 @@ private:
   TTree* tree;
 
   //Run and lumisection
-  int run;
-  int event;
-  int lumSec;
+  Int_t run;
+  Int_t event;
+  Int_t lumSec;
 
 };
 
 EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& iConfig): 
-  isMC(iConfig.existsAs<bool>("isMC")?iConfig.getParameter<bool>("isMC"):true), 
-  gensToken(consumes<std::vector<reco::GenParticle> >(iConfig.getParameter<edm::InputTag>("gens"))),
+  trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerhltres"))),
+  oflpVtxToken(consumes<std::vector<reco::Vertex> >(iConfig.getParameter<edm::InputTag>("oflprimaryVtx"))), 
+  oflelectronsToken(consumes<std::vector<pat::Electron> >(iConfig.getParameter<edm::InputTag>("oflelectrons"))), 
+  oflrhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("oflrho"))), 
   pVtxToken(consumes<std::vector<Run3ScoutingVertex> >(iConfig.getParameter<edm::InputTag>("primaryVtx"))), 
-  muonsToken(consumes<std::vector<Run3ScoutingMuon> >(iConfig.getParameter<edm::InputTag>("muons"))), 
   electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
   photonsToken(consumes<std::vector<Run3ScoutingPhoton> >(iConfig.getParameter<edm::InputTag>("photons"))),
-  rhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))),
-  doL1(iConfig.existsAs<bool>("doL1")?iConfig.getParameter<bool>("doL1"):false) {
+  rhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))) {
 
   usesResource("TFileService");
 
-  // If doL1, access necessary heads for L1 algorithm
-  if(doL1) {
-    algInputTag_ = iConfig.getParameter<edm::InputTag>("AlgInputTag");
-    extInputTag_ = iConfig.getParameter<edm::InputTag>("l1tExtBlkInputTag");
-    algToken_ = consumes<BXVector<GlobalAlgBlk>>(algInputTag_);
-    l1Seeds_ = iConfig.getParameter<std::vector<std::string> >("l1Seeds");
-    l1GtUtils_ = std::make_unique<l1t::L1TGlobalUtil>(iConfig, consumesCollector(), *this, algInputTag_, extInputTag_, l1t::UseEventSetupIn::Event);
-  }
-  else {
-    l1Seeds_ = std::vector<std::string>();
-    l1GtUtils_ = 0;
-  }
-  
   // Access the TFileService
   edm::Service<TFileService> fs;
 
@@ -271,34 +226,27 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("lumSec", &lumSec, "lumSec/i" );
   tree->Branch("run", &run, "run/i" );
   tree->Branch("event", &event, "event/i" );
-    
-  // L1 info
-  tree->Branch("l1Result", "std::vector<bool>", &l1Result_, 32000, 0);
 
-  // Gen level particles
-  if(isMC) {
-    tree->Branch("n_genpart", &n_gen, "n_genpart/i");
-    tree->Branch("genpart_pdg", &genpart_pdg);
-    tree->Branch("genpart_pt", &genpart_pt);
-    tree->Branch("genpart_eta", &genpart_eta);
-    tree->Branch("genpart_phi", &genpart_phi);
-    tree->Branch("genpart_m", &genpart_m);
-    tree->Branch("genpart_vx", &genpart_vx);
-    tree->Branch("genpart_vy", &genpart_vy);
-    tree->Branch("genpart_vz", &genpart_vz);
-    tree->Branch("genpart_nmoms", &genpart_nmoms);
-    tree->Branch("genpart_mompdg", &genpart_mompdg);
-    tree->Branch("genpart_fromHardProcessBeforeFSR", &genpart_fromHardProcessBeforeFSR);
-    tree->Branch("genpart_fromHardProcessDecayed", &genpart_fromHardProcessDecayed);
-    tree->Branch("genpart_fromHardProcessFS", &genpart_fromHardProcessFS);
-    tree->Branch("genpart_isHardProcess", &genpart_isHardProcess);
-    tree->Branch("genpart_isLastCopy", &genpart_isLastCopy);
-    tree->Branch("genpart_isLastCopyBeforeFSR", &genpart_isLastCopyBeforeFSR);
-    tree->Branch("genpart_isPromptFS", &genpart_isPromptFS);
-    tree->Branch("genpart_isPromptDec", &genpart_isPromptDec);
-    tree->Branch("genpart_isDirectPromptTauDecayProdFS", &genpart_isDirectPromptTauDecayProdFS);
-  }
+  // Trigger Results
+  tree->Branch("HLT_IsoMu27", &HLT_IsoMu27, "HLT_IsoMu27/i" );
+  tree->Branch("HLT_Mu50", &HLT_Mu50, "HLT_Mu50/i" );
+  tree->Branch("DST_Run3PFScouting", &DST_Run3PFScouting, "DST_Run3PFScouting/i" );
+  tree->Branch("DST_HLTMuon_Run3PFScouting", &DST_HLTMuon_Run3PFScouting, "DST_HLTMuon_Run3PFScouting/i" );
+  tree->Branch("HLT_OtherScoutingPFMonitor", &HLT_OtherScoutingPFMonitor, "HLT_OtherScoutingPFMonitor/i" );
 
+  // Offline Primary vertex info
+  tree->Branch("n_oflpVtx", &n_oflpVtx, "n_oflpVtx/i");
+  tree->Branch("oflpVtx_x", &oflpVtx_x);
+  tree->Branch("oflpVtx_y", &oflpVtx_y);
+  tree->Branch("oflpVtx_z", &oflpVtx_z);
+  tree->Branch("oflpVtx_xError", &oflpVtx_xError);
+  tree->Branch("oflpVtx_yError", &oflpVtx_yError);
+  tree->Branch("oflpVtx_zError", &oflpVtx_zError);
+  tree->Branch("oflpVtx_trksize", &oflpVtx_trksize);
+  tree->Branch("oflpVtx_chi2", &oflpVtx_chi2);
+  tree->Branch("oflpVtx_ndof", &oflpVtx_ndof);
+  tree->Branch("oflpVtx_isvalidvtx", &oflpVtx_isvalidvtx);
+  
   // Primary vertex info
   tree->Branch("n_pVtx", &n_pVtx, "n_pVtx/i");
   tree->Branch("pVtx_x", &pVtx_x);
@@ -312,39 +260,25 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("pVtx_ndof", &pVtx_ndof);
   tree->Branch("pVtx_isvalidvtx", &pVtx_isvalidvtx);
   
-  // Muons
-  tree->Branch("n_mu", &n_mu, "n_mu/i");
-  tree->Branch("Muon_pt", &Muon_pt);
-  tree->Branch("Muon_eta", &Muon_eta);
-  tree->Branch("Muon_phi", &Muon_phi);
-  tree->Branch("Muon_m", &Muon_m);
-  tree->Branch("Muon_type", &Muon_type);
-  tree->Branch("Muon_charge", &Muon_charge);
-  tree->Branch("Muon_normchi2", &Muon_normchi2);
-  tree->Branch("Muon_ecaliso", &Muon_ecaliso);
-  tree->Branch("Muon_hcaliso", &Muon_hcaliso);
-  tree->Branch("Muon_trkiso", &Muon_trkiso);
-  tree->Branch("Muon_validpixelhits", &Muon_nvalidpixelhits);
-  tree->Branch("Muon_nvalidstriphits", &Muon_nvalidstriphits);
-  tree->Branch("Muon_trkchi2", &Muon_trkchi2);
-  tree->Branch("Muon_ndof", &Muon_ndof);
-  tree->Branch("Muon_dxy", &Muon_dxy);
-  tree->Branch("Muon_dz", &Muon_dz);
-  tree->Branch("Muon_trkqoverp", &Muon_trkqoverp);
-  tree->Branch("Muon_trklambda", &Muon_trklambda);
-  tree->Branch("Muon_trkpt", &Muon_trkpt);
-  tree->Branch("Muon_trkphi",  &Muon_trkphi);
-  tree->Branch("Muon_trketa", &Muon_trketa);
-  tree->Branch("Muon_dxyError", &Muon_dxyError);
-  tree->Branch("Muon_dzError", &Muon_dzError);
-  tree->Branch("Muon_trkqoverperror", &Muon_trkqoverperror);
-  tree->Branch("Muon_trklambdaerror", &Muon_trklambdaerror);
-  tree->Branch("Muon_trkphierror", &Muon_trkphierror);
-  tree->Branch("Muon_trkdsz", &Muon_trkdsz);
-  tree->Branch("Muon_trkdszerror", &Muon_trkdszerror);
-  tree->Branch("Muon_vx", &Muon_vx);
-  tree->Branch("Muon_vy", &Muon_vy);
-  tree->Branch("Muon_vz", &Muon_vz);
+  // Offline Electrons
+  tree->Branch("n_oflele", &n_oflele, "n_oflele/i");
+  tree->Branch("OflElectron_energy", &OflElectron_energy);
+  tree->Branch("OflElectron_pt", &OflElectron_pt);
+  tree->Branch("OflElectron_eta", &OflElectron_eta);
+  tree->Branch("OflElectron_phi", &OflElectron_phi);
+  tree->Branch("OflElectron_d0", &OflElectron_d0);
+  tree->Branch("OflElectron_dz", &OflElectron_dz);
+  tree->Branch("OflElectron_detain", &OflElectron_detain);
+  tree->Branch("OflElectron_dphiin", &OflElectron_dphiin);
+  tree->Branch("OflElectron_sigmaietaieta", &OflElectron_sigmaietaieta);
+  tree->Branch("OflElectron_hoe", &OflElectron_hoe);
+  tree->Branch("OflElectron_ooemoop", &OflElectron_ooemoop);
+  tree->Branch("OflElectron_missinghits", &OflElectron_missinghits);
+  tree->Branch("OflElectron_charge", &OflElectron_charge);
+  tree->Branch("OflElectron_photoniso", &OflElectron_photoniso);
+  tree->Branch("OflElectron_neuthadroniso", &OflElectron_neuthadroniso);
+  tree->Branch("OflElectron_chrghadroniso", &OflElectron_chrghadroniso);
+  tree->Branch("OflElectron_conversionveto", &OflElectron_conversionveto);
 
   // Electrons
   tree->Branch("n_ele", &n_ele, "n_ele/i");
@@ -368,10 +302,6 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Electron_smin", &Electron_smaj);
   tree->Branch("Electron_smaj", &Electron_smin);
   tree->Branch("Electron_seedid", &Electron_seedid);
-  tree->Branch("Electron_energymatrix", &Electron_energymatrix);
-  tree->Branch("Electron_energymatrix", &Electron_energymatrix);
-  tree->Branch("Electron_detids", &Electron_detids);
-  tree->Branch("Electron_timingmatrix", &Electron_timingmatrix);
   tree->Branch("Electron_rechitzerosuppression", &Electron_rechitzerosuppression);
   
   // Photons
@@ -389,10 +319,11 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Photon_smin", &Photon_smin);
   tree->Branch("Photon_smaj", &Photon_smaj);
   tree->Branch("Photon_seedid", &Photon_seedid);
-  tree->Branch("Photon_energymatrix", &Photon_energymatrix);
-  tree->Branch("Photon_detids", &Photon_detids);
-  tree->Branch("Photon_timingmatrix", &Photon_timingmatrix);
   tree->Branch("Photon_rechitzerosuppression", &Photon_rechitzerosuppression);
+
+  // Offline Rho
+  tree->Branch("n_oflrhoval", &n_oflrhoval, "n_oflrhoval/i");
+  tree->Branch("oflrho", &oflrho);
 
   // Rho
   tree->Branch("n_rhoval", &n_rhoval, "n_rhoval/i");
@@ -408,18 +339,20 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   using namespace std;
   using namespace reco;
       
-  Handle<vector<reco::GenParticle> >gensH;
-  if(isMC) {
-    iEvent.getByToken(gensToken, gensH);
-  }
+  edm::Handle<edm::TriggerResults> trigResults;
+  iEvent.getByToken(trgResultsToken, trigResults);
+
+  Handle<vector<reco::Vertex> > oflpVtxH;
+  iEvent.getByToken(oflpVtxToken, oflpVtxH);
+  bool oflpVtxValid = oflpVtxH.isValid();
 
   Handle<vector<Run3ScoutingVertex> > pVtxH;
   iEvent.getByToken(pVtxToken, pVtxH);
   bool pVtxValid = pVtxH.isValid();
 
-  Handle<vector<Run3ScoutingMuon> > muonsH;
-  iEvent.getByToken(muonsToken, muonsH);
-  bool muoValid = muonsH.isValid();
+  Handle<vector<pat::Electron> > oflelectronsH;
+  iEvent.getByToken(oflelectronsToken, oflelectronsH);
+  bool ofleleValid = oflelectronsH.isValid();
 
   Handle<vector<Run3ScoutingElectron> > electronsH;
   iEvent.getByToken(electronsToken, electronsH);
@@ -429,6 +362,10 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   iEvent.getByToken(photonsToken, photonsH);
   bool phoValid = photonsH.isValid();
 
+  Handle<double > oflrhoH;
+  iEvent.getByToken(oflrhoToken, oflrhoH);
+  bool oflrhoValid = oflrhoH.isValid();
+
   Handle<double > rhoH;
   iEvent.getByToken(rhoToken, rhoH);
   bool rhoValid = rhoH.isValid();
@@ -437,49 +374,60 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   event = iEvent.eventAuxiliary().event();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
 
-  ///////////////////// for genmatching /////////////////////////////////////////////
+  // Access the trigger bits
+  HLT_IsoMu27 = 0;
+  HLT_Mu50 = 0;
+  DST_Run3PFScouting = 0;
+  DST_HLTMuon_Run3PFScouting = 0;
+  Int_t HLT_Ele115_CaloIdVT_GsfTrkIdT = 0;
+  Int_t HLT_Ele35_WPTight_Gsf = 0;
+  Int_t HLT_PFHT1050 = 0;
+  Int_t HLT_Photon200 = 0;
+  if( !trigResults.failedToGet() ) {
+    int N_Triggers = trigResults->size();
+    //cout<<"Number of triggers: "<<N_Triggers<<endl;
+    const edm::TriggerNames & trigName = iEvent.triggerNames(*trigResults);
+    for( int i_Trig = 0; i_Trig < N_Triggers; ++i_Trig ) {
+      if (trigResults.product()->accept(i_Trig)) {
+	//cout << "Path: " <<trigName.triggerName(i_Trig)<<"Results: "<<trigResults.product()->accept(i_Trig)<<endl;
+	TString TrigPath =trigName.triggerName(i_Trig);
+	if(TrigPath.Index("HLT_IsoMu27_v") >=0) HLT_IsoMu27 = 1; 
+	if(TrigPath.Index("HLT_Mu50_v") >=0) HLT_Mu50 = 1; 
+	if(TrigPath.Index("DST_Run3_PFScoutingPixelTracking_v") >=0) DST_Run3PFScouting = 1; 
+	if(TrigPath.Index("DST_HLTMuon_Run3_PFScoutingPixelTracking_v") >=0) DST_HLTMuon_Run3PFScouting = 1; 
+	if(TrigPath.Index("HLT_Ele115_CaloIdVT_GsfTrkIdT_v") >=0) HLT_Ele115_CaloIdVT_GsfTrkIdT = 1; 
+	if(TrigPath.Index("HLT_Ele35_WPTight_Gsf_v") >=0) HLT_Ele35_WPTight_Gsf = 1; 
+	if(TrigPath.Index("HLT_PFHT1050_v") >=0) HLT_PFHT1050 = 1; 
+	if(TrigPath.Index("HLT_Photon200_v") >=0) HLT_Photon200 = 1; 
+      }
+    }
+  } // End of loop for accessing the trigger bits
 
-  n_gen=0;
-
-  if(isMC) {
-    if(gensH.isValid()) {
-      
-      for (auto gen_iter = gensH->begin(); gen_iter != gensH->end(); ++gen_iter) {
-	
-	int nmoms = 0;
-	if((std::abs(gen_iter->pdgId())==11 || std::abs(gen_iter->pdgId())==13 || std::abs(gen_iter->pdgId())==15)) {
-	  
-	  genpart_pdg.push_back(gen_iter->pdgId());
-	  genpart_pt.push_back(gen_iter->pt());
-	  genpart_eta.push_back(gen_iter->eta());
-	  genpart_phi.push_back(gen_iter->phi());
-	  genpart_m.push_back(gen_iter->mass());
-	  genpart_vx.push_back(gen_iter->vx());
-	  genpart_vy.push_back(gen_iter->vy());
-	  genpart_vz.push_back(gen_iter->vz());
-	  
-	  nmoms = gen_iter->numberOfMothers();
-	  genpart_nmoms.push_back(nmoms);
-	  if(gen_iter->numberOfMothers() > 0) genpart_mompdg.push_back(gen_iter->mother(0)->pdgId());
-	  
-	  genpart_fromHardProcessBeforeFSR.push_back(gen_iter->fromHardProcessBeforeFSR());
-	  genpart_fromHardProcessDecayed.push_back(gen_iter->fromHardProcessDecayed());
-	  genpart_fromHardProcessFS.push_back(gen_iter->fromHardProcessFinalState());
-	  genpart_isHardProcess.push_back(gen_iter->isHardProcess());
-	  genpart_isLastCopy.push_back(gen_iter->isLastCopy());
-	  genpart_isLastCopyBeforeFSR.push_back(gen_iter->isLastCopyBeforeFSR());
-	  genpart_isPromptFS.push_back(gen_iter->isPromptFinalState());
-	  genpart_isPromptDec.push_back(gen_iter->isPromptDecayed());
-	  genpart_isDirectPromptTauDecayProdFS.push_back(gen_iter->isDirectPromptTauDecayProductFinalState());
-	  
-	  n_gen++;
-	} //end if gen lepton
-	
-      } //end for genpart loop
-      
-    } // end of gensH.isValid()
-  } // end of isMC
-
+  if( HLT_Ele115_CaloIdVT_GsfTrkIdT==1 || HLT_Ele35_WPTight_Gsf==1 || HLT_PFHT1050==1 || HLT_Photon200==1 ) {
+    HLT_OtherScoutingPFMonitor = 1;
+  }
+  else {
+    HLT_OtherScoutingPFMonitor= 0;
+  }  
+  // Offline Primary Vertex
+  n_oflpVtx = 0;
+  if(oflpVtxValid) {
+    for (auto &oflpVtx : *oflpVtxH) {
+      auto *oflpVtx_iter = &oflpVtx;
+      oflpVtx_x.push_back(oflpVtx_iter->x());
+      oflpVtx_y.push_back(oflpVtx_iter->y());
+      oflpVtx_z.push_back(oflpVtx_iter->z());
+      oflpVtx_xError.push_back(oflpVtx_iter->xError());
+      oflpVtx_yError.push_back(oflpVtx_iter->yError());
+      oflpVtx_zError.push_back(oflpVtx_iter->zError());
+      oflpVtx_trksize.push_back(oflpVtx_iter->tracksSize());
+      oflpVtx_chi2.push_back(oflpVtx_iter->chi2());
+      oflpVtx_ndof.push_back(oflpVtx_iter->ndof());
+      oflpVtx_isvalidvtx.push_back(oflpVtx_iter->isValid());
+      n_oflpVtx++;
+    } // end offline primary vertex loop
+  } // end oflpVtxValid condition
+  
   // Primary Vertex
   n_pVtx = 0;
   if(pVtxValid) {
@@ -499,46 +447,32 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
     } // end primary vertex loop
   } // end pVtxValid condition
 
-  // Muons
-  n_mu = 0;
-  if(muoValid) {
-    for (auto &muo : *muonsH) {
-      auto *muons_iter = &muo;
-      Muon_pt.push_back(muons_iter->pt());
-      Muon_eta.push_back(muons_iter->eta());
-      Muon_phi.push_back(muons_iter->phi());
-      Muon_m.push_back(muons_iter->m());
-      Muon_type.push_back(muons_iter->type());
-      Muon_charge.push_back(muons_iter->charge());
-      Muon_normchi2.push_back(muons_iter->normalizedChi2());
-      Muon_ecaliso.push_back(muons_iter->ecalIso());
-      Muon_hcaliso.push_back(muons_iter->hcalIso());
-      Muon_trkiso.push_back(muons_iter->trackIso());
-      Muon_nvalidpixelhits.push_back(muons_iter->nValidPixelHits());
-      Muon_nvalidstriphits.push_back(muons_iter->nValidStripHits());
-      Muon_trkchi2.push_back(muons_iter->trk_chi2());
-      Muon_ndof.push_back(muons_iter->trk_ndof());
-      Muon_dxy.push_back(muons_iter->trk_dxy());
-      Muon_dz.push_back(muons_iter->trk_dz());
-      Muon_trkqoverp.push_back(muons_iter->trk_qoverp());
-      Muon_trklambda.push_back(muons_iter->trk_lambda());
-      Muon_trkpt.push_back(muons_iter->trk_pt());
-      Muon_trkphi.push_back(muons_iter->trk_phi());
-      Muon_trketa.push_back(muons_iter->trk_eta());
-      Muon_dxyError.push_back(muons_iter->trk_dxyError());
-      Muon_dzError.push_back(muons_iter->trk_dzError());
-      Muon_trkqoverperror.push_back(muons_iter->trk_qoverpError());
-      Muon_trklambdaerror.push_back(muons_iter->trk_lambdaError());
-      Muon_trkphierror.push_back(muons_iter->trk_phiError());
-      Muon_trkdsz.push_back(muons_iter->trk_dsz());
-      Muon_trkdszerror.push_back(muons_iter->trk_dszError());
-      Muon_vx.push_back(muons_iter->trk_vx());
-      Muon_vy.push_back(muons_iter->trk_vy());
-      Muon_vz.push_back(muons_iter->trk_vz());
+  // Offline Electrons
+  n_oflele = 0;
+  if(ofleleValid) {
+    for (auto &oflele : *oflelectronsH) {
+      auto *oflelectrons_iter = &oflele;
+      OflElectron_energy.push_back(oflelectrons_iter->energy());
+      OflElectron_pt.push_back(oflelectrons_iter->pt());
+      OflElectron_eta.push_back(oflelectrons_iter->eta());
+      OflElectron_phi.push_back(oflelectrons_iter->phi());	
+      OflElectron_d0.push_back(oflelectrons_iter->dB(pat::Electron::PV3D));
+      OflElectron_dz.push_back(oflelectrons_iter->dB(pat::Electron::PVDZ));
+      OflElectron_detain.push_back(oflelectrons_iter->deltaEtaSuperClusterTrackAtVtx());
+      OflElectron_dphiin.push_back(oflelectrons_iter->deltaPhiSuperClusterTrackAtVtx());
+      OflElectron_sigmaietaieta.push_back(oflelectrons_iter->full5x5_sigmaIetaIeta());
+      OflElectron_hoe.push_back(oflelectrons_iter->hadronicOverEm());
+      OflElectron_ooemoop.push_back( (1.0/oflelectrons_iter->correctedEcalEnergy()) - (1.0/oflelectrons_iter->p()) );
+      OflElectron_missinghits.push_back(oflelectrons_iter->gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS));
+      OflElectron_charge.push_back(oflelectrons_iter->charge());
+      OflElectron_photoniso.push_back(oflelectrons_iter->photonIso());
+      OflElectron_neuthadroniso.push_back(oflelectrons_iter->neutralHadronIso());
+      OflElectron_chrghadroniso.push_back(oflelectrons_iter->chargedHadronIso());
+      OflElectron_conversionveto.push_back(oflelectrons_iter->passConversionVeto());
+      n_oflele++;
 
-      n_mu++;
-    } // end muon loop
-  } // end muoValid condition
+    } // end offline electron loop
+  } // end ofleleValid condition
 
   // Electrons
   n_ele = 0;
@@ -565,10 +499,6 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       Electron_smin.push_back(electrons_iter->sMin());
       Electron_smaj.push_back(electrons_iter->sMaj());
       Electron_seedid.push_back(electrons_iter->seedId());
-      Electron_energymatrix.push_back(electrons_iter->energyMatrix());
-      Electron_detids.push_back(electrons_iter->detIds());
-      Electron_timingmatrix.push_back(electrons_iter->timingMatrix());
-      //Electron_rechitzerosuppression.push_back(electrons_iter->rechitZeroSuppression());
       n_ele++;
 
     } // end electron loop
@@ -593,14 +523,17 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       Photon_smin.push_back(photons_iter->sMin());
       Photon_smaj.push_back(photons_iter->sMaj());
       Photon_seedid.push_back(photons_iter->seedId());
-      Photon_energymatrix.push_back(photons_iter->energyMatrix());
-      Photon_detids.push_back(photons_iter->detIds());
-      Photon_timingmatrix.push_back(photons_iter->timingMatrix());
-      //Photon_rechitzerosuppression.push_back(photons_iter->rechitZeroSuppression());
       n_pho++;
 
     } // end photon loop
   } // end phoValid condition
+
+  // Offline Rho
+  n_oflrhoval = 0;
+  if(oflrhoValid) {
+    oflrho.push_back(*oflrhoH);
+    n_oflrhoval++;
+  }
 
   // Rho
   n_rhoval = 0;
@@ -608,55 +541,22 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
     rho.push_back(*rhoH);
     n_rhoval++;
   }
-
-  // Fill L1 seeds
-  if(doL1) {
-    l1GtUtils_->retrieveL1(iEvent,iSetup,algToken_);
-    /*
-    for( int r = 0; r<512; r++){
-      string name("empty");
-      bool algoName_ = false;
-      algoName_ = l1GtUtils_->getAlgNameFromBit(r,name);
-      l1GtUtils_->getAlgNameFromBit(r,name);
-      cout << "getAlgNameFromBit = " << algoName_  << endl;
-      cout << "L1 bit number = " << r << " ; L1 bit name = " << name << endl;
-    }
-    */
-    for( unsigned int iseed = 0; iseed < l1Seeds_.size(); iseed++ ) {
-      bool l1htbit = 0;
-      
-      l1GtUtils_->getFinalDecisionByName(string(l1Seeds_[iseed]), l1htbit);
-      //cout<<string(l1Seeds_[iseed])<<"  "<<l1htbit<<endl;
-      l1Result_.push_back( l1htbit );
-    }
-  }
     
   tree->Fill();	
   clearVars(); 
 }
 
 void EGammaOnly_ScoutingNanoAOD::clearVars(){
-  if(isMC) {
-    genpart_pdg.clear();
-    genpart_pt.clear();
-    genpart_eta.clear();
-    genpart_phi.clear();
-    genpart_m.clear();
-    genpart_vx.clear();
-    genpart_vy.clear();
-    genpart_vz.clear();
-    genpart_nmoms.clear();
-    genpart_mompdg.clear();
-    genpart_fromHardProcessBeforeFSR.clear();
-    genpart_fromHardProcessDecayed.clear();
-    genpart_fromHardProcessFS.clear();
-    genpart_isHardProcess.clear();
-    genpart_isLastCopy.clear();
-    genpart_isLastCopyBeforeFSR.clear();
-    genpart_isPromptFS.clear();
-    genpart_isPromptDec.clear();
-    genpart_isDirectPromptTauDecayProdFS.clear();
-  }
+  oflpVtx_x.clear();
+  oflpVtx_y.clear();
+  oflpVtx_z.clear();
+  oflpVtx_xError.clear();
+  oflpVtx_yError.clear();
+  oflpVtx_zError.clear();
+  oflpVtx_trksize.clear();
+  oflpVtx_chi2.clear();
+  oflpVtx_ndof.clear();
+  oflpVtx_isvalidvtx.clear();
   pVtx_x.clear();
   pVtx_y.clear();
   pVtx_z.clear();
@@ -667,37 +567,23 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   pVtx_chi2.clear();
   pVtx_ndof.clear();
   pVtx_isvalidvtx.clear();
-  Muon_pt.clear();
-  Muon_eta.clear();
-  Muon_phi.clear();
-  Muon_m.clear();
-  Muon_type.clear();
-  Muon_charge.clear();
-  Muon_normchi2.clear();
-  Muon_ecaliso.clear();
-  Muon_hcaliso.clear();
-  Muon_trkiso.clear();
-  Muon_nvalidpixelhits.clear();
-  Muon_nvalidstriphits.clear();
-  Muon_trkchi2.clear();
-  Muon_ndof.clear();
-  Muon_dxy.clear();
-  Muon_dz.clear();
-  Muon_trkqoverp.clear();
-  Muon_trklambda.clear();
-  Muon_trkpt.clear();
-  Muon_trkphi.clear();
-  Muon_trketa.clear();
-  Muon_dxyError.clear();
-  Muon_dzError.clear();
-  Muon_trkqoverperror.clear();
-  Muon_trklambdaerror.clear();
-  Muon_trkphierror.clear();
-  Muon_trkdsz.clear();
-  Muon_trkdszerror.clear();
-  Muon_vx.clear();
-  Muon_vy.clear();
-  Muon_vz.clear();
+  OflElectron_energy.clear();
+  OflElectron_pt.clear();
+  OflElectron_eta.clear();
+  OflElectron_phi.clear();
+  OflElectron_d0.clear();
+  OflElectron_dz.clear();
+  OflElectron_detain.clear();
+  OflElectron_dphiin.clear();
+  OflElectron_sigmaietaieta.clear();
+  OflElectron_hoe.clear();
+  OflElectron_ooemoop.clear();
+  OflElectron_missinghits.clear();
+  OflElectron_charge.clear();
+  OflElectron_photoniso.clear();
+  OflElectron_neuthadroniso.clear();
+  OflElectron_chrghadroniso.clear();
+  OflElectron_conversionveto.clear();
   Electron_pt.clear();
   Electron_eta.clear();
   Electron_phi.clear();
@@ -718,9 +604,6 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Electron_smin.clear();
   Electron_smaj.clear();
   Electron_seedid.clear();
-  Electron_energymatrix.clear();
-  Electron_detids.clear();
-  Electron_timingmatrix.clear();
   Electron_rechitzerosuppression.clear();
   Photon_pt.clear();
   Photon_eta.clear();
@@ -735,10 +618,7 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Photon_smin.clear();
   Photon_smaj.clear();
   Photon_seedid.clear();
-  Photon_energymatrix.clear();
-  Photon_detids.clear();
-  Photon_timingmatrix.clear();
-  Photon_rechitzerosuppression.clear();
+  oflrho.clear();
   rho.clear();
 }
 
