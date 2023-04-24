@@ -14,42 +14,23 @@ using namespace std;
 class robustanalyzer {
   
 public:
-  robustanalyzer(TString, TString, int, bool, bool);
+  robustanalyzer(TString, TString, int);
   ~robustanalyzer();
 
   void analyzersinglefile(int);
   void addhist(TString);
-  void addgenhist(TString);
-  void addgenmchhist(TString);
   void fillhistinevent(TString, vector<int>);
-  void fillgenhistinevent(TString, vector<int>);
-  void fillgenmchhistinevent(TString, vector<int>, vector<int>);
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
-  bool inZwind(TLorentzVector, TLorentzVector);
-  bool inSideBand1(TLorentzVector, TLorentzVector);
-  bool inSideBand2(TLorentzVector, TLorentzVector);
-  bool inSideBand3(TLorentzVector, TLorentzVector);
-  vector< pair<int,int> > diElecGenMatching(vector<int>, vector<int>);
     
   private:
 
   int nC;
-  bool isDY;
-  bool isMC;
-    
+  
   TTreeReader* tree;
-  TTreeReaderValue<unsigned int> *n_gen;
-  TTreeReaderValue<vector<int>> *gen_pdg;
-  TTreeReaderValue<vector<float>> *gen_pt;
-  TTreeReaderValue<vector<float>> *gen_eta;
-  TTreeReaderValue<vector<float>> *gen_phi;
-  TTreeReaderValue<vector<float>> *gen_vx;
-  TTreeReaderValue<vector<float>> *gen_vy;
-  TTreeReaderValue<vector<float>> *gen_vz;
-  TTreeReaderValue<vector<int>> *gen_nmoms;
-  TTreeReaderValue<vector<int>> *gen_mompdg;
-  TTreeReaderValue<vector<bool>> *gen_islastcopy;
-  TTreeReaderValue<UInt_t> *n_ele;
+  TTreeReaderValue<unsigned int> *hlt_isomu27;
+  TTreeReaderValue<unsigned int> *hlt_mu50;
+  TTreeReaderValue<unsigned int> *hlt_scouting;
+  TTreeReaderValue<unsigned int> *n_ele;
   TTreeReaderValue<vector<float>> *ele_pt;
   TTreeReaderValue<vector<float>> *ele_eta;
   TTreeReaderValue<vector<float>> *ele_phi;
@@ -69,10 +50,8 @@ public:
   TTreeReaderValue<vector<float>> *ele_r9;
   TTreeReaderValue<vector<float>> *ele_smin;
   TTreeReaderValue<vector<float>> *ele_smaj;
-  TTreeReaderValue<vector<unsigned int>> *ele_seedid;
-  TTreeReaderValue<vector<vector<float>>> *ele_enemat;
-  TTreeReaderValue<vector<vector<float>>> *ele_timmat;
-  TTreeReaderValue<UInt_t> *n_rho;
+
+  TTreeReaderValue<unsigned int> *n_rho;
   TTreeReaderValue<vector<float>> *rho;
   
   TFile* outfile;

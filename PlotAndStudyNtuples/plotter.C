@@ -11,10 +11,7 @@ double sig30cmsf = 1.0/28;
 double sig1msf = 1.0/19;
 double sig3msf = 1.0/7;
 TString cutdeets = "Cut details";
-TFile* datahistfile = TFile::Open("hists_data_large.root","READ");
-TFile* dym50histfile = TFile::Open("hists_DYToLLM50.root","READ");
-//TFile* qcdpt30To50histfile = TFile::Open("hists_QCDPt30To50.root","READ");
-TFile* qcdhistfile = TFile::Open("hists_QCD.root","READ");
+TFile* datahistfile = TFile::Open("hists_data.root","READ");
 TFile* tempfile = TFile::Open("hists_temp.root","RECREATE");
 
 TString seltext[2] = {"line1", "line2"};
@@ -505,7 +502,7 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   std::vector<TH1F*> allhists;
   demo->SetTitle("");
   demo->GetXaxis()->SetTitle(xaxistitle);
-  demo->GetYaxis()->SetTitle("ID eff.");
+  demo->GetYaxis()->SetTitle("reco. eff.");
   demo->SetLineColorAlpha(kWhite,1);
   demo->SetFillColorAlpha(kWhite,1);
   allhists.push_back(demo);
@@ -517,361 +514,9 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   for(unsigned int filenum=0; filenum<file.size(); filenum++) {
     pEff[filenum]->Draw("same");
   }
-  c1->SaveAs("./dirplots/"+((TString)file[0]->GetName()).ReplaceAll(".root","")+"/"+cutnames[1]+"_eff.png");
+  c1->SaveAs("./ScoutingParkingPaper_dirplots/"+((TString)file[0]->GetName()).ReplaceAll(".root","")+"/"+cutnames[1]+"_eff.png");
   
   return -1;
-}
-
-void group_plotter(std::vector<TFile*> file, std::vector<TString> cutname, bool isBar) {
-
-  //all1dhists.push_back(new TH1F(selection+"sctbar_elm","m / GeV",1000,-1e-5,1e-5));
-  //all1dhists.push_back(new TH1F(selection+"sctbar_ellog10d0","log_{10}d_{0} / log_{10}cm",1000,-5,5));
-  //all1dhists.push_back(new TH1F(selection+"sctbar_eldz","d_{z} / cm",4000,-20,20));
-  //all1dhists.push_back(new TH1F(selection+"sctbar_elcharge","charge",5,-2,3));
-  comparesamevariable(file, cutname, "elpt", 5, 200, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron p_{T} [GeV]");
-  comparesamevariable(file, cutname, "eld0", 8500, 11500, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron d_{0} [cm]");
-  comparesamevariable(file, cutname, "eldetain", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#eta(SC seed, track)");
-  if(isBar) {
-    comparesamevariable(file, cutname, "eldphiin", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#phi(SC, track)");
-    comparesamevariable(file, cutname, "elsigmaietaieta", -1, 400, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #sigmai#etai#eta");
-    comparesamevariable(file, cutname, "elhoe", -1, -1, 50, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron H/E");
-    comparesamevariable(file, cutname, "elooemoop", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron E^{-1}-p^{-1} [GeV^{-1}]");
-    comparesamevariable(file, cutname, "elmhits", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron missing hits");
-    comparesamevariable(file, cutname, "elecaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron ECAL iso. [GeV]");
-    comparesamevariable(file, cutname, "elhcaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron HCAL iso. [GeV]");
-    comparesamevariable(file, cutname, "eltkiso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron track iso. [GeV]");
-    comparesamevariable(file, cutname, "elr9", -1, 150, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron r9");
-    comparesamevariable(file, cutname, "elsmin", -1, 1100, 5, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smin");
-    comparesamevariable(file, cutname, "elsmaj", -1, 700, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smaj");
-  }
-  else {
-    comparesamevariable(file, cutname, "eldetain", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#eta(SC seed, track)");
-    comparesamevariable(file, cutname, "eldphiin", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "#Delta#phi(SC, track)");
-    comparesamevariable(file, cutname, "elsigmaietaieta", -1, 800, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron #sigmai#etai#eta");
-    comparesamevariable(file, cutname, "elhoe", -1, -1, 50, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron H/E");
-    comparesamevariable(file, cutname, "elooemoop", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron E^{-1}-p^{-1} [GeV^{-1}]");
-    comparesamevariable(file, cutname, "elmhits", -1, -1, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron missing hits");
-    comparesamevariable(file, cutname, "elecaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron ECAL iso. [GeV]");
-    comparesamevariable(file, cutname, "elhcaliso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron HCAL iso. [GeV]");
-    comparesamevariable(file, cutname, "eltkiso", -1, -1, 10, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron track iso. [GeV]");
-    comparesamevariable(file, cutname, "elr9", -1, 300, 1, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron r9");
-    comparesamevariable(file, cutname, "elsmin", -1, 2200, 5, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smin");
-    comparesamevariable(file, cutname, "elsmaj", -1, 1400, 4, true, true, true, (float []){8e-1,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "electron smaj");
-  }
-    
-}
-
-int makedatadriveneffplot(TString name_ref, TString name_combined, std::vector<double> *rebin) {
-
-  std::vector<TFile*> file;
-  std::vector<TString> cutname;
-
-  coloropt.clear();
-  legendEntries.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-  
-  file.push_back(tempfile);
-  cutname.push_back(name_ref);
-  cutname.push_back(name_combined);
-  coloropt.push_back(kBlack);
-  legendEntries.push_back("prompt e eff.");
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  legendmarkerstyle.push_back("f");
-  
-  efficiency(file, cutname, rebin->size()-1, &rebin->at(0), "p_{T} / GeV");
-
-  return -1;
-}
-
-void elEffZsignalEB() {
-
-  double SpBinSpB = 0.0, BinSpB = 0.0;
-  fitinvmee_roofit("tightnoneselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "tightnonesel_Zwind_sctbar_elpt", SpBinSpB, "tightnonesel_SideBand3_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightnonesel_Zwind_sctbar_eleta", SpBinSpB, "tightnonesel_SideBand3_sctbar_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightnonesel_Zwind_sctbar_elphi", SpBinSpB, "tightnonesel_SideBand3_sctbar_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  fitinvmee_roofit("nonetightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "nonetightsel_Zwind_sctbar_elpt", SpBinSpB, "nonetightsel_SideBand3_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "nonetightsel_Zwind_sctbar_eleta", SpBinSpB, "nonetightsel_SideBand3_sctbar_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "nonetightsel_Zwind_sctbar_elphi", SpBinSpB, "nonetightsel_SideBand3_sctbar_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  TH1F* histnonept1 = (TH1F*) tempfile->Get("tightnonesel_Zsignal_sctbar_elpt");
-  TH1F* histnonept2 = (TH1F*) tempfile->Get("nonetightsel_Zsignal_sctbar_elpt");
-  TH1F* histnonept = (TH1F*) histnonept1->Clone("tightnonesel_nonetightsel_Zsignal_sctbar_elpt");
-  histnonept->Add(histnonept2);
-  tempfile->WriteObject(histnonept, histnonept->GetName());  
-  TH1F* histnoneeta1 = (TH1F*) tempfile->Get("tightnonesel_Zsignal_sctbar_eleta");
-  TH1F* histnoneeta2 = (TH1F*) tempfile->Get("nonetightsel_Zsignal_sctbar_eleta");
-  TH1F* histnoneeta = (TH1F*) histnoneeta1->Clone("tightnonesel_nonetightsel_Zsignal_sctbar_eleta");
-  histnoneeta->Add(histnoneeta2);
-  tempfile->WriteObject(histnoneeta, histnoneeta->GetName());
-  TH1F* histnonephi1 = (TH1F*) tempfile->Get("tightnonesel_Zsignal_sctbar_elphi");
-  TH1F* histnonephi2 = (TH1F*) tempfile->Get("nonetightsel_Zsignal_sctbar_elphi");
-  TH1F* histnonephi = (TH1F*) histnonephi1->Clone("tightnonesel_nonetightsel_Zsignal_sctbar_elphi");
-  histnonephi->Add(histnonephi2);
-  tempfile->WriteObject(histnonephi, histnonephi->GetName());
-  
-  fitinvmee_roofit("tightlooseselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "tightloosesel_Zwind_sctbar_elpt", SpBinSpB, "tightloosesel_SideBand3_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightloosesel_Zwind_sctbar_eleta", SpBinSpB, "tightloosesel_SideBand3_sctbar_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightloosesel_Zwind_sctbar_elphi", SpBinSpB, "tightloosesel_SideBand3_sctbar_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  fitinvmee_roofit("loosetightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "loosetightsel_Zwind_sctbar_elpt", SpBinSpB, "loosetightsel_SideBand3_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "loosetightsel_Zwind_sctbar_eleta", SpBinSpB, "loosetightsel_SideBand3_sctbar_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "loosetightsel_Zwind_sctbar_elphi", SpBinSpB, "loosetightsel_SideBand3_sctbar_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  TH1F* histloosept1 = (TH1F*) tempfile->Get("tightloosesel_Zsignal_sctbar_elpt");
-  TH1F* histloosept2 = (TH1F*) tempfile->Get("loosetightsel_Zsignal_sctbar_elpt");
-  TH1F* histloosept = (TH1F*) histloosept1->Clone("tightloosesel_loosetightsel_Zsignal_sctbar_elpt");
-  histloosept->Add(histloosept2);
-  tempfile->WriteObject(histloosept, histloosept->GetName());  
-  TH1F* histlooseeta1 = (TH1F*) tempfile->Get("tightloosesel_Zsignal_sctbar_eleta");
-  TH1F* histlooseeta2 = (TH1F*) tempfile->Get("loosetightsel_Zsignal_sctbar_eleta");
-  TH1F* histlooseeta = (TH1F*) histlooseeta1->Clone("tightloosesel_loosetightsel_Zsignal_sctbar_eleta");
-  histlooseeta->Add(histlooseeta2);
-  tempfile->WriteObject(histlooseeta, histlooseeta->GetName());  
-  TH1F* histloosephi1 = (TH1F*) tempfile->Get("tightloosesel_Zsignal_sctbar_elphi");
-  TH1F* histloosephi2 = (TH1F*) tempfile->Get("loosetightsel_Zsignal_sctbar_elphi");
-  TH1F* histloosephi = (TH1F*) histloosephi1->Clone("tightloosesel_loosetightsel_Zsignal_sctbar_elphi");
-  histloosephi->Add(histloosephi2);
-  tempfile->WriteObject(histloosephi, histloosephi->GetName());  
-  
-  std::vector<double> rebinpt = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120};
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_elpt", "tightloosesel_loosetightsel_Zsignal_sctbar_elpt", &rebinpt);
-  std::vector<double> rebineta = {-1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6};
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_eleta", "tightloosesel_loosetightsel_Zsignal_sctbar_eleta", &rebineta);
-  std::vector<double> rebinphi = {-3.3, -3.2, -3.1, -3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3};
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_elphi", "tightloosesel_loosetightsel_Zsignal_sctbar_elphi", &rebinphi);
-  
-  fitinvmee_roofit("tightmediumselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "tightmediumsel_Zwind_sctbar_elpt", SpBinSpB, "tightmediumsel_SideBand3_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightmediumsel_Zwind_sctbar_eleta", SpBinSpB, "tightmediumsel_SideBand3_sctbar_eleta", BinSpB, -1, 150, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightmediumsel_Zwind_sctbar_elphi", SpBinSpB, "tightmediumsel_SideBand3_sctbar_elphi", BinSpB, -1, 150, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  fitinvmee_roofit("mediumtightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "mediumtightsel_Zwind_sctbar_elpt", SpBinSpB, "mediumtightsel_SideBand3_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "mediumtightsel_Zwind_sctbar_eleta", SpBinSpB, "mediumtightsel_SideBand3_sctbar_eleta", BinSpB, -1, 150, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "mediumtightsel_Zwind_sctbar_elphi", SpBinSpB, "mediumtightsel_SideBand3_sctbar_elphi", BinSpB, -1, 150, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  TH1F* histmediumpt1 = (TH1F*) tempfile->Get("tightmediumsel_Zsignal_sctbar_elpt");
-  TH1F* histmediumpt2 = (TH1F*) tempfile->Get("mediumtightsel_Zsignal_sctbar_elpt");
-  TH1F* histmediumpt = (TH1F*) histmediumpt1->Clone("tightmediumsel_mediumtightsel_Zsignal_sctbar_elpt");
-  histmediumpt->Add(histmediumpt2);
-  tempfile->WriteObject(histmediumpt, histmediumpt->GetName());  
-  TH1F* histmediumeta1 = (TH1F*) tempfile->Get("tightmediumsel_Zsignal_sctbar_eleta");
-  TH1F* histmediumeta2 = (TH1F*) tempfile->Get("mediumtightsel_Zsignal_sctbar_eleta");
-  TH1F* histmediumeta = (TH1F*) histmediumeta1->Clone("tightmediumsel_mediumtightsel_Zsignal_sctbar_eleta");
-  histmediumeta->Add(histmediumeta2);
-  tempfile->WriteObject(histmediumeta, histmediumeta->GetName());  
-  TH1F* histmediumphi1 = (TH1F*) tempfile->Get("tightmediumsel_Zsignal_sctbar_elphi");
-  TH1F* histmediumphi2 = (TH1F*) tempfile->Get("mediumtightsel_Zsignal_sctbar_elphi");
-  TH1F* histmediumphi = (TH1F*) histmediumphi1->Clone("tightmediumsel_mediumtightsel_Zsignal_sctbar_elphi");
-  histmediumphi->Add(histmediumphi2);
-  tempfile->WriteObject(histmediumphi, histmediumphi->GetName());  
-  
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_elpt", "tightmediumsel_mediumtightsel_Zsignal_sctbar_elpt", &rebinpt);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_eleta", "tightmediumsel_mediumtightsel_Zsignal_sctbar_eleta", &rebineta);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_elphi", "tightmediumsel_mediumtightsel_Zsignal_sctbar_elphi", &rebinphi);
-  
-  //fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  //subtractsideband(datahistfile, "tightsel_Zwind_sctbar_elpt", SpBinSpB, "tightsel_SideBand3_sctbar_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", true, (float []){1,2e3}, (float []){0.55,0.7,0.75,0.95});
-  //subtractsideband(datahistfile, "tightsel_Zwind_sctbar_eleta", SpBinSpB, "tightsel_SideBand3_sctbar_eleta", BinSpB, -1, 150, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  //subtractsideband(datahistfile, "tightsel_Zwind_sctbar_elphi", SpBinSpB, "tightsel_SideBand3_sctbar_elphi", BinSpB, -1, 150, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  //TH1F* histtightpt1 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctbar_elpt");
-  //TH1F* histtightpt2 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctbar_elpt");
-  //TH1F* histtightpt = (TH1F*) histtightpt1->Clone("tightsel_tightsel_Zsignal_sctbar_elpt");
-  //histtightpt->Add(histtightpt2);
-  //tempfile->WriteObject(histtightpt, histtightpt->GetName());  
-  //TH1F* histtighteta1 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctbar_eleta");
-  //TH1F* histtighteta = (TH1F*) histtighteta1->Clone("tightsel_tightsel_Zsignal_sctbar_eleta");
-  //histtighteta->Add(histtighteta1);
-  //tempfile->WriteObject(histtighteta, histtighteta->GetName());  
-  //TH1F* histtightphi1 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctbar_elphi");
-  //TH1F* histtightphi = (TH1F*) histtightphi1->Clone("tightsel_tightsel_Zsignal_sctbar_elphi");
-  //histtightphi->Add(histtightphi1);
-  //tempfile->WriteObject(histtightphi, histtightphi->GetName());  
-  
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_elpt", "tightsel_tightsel_Zsignal_sctbar_elpt", &rebinpt);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_eleta", "tightsel_tightsel_Zsignal_sctbar_eleta", &rebineta);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctbar_elphi", "tightsel_tightsel_Zsignal_sctbar_elphi", &rebinphi);
-  
-  std::vector<TFile*> file;
-  std::vector<TString> cutnamept;
-  std::vector<TString> cutnameeta;
-  std::vector<TString> cutnamephi;
-
-  coloropt.clear();
-  markerstyle.clear();
-  markersize.clear();
-  
-  file.push_back(tempfile);
-  cutnamept.push_back("tightnonesel_nonetightsel_Zsignal_sctbar_elpt");
-  cutnamept.push_back("tightloosesel_loosetightsel_Zsignal_sctbar_elpt");
-  cutnameeta.push_back("tightnonesel_nonetightsel_Zsignal_sctbar_eleta");
-  cutnameeta.push_back("tightloosesel_loosetightsel_Zsignal_sctbar_eleta");
-  cutnamephi.push_back("tightnonesel_nonetightsel_Zsignal_sctbar_elphi");
-  cutnamephi.push_back("tightloosesel_loosetightsel_Zsignal_sctbar_elphi");
-  coloropt.push_back(kBlue);
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  
-  file.push_back(tempfile);
-  cutnamept.push_back("tightnonesel_nonetightsel_Zsignal_sctbar_elpt");
-  cutnamept.push_back("tightmediumsel_mediumtightsel_Zsignal_sctbar_elpt");
-  cutnameeta.push_back("tightnonesel_nonetightsel_Zsignal_sctbar_eleta");
-  cutnameeta.push_back("tightmediumsel_mediumtightsel_Zsignal_sctbar_eleta");
-  cutnamephi.push_back("tightnonesel_nonetightsel_Zsignal_sctbar_elphi");
-  cutnamephi.push_back("tightmediumsel_mediumtightsel_Zsignal_sctbar_elphi");
-  coloropt.push_back(kGreen+2);
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  
-  efficiency(file, cutnamept, rebinpt.size()-1, &rebinpt[0], "p_{T} / GeV");
-  efficiency(file, cutnameeta, rebineta.size()-1, &rebineta[0], "#eta");
-  efficiency(file, cutnamephi, rebinphi.size()-1, &rebinphi[0], "#phi");
-}
-
-void elEffZsignalEE() {
-
-  double SpBinSpB = 0.0, BinSpB = 0.0;
-  fitinvmee_roofit("tightnoneselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "tightnonesel_Zwind_sctec_elpt", SpBinSpB, "tightnonesel_SideBand3_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightnonesel_Zwind_sctec_eleta", SpBinSpB, "tightnonesel_SideBand3_sctec_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightnonesel_Zwind_sctec_elphi", SpBinSpB, "tightnonesel_SideBand3_sctec_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  fitinvmee_roofit("nonetightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "nonetightsel_Zwind_sctec_elpt", SpBinSpB, "nonetightsel_SideBand3_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "nonetightsel_Zwind_sctec_eleta", SpBinSpB, "nonetightsel_SideBand3_sctec_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "nonetightsel_Zwind_sctec_elphi", SpBinSpB, "nonetightsel_SideBand3_sctec_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  TH1F* histnonept1 = (TH1F*) tempfile->Get("tightnonesel_Zsignal_sctec_elpt");
-  TH1F* histnonept2 = (TH1F*) tempfile->Get("nonetightsel_Zsignal_sctec_elpt");
-  TH1F* histnonept = (TH1F*) histnonept1->Clone("tightnonesel_nonetightsel_Zsignal_sctec_elpt");
-  histnonept->Add(histnonept2);
-  tempfile->WriteObject(histnonept, histnonept->GetName());  
-  TH1F* histnoneeta1 = (TH1F*) tempfile->Get("tightnonesel_Zsignal_sctec_eleta");
-  TH1F* histnoneeta2 = (TH1F*) tempfile->Get("nonetightsel_Zsignal_sctec_eleta");
-  TH1F* histnoneeta = (TH1F*) histnoneeta1->Clone("tightnonesel_nonetightsel_Zsignal_sctec_eleta");
-  histnoneeta->Add(histnoneeta2);
-  tempfile->WriteObject(histnoneeta, histnoneeta->GetName());
-  TH1F* histnonephi1 = (TH1F*) tempfile->Get("tightnonesel_Zsignal_sctec_elphi");
-  TH1F* histnonephi2 = (TH1F*) tempfile->Get("nonetightsel_Zsignal_sctec_elphi");
-  TH1F* histnonephi = (TH1F*) histnonephi1->Clone("tightnonesel_nonetightsel_Zsignal_sctec_elphi");
-  histnonephi->Add(histnonephi2);
-  tempfile->WriteObject(histnonephi, histnonephi->GetName());
-  
-  fitinvmee_roofit("tightlooseselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "tightloosesel_Zwind_sctec_elpt", SpBinSpB, "tightloosesel_SideBand3_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightloosesel_Zwind_sctec_eleta", SpBinSpB, "tightloosesel_SideBand3_sctec_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightloosesel_Zwind_sctec_elphi", SpBinSpB, "tightloosesel_SideBand3_sctec_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  fitinvmee_roofit("loosetightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "loosetightsel_Zwind_sctec_elpt", SpBinSpB, "loosetightsel_SideBand3_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "loosetightsel_Zwind_sctec_eleta", SpBinSpB, "loosetightsel_SideBand3_sctec_eleta", BinSpB, -1, -1, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "loosetightsel_Zwind_sctec_elphi", SpBinSpB, "loosetightsel_SideBand3_sctec_elphi", BinSpB, -1, -1, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  TH1F* histloosept1 = (TH1F*) tempfile->Get("tightloosesel_Zsignal_sctec_elpt");
-  TH1F* histloosept2 = (TH1F*) tempfile->Get("loosetightsel_Zsignal_sctec_elpt");
-  TH1F* histloosept = (TH1F*) histloosept1->Clone("tightloosesel_loosetightsel_Zsignal_sctec_elpt");
-  histloosept->Add(histloosept2);
-  tempfile->WriteObject(histloosept, histloosept->GetName());  
-  TH1F* histlooseeta1 = (TH1F*) tempfile->Get("tightloosesel_Zsignal_sctec_eleta");
-  TH1F* histlooseeta2 = (TH1F*) tempfile->Get("loosetightsel_Zsignal_sctec_eleta");
-  TH1F* histlooseeta = (TH1F*) histlooseeta1->Clone("tightloosesel_loosetightsel_Zsignal_sctec_eleta");
-  histlooseeta->Add(histlooseeta2);
-  tempfile->WriteObject(histlooseeta, histlooseeta->GetName());  
-  TH1F* histloosephi1 = (TH1F*) tempfile->Get("tightloosesel_Zsignal_sctec_elphi");
-  TH1F* histloosephi2 = (TH1F*) tempfile->Get("loosetightsel_Zsignal_sctec_elphi");
-  TH1F* histloosephi = (TH1F*) histloosephi1->Clone("tightloosesel_loosetightsel_Zsignal_sctec_elphi");
-  histloosephi->Add(histloosephi2);
-  tempfile->WriteObject(histloosephi, histloosephi->GetName());  
-  
-  std::vector<double> rebinpt = {5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100, 105, 110, 115, 120};
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_elpt", "tightloosesel_loosetightsel_Zsignal_sctec_elpt", &rebinpt);
-  std::vector<double> rebineta = {-2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7};
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_eleta", "tightloosesel_loosetightsel_Zsignal_sctec_eleta", &rebineta);
-  std::vector<double> rebinphi = {-3.3, -3.2, -3.1, -3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3};
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_elphi", "tightloosesel_loosetightsel_Zsignal_sctec_elphi", &rebinphi);
-  
-  fitinvmee_roofit("tightmediumselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "tightmediumsel_Zwind_sctec_elpt", SpBinSpB, "tightmediumsel_SideBand3_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightmediumsel_Zwind_sctec_eleta", SpBinSpB, "tightmediumsel_SideBand3_sctec_eleta", BinSpB, -1, 150, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "tightmediumsel_Zwind_sctec_elphi", SpBinSpB, "tightmediumsel_SideBand3_sctec_elphi", BinSpB, -1, 150, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  fitinvmee_roofit("mediumtightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  subtractsideband(datahistfile, "mediumtightsel_Zwind_sctec_elpt", SpBinSpB, "mediumtightsel_SideBand3_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "mediumtightsel_Zwind_sctec_eleta", SpBinSpB, "mediumtightsel_SideBand3_sctec_eleta", BinSpB, -1, 150, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  subtractsideband(datahistfile, "mediumtightsel_Zwind_sctec_elphi", SpBinSpB, "mediumtightsel_SideBand3_sctec_elphi", BinSpB, -1, 150, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  TH1F* histmediumpt1 = (TH1F*) tempfile->Get("tightmediumsel_Zsignal_sctec_elpt");
-  TH1F* histmediumpt2 = (TH1F*) tempfile->Get("mediumtightsel_Zsignal_sctec_elpt");
-  TH1F* histmediumpt = (TH1F*) histmediumpt1->Clone("tightmediumsel_mediumtightsel_Zsignal_sctec_elpt");
-  histmediumpt->Add(histmediumpt2);
-  tempfile->WriteObject(histmediumpt, histmediumpt->GetName());  
-  TH1F* histmediumeta1 = (TH1F*) tempfile->Get("tightmediumsel_Zsignal_sctec_eleta");
-  TH1F* histmediumeta2 = (TH1F*) tempfile->Get("mediumtightsel_Zsignal_sctec_eleta");
-  TH1F* histmediumeta = (TH1F*) histmediumeta1->Clone("tightmediumsel_mediumtightsel_Zsignal_sctec_eleta");
-  histmediumeta->Add(histmediumeta2);
-  tempfile->WriteObject(histmediumeta, histmediumeta->GetName());  
-  TH1F* histmediumphi1 = (TH1F*) tempfile->Get("tightmediumsel_Zsignal_sctec_elphi");
-  TH1F* histmediumphi2 = (TH1F*) tempfile->Get("mediumtightsel_Zsignal_sctec_elphi");
-  TH1F* histmediumphi = (TH1F*) histmediumphi1->Clone("tightmediumsel_mediumtightsel_Zsignal_sctec_elphi");
-  histmediumphi->Add(histmediumphi2);
-  tempfile->WriteObject(histmediumphi, histmediumphi->GetName());  
-  
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_elpt", "tightmediumsel_mediumtightsel_Zsignal_sctec_elpt", &rebinpt);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_eleta", "tightmediumsel_mediumtightsel_Zsignal_sctec_eleta", &rebineta);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_elphi", "tightmediumsel_mediumtightsel_Zsignal_sctec_elphi", &rebinphi);
-  
-  //fitinvmee_roofit("tightselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &SpBinSpB, &BinSpB, (double []){86.0, 97.0});
-  //subtractsideband(datahistfile, "tightsel_Zwind_sctec_elpt", SpBinSpB, "tightsel_SideBand3_sctec_elpt", BinSpB, -1, 150, 1, "electron p_{T} [GeV]", "number of events", true, (float []){1,2e3}, (float []){0.55,0.7,0.75,0.95});
-  //subtractsideband(datahistfile, "tightsel_Zwind_sctec_eleta", SpBinSpB, "tightsel_SideBand3_sctec_eleta", BinSpB, -1, 150, 1, "electron #eta", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  //subtractsideband(datahistfile, "tightsel_Zwind_sctec_elphi", SpBinSpB, "tightsel_SideBand3_sctec_elphi", BinSpB, -1, 150, 1, "electron #phi", "number of events", false, (float []){-1e2,1e3}, (float []){0.55,0.7,0.75,0.95});
-  //TH1F* histtightpt1 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctec_elpt");
-  //TH1F* histtightpt2 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctec_elpt");
-  //TH1F* histtightpt = (TH1F*) histtightpt1->Clone("tightsel_tightsel_Zsignal_sctec_elpt");
-  //histtightpt->Add(histtightpt2);
-  //tempfile->WriteObject(histtightpt, histtightpt->GetName());  
-  //TH1F* histtighteta1 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctec_eleta");
-  //TH1F* histtighteta = (TH1F*) histtighteta1->Clone("tightsel_tightsel_Zsignal_sctec_eleta");
-  //histtighteta->Add(histtighteta1);
-  //tempfile->WriteObject(histtighteta, histtighteta->GetName());  
-  //TH1F* histtightphi1 = (TH1F*) tempfile->Get("tightsel_Zsignal_sctec_elphi");
-  //TH1F* histtightphi = (TH1F*) histtightphi1->Clone("tightsel_tightsel_Zsignal_sctec_elphi");
-  //histtightphi->Add(histtightphi1);
-  //tempfile->WriteObject(histtightphi, histtightphi->GetName());  
-  
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_elpt", "tightsel_tightsel_Zsignal_sctec_elpt", &rebinpt);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_eleta", "tightsel_tightsel_Zsignal_sctec_eleta", &rebineta);
-  //makedatadriveneffplot("tightnonesel_nonetightsel_Zsignal_sctec_elphi", "tightsel_tightsel_Zsignal_sctec_elphi", &rebinphi);
-  
-  std::vector<TFile*> file;
-  std::vector<TString> cutnamept;
-  std::vector<TString> cutnameeta;
-  std::vector<TString> cutnamephi;
-
-  coloropt.clear();
-  markerstyle.clear();
-  markersize.clear();
-  
-  file.push_back(tempfile);
-  cutnamept.push_back("tightnonesel_nonetightsel_Zsignal_sctec_elpt");
-  cutnamept.push_back("tightloosesel_loosetightsel_Zsignal_sctec_elpt");
-  cutnameeta.push_back("tightnonesel_nonetightsel_Zsignal_sctec_eleta");
-  cutnameeta.push_back("tightloosesel_loosetightsel_Zsignal_sctec_eleta");
-  cutnamephi.push_back("tightnonesel_nonetightsel_Zsignal_sctec_elphi");
-  cutnamephi.push_back("tightloosesel_loosetightsel_Zsignal_sctec_elphi");
-  coloropt.push_back(kBlue);
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  
-  file.push_back(tempfile);
-  cutnamept.push_back("tightnonesel_nonetightsel_Zsignal_sctec_elpt");
-  cutnamept.push_back("tightmediumsel_mediumtightsel_Zsignal_sctec_elpt");
-  cutnameeta.push_back("tightnonesel_nonetightsel_Zsignal_sctec_eleta");
-  cutnameeta.push_back("tightmediumsel_mediumtightsel_Zsignal_sctec_eleta");
-  cutnamephi.push_back("tightnonesel_nonetightsel_Zsignal_sctec_elphi");
-  cutnamephi.push_back("tightmediumsel_mediumtightsel_Zsignal_sctec_elphi");
-  coloropt.push_back(kGreen+2);
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  
-  efficiency(file, cutnamept, rebinpt.size()-1, &rebinpt[0], "p_{T} / GeV");
-  efficiency(file, cutnameeta, rebineta.size()-1, &rebineta[0], "#eta");
-  efficiency(file, cutnamephi, rebinphi.size()-1, &rebinphi[0], "#phi");
 }
 
 int plotter() {
@@ -880,8 +525,6 @@ int plotter() {
   std::vector<TString> cutname;
   std::vector<TString> legend;  
 
-  //////////////////////// DELETE EVERYTHING BEFORE THIS \\\\\\\\\\\\\\\\\\\\\\\\\ \
-
   file.clear();
   cutname.clear();
   coloropt.clear();
@@ -892,22 +535,18 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("noselsct");
+  cutname.push_back("mutrigselsct_elpt");
+  cutname.push_back("muAscouttrigselsct_elpt");
   coloropt.push_back(kBlack);
-  legend.push_back("Run2022B Scouting");
-  histtype.push_back("p e1");
+  legend.push_back("Muon");
+  histtype.push_back("hist");
   markerstyle.push_back(20);
   markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
+  legendmarkerstyle.push_back("pe");
 
   legendEntries = legend;
-  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron multiplicity");
-  //comparesamevariable(file, cutname, "elpt", -1, 400, 1, true, true, true, (float []){8e-1,2e9}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "eleta", 230, 770, 1, true, false, false, (float []){8e-1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
-  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, false, true, true, (float []){0,5e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
-  //comparesamevariable(file, cutname, "dielM", 500, 20000, 100, true, true, true, (float []){8e-1,1e7}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-  //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, true, true, (float []){8e-1,1e4}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-  //invmee_specialplot("noselsct_dielM", 0.02);
+  vector<double> binspt{0,10,20,30,40,50,60,70,80,100};
+  efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
 
   file.clear();
   cutname.clear();
@@ -919,34 +558,18 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("leadepemselsct");
+  cutname.push_back("mutrigselsct_eleta");
+  cutname.push_back("muAscouttrigselsct_eleta");
   coloropt.push_back(kBlack);
-  legend.push_back("Atleast (e_{12}^{+}, e_{12}^{-})");
-  histtype.push_back("p e1");
+  legend.push_back("Muon");
+  histtype.push_back("hist");
   markerstyle.push_back(20);
   markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  file.push_back(datahistfile);
-  cutname.push_back("leadepem_only_selsct");
-  coloropt.push_back(kRed);
-  legend.push_back("(e_{12}^{+}, e_{12}^{-}) only");
-  histtype.push_back("same p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(1);
-  legendmarkerstyle.push_back("lep");
-
-  file.push_back(datahistfile);
-  cutname.push_back("leadepem_Zwind_selsct");
-  coloropt.push_back(kGreen+2);
-  legend.push_back("80<M(e_{12}^{+}, e_{12}^{-})<100");
-  histtype.push_back("same p");
-  markerstyle.push_back(40);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
+  legendmarkerstyle.push_back("pe");
 
   legendEntries = legend;
-  //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, true, true, (float []){8e-1,1e4}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
+  vector<double> binseta{-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
+  efficiency(file, cutname, binseta.size()-1, &binseta[0], "#eta");
 
   file.clear();
   cutname.clear();
@@ -958,416 +581,18 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("noselsct");
+  cutname.push_back("mutrigselsct_elphi");
+  cutname.push_back("muAscouttrigselsct_elphi");
   coloropt.push_back(kBlack);
-  legend.push_back("no sel. bkg. rich");
-  histtype.push_back("p e1");
+  legend.push_back("Muon");
+  histtype.push_back("hist");
   markerstyle.push_back(20);
   markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  file.push_back(datahistfile);
-  cutname.push_back("leadepem_Zwind_selsct");
-  coloropt.push_back(kGreen+2);
-  legend.push_back("80<M(e_{12}^{+}, e_{12}^{-})<100");
-  histtype.push_back("same p");
-  markerstyle.push_back(40);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
+  legendmarkerstyle.push_back("pe");
 
   legendEntries = legend;
-
-  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){2e-8,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron multiplicity");
-  //comparesamevariable(file, cutname, "elpt", -1, 150, 1, true, true, true, (float []){2e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "eleta", 230, 770, 1, true, false, false, (float []){2e-8,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron #eta");
-  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){5e-5,2}, (float []){0.55,0.7,0.75,0.95}, true, "electron #phi");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-  scale.clear();
-  /*
-  file.push_back(datahistfile);
-  cutname.push_back("leadepem_Zwindptgt20_selsct");
-  coloropt.push_back(kBlack);
-  legend.push_back("Z wind., p_{T}>20");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-  scale.push_back(1);
-  
-  file.push_back(dym50histfile);
-  cutname.push_back("leadepem_ptgt20_selsct");
-  coloropt.push_back(kRed);
-  legend.push_back("(Z#rightarrowee, p_{T}>20");
-  histtype.push_back("same hist");
-  markerstyle.push_back(1);
-  markersize.push_back(0);
-  legendmarkerstyle.push_back("f");
-  scale.push_back(1);
-  */
-  file.push_back(datahistfile);
-  cutname.push_back("leadepem_ptgt20_selsct");
-  coloropt.push_back(kGreen+2);
-  legend.push_back("(e_{12}^{+}, e_{12}^{-}), p_{T}>20");
-  histtype.push_back("same p");
-  markerstyle.push_back(40);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-  scale.push_back(1);
-
-  legendEntries = legend;
-
-  //comparesamevariable(file, cutname, "leadsublead_dielM", 3500, 20000, 100, false, false, false, (float []){8e-1,1.5e3}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-  //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
-  //fitinvmee("tightselsct_leadbarsubleadbar_dielM");
-  //fitinvmee_roofit("tightselsct_leadbarsubleadbar_dielM");
-  //fitinvmee("tightselsct_leadecsubleadec_dielM");
-  //fitinvmee_roofit("tightselsct_leadecsubleadec_dielM");
-
-  cutname.clear();
-  scale.clear();
-  scale.push_back(1);
-  scale.push_back((2740.0/(2740.0+8365.0))*(15509.0/5147603.0));
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_elsigmaietaieta","noselsctbar_elsigmaietaieta"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_elhoe","noselsctbar_elhoe"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_eltkiso","noselsctbar_eltkiso"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_elsmin","noselsctbar_elsmin"});
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-  scale.clear();
-  scale.push_back(-1);
-
-  file.push_back(dym50histfile);
-  cutname.push_back("leadepem_Zwindptgt20_selsctbar");
-  coloropt.push_back(kRed-6);
-  legend.push_back("Z#rightarrowee, p_{T}>20");
-  histtype.push_back("same hist");
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  legendmarkerstyle.push_back("f");
-
-  file.push_back(tempfile);
-  cutname.push_back("leadepem_Zwindptgt20_selsctbar");
-  coloropt.push_back(kRed);
-  legend.push_back("data, Z, p_{T}>20");
-  histtype.push_back("same p");
-  markerstyle.push_back(24);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  file.push_back(datahistfile);
-  cutname.push_back("noselsctbar");
-  coloropt.push_back(kGreen+2);
-  legend.push_back("no selection, bkg.");
-  histtype.push_back("same p");
-  markerstyle.push_back(40);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-
-  //comparesamevariable(file, cutname, "elsigmaietaieta", -1, 250, 4, true, true, true, (float []){5e-4,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron #sigmai#etai#eta");
-  //comparesamevariable(file, cutname, "elhoe", -1, 20000, 200, true, true, true, (float []){5e-4,2}, (float []){0.6,0.7,0.85,0.95}, true, "electron H/E");
-  //comparesamevariable(file, cutname, "eltkiso", -1, -1, 200, true, true, true, (float []){5e-4,2}, (float []){0.6,0.7,0.85,0.95}, true, "electron track iso. [GeV]");
-  //comparesamevariable(file, cutname, "elsmin", -1, 1500, 5, true, true, true, (float []){5e-4,2e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron smin");
-
-  cutname.clear();
-  scale.clear();
-  scale.push_back(1);
-  scale.push_back((2740.0/(2740.0+8365.0))*(6775.0/5956977.0));
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_elsigmaietaieta","noselsctec_elsigmaietaieta"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_elhoe","noselsctec_elhoe"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_eltkiso","noselsctec_eltkiso"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_elsmin","noselsctec_elsmin"});
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-  scale.clear();
-  scale.push_back(-1);
-
-  file.push_back(dym50histfile);
-  cutname.push_back("leadepem_Zwindptgt20_selsctec");
-  coloropt.push_back(kRed-6);
-  legend.push_back("Z#rightarrowee, p_{T}>20");
-  histtype.push_back("same hist");
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  legendmarkerstyle.push_back("f");
-
-  file.push_back(tempfile);
-  cutname.push_back("leadepem_Zwindptgt20_selsctec");
-  coloropt.push_back(kRed);
-  legend.push_back("data, Z, p_{T}>20");
-  histtype.push_back("same p");
-  markerstyle.push_back(24);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  file.push_back(datahistfile);
-  cutname.push_back("noselsctec");
-  coloropt.push_back(kGreen+2);
-  legend.push_back("no selection, bkg.");
-  histtype.push_back("same p");
-  markerstyle.push_back(40);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-
-  //comparesamevariable(file, cutname, "elsigmaietaieta", 100, 600, 4, true, true, true, (float []){1e-3,2e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron #sigmai#etai#eta");
-  //comparesamevariable(file, cutname, "elhoe", -1, 15000, 200, true, true, true, (float []){1e-3,2e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron H/E");
-  //comparesamevariable(file, cutname, "eltkiso", -1, -1, 200, true, true, true, (float []){1e-3,2}, (float []){0.6,0.7,0.85,0.95}, true, "electron track iso. [GeV]");
-  //comparesamevariable(file, cutname, "elsmin", 100, 1000, 10, true, true, true, (float []){1e-3,8e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron smin");
-
-  cutname.clear();
-  scale.clear();
-  scale.push_back(1);
-  scale.push_back((2740.0/(2740.0+8365.0))*(15509.0/5147603.0));
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_elsigmaietaieta","noselsctbar_elsigmaietaieta"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_elhoe","noselsctbar_elhoe"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_eltkiso","noselsctbar_eltkiso"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctbar_elsmin","noselsctbar_elsmin"});
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-  scale.clear();
-  scale.push_back(-1);
-
-  file.push_back(qcdhistfile);
-  cutname.push_back("noselsctbar");
-  coloropt.push_back(kGreen-10);
-  legend.push_back("QCD MC");
-  histtype.push_back("same hist");
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  legendmarkerstyle.push_back("f");
-
-  file.push_back(tempfile);
-  cutname.push_back("leadepem_Zwindptgt20_selsctbar");
-  coloropt.push_back(kRed);
-  legend.push_back("data, Z, p_{T}>20");
-  histtype.push_back("same p");
-  markerstyle.push_back(24);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  file.push_back(datahistfile);
-  cutname.push_back("noselsctbar");
-  coloropt.push_back(kGreen+2);
-  legend.push_back("no selection, bkg.");
-  histtype.push_back("same p");
-  markerstyle.push_back(40);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-
-  //comparesamevariable(file, cutname, "elsigmaietaieta", -1, 250, 4, true, true, true, (float []){5e-4,1}, (float []){0.6,0.7,0.85,0.95}, true, "electron #sigmai#etai#eta");
-  //comparesamevariable(file, cutname, "elhoe", -1, 20000, 200, true, true, true, (float []){5e-4,2}, (float []){0.6,0.7,0.85,0.95}, true, "electron H/E");
-  //comparesamevariable(file, cutname, "eltkiso", -1, -1, 200, true, true, true, (float []){5e-4,2}, (float []){0.6,0.7,0.85,0.95}, true, "electron track iso. [GeV]");
-  //comparesamevariable(file, cutname, "elsmin", -1, 1500, 5, true, true, true, (float []){5e-4,2e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron smin");
-
-  cutname.clear();
-  scale.clear();
-  scale.push_back(1);
-  scale.push_back((2740.0/(2740.0+8365.0))*(6775.0/5956977.0));
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_elsigmaietaieta","noselsctec_elsigmaietaieta"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_elhoe","noselsctec_elhoe"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_eltkiso","noselsctec_eltkiso"});
-  //subtractsideband(datahistfile, {"leadepem_Zwindptgt20_selsctec_elsmin","noselsctec_elsmin"});
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-  scale.clear();
-  scale.push_back(-1);
-
-  file.push_back(qcdhistfile);
-  cutname.push_back("noselsctec");
-  coloropt.push_back(kGreen-10);
-  legend.push_back("QCD MC");
-  histtype.push_back("same hist");
-  markerstyle.push_back(0);
-  markersize.push_back(0);
-  legendmarkerstyle.push_back("f");
-
-  file.push_back(tempfile);
-  cutname.push_back("leadepem_Zwindptgt20_selsctec");
-  coloropt.push_back(kRed);
-  legend.push_back("data, Z, p_{T}>20");
-  histtype.push_back("same p");
-  markerstyle.push_back(24);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  file.push_back(datahistfile);
-  cutname.push_back("noselsctec");
-  coloropt.push_back(kGreen+2);
-  legend.push_back("no selection, bkg.");
-  histtype.push_back("same p");
-  markerstyle.push_back(40);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-
-  //comparesamevariable(file, cutname, "elsigmaietaieta", 100, 600, 4, true, true, true, (float []){1e-3,2e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron #sigmai#etai#eta");
-  //comparesamevariable(file, cutname, "elhoe", -1, 15000, 200, true, true, true, (float []){1e-3,2e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron H/E");
-  //comparesamevariable(file, cutname, "eltkiso", -1, -1, 200, true, true, true, (float []){1e-3,2}, (float []){0.6,0.7,0.85,0.95}, true, "electron track iso. [GeV]");
-  //comparesamevariable(file, cutname, "elsmin", 100, 1000, 10, true, true, true, (float []){1e-3,8e-1}, (float []){0.6,0.7,0.85,0.95}, true, "electron smin");
-
-  //invmee_specialplot("noselsct_leadsublead_dielM", 0.02);
-  //invmee_specialplot("vetoselsct_leadsublead_dielM", 0.02);
-  //invmee_specialplot("looseselsct_leadsublead_dielM", 0.02);
-  //invmee_specialplot("mediumselsct_leadsublead_dielM", 0.02);
-  //invmee_specialplot("tightselsct_leadsublead_dielM", 0.02);
-  
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("looseselsct");
-  coloropt.push_back(kBlack);
-  legend.push_back("Run2022B Scouting");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-  comparesamevariable(file, cutname, "leadsublead_dielM", 1000, 12000, 20, true, true, true, (float []){1e2,1e5}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("mediumselsct");
-  coloropt.push_back(kBlack);
-  legend.push_back("Run2022B Scouting");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-  //comparesamevariable(file, cutname, "leadsublead_dielM", 1250, 1470, 5, false, true, true, (float []){0,400}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("tightselsct");
-  coloropt.push_back(kBlack);
-  legend.push_back("Run2022B Scouting");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-  //comparesamevariable(file, cutname, "leadsublead_dielM", 1250, 1470, 5, false, true, true, (float []){0,400}, (float []){0.6,0.7,0.85,0.95}, false, "M(e,e) [GeV]");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("tightsel_Zwind_sct");
-  coloropt.push_back(kBlack);
-  legend.push_back("Run2022B Scouting");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-  //comparesamevariable(file, cutname, "elmult", 5, 20, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron multiplicity");
-  //comparesamevariable(file, cutname, "elpt", -1, 150, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "eleta", 230, 770, 1, true, false, false, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron #eta");
-  //comparesamevariable(file, cutname, "elphi", -1, -1, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron #phi");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("tightsel");
-  coloropt.push_back(kBlack);
-  legend.push_back("Run2022B Scouting");
-  histtype.push_back("p e1");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("lep");
-
-  legendEntries = legend;
-  //comparesamevariable(file, cutname, "Zwind_sctbar_elpt", -1, 150, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "SideBand_sctbar_elpt", -1, 150, 1, true, true, true, (float []){1e-1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "electron p_{T} [GeV]");
-
-  //double null1=0, null2=0;
-  //fitinvmee_roofit("mediumselsct_leadbarsubleadbar_dielM", (double []){50.0, 140.0}, &null1, &null2, (double []){86.0, 97.0});
-  //fitinvmee_roofit("mediumselsct_leadecsubleadec_dielM", (double []){50.0, 140.0}, &null1, &null2, (double []){76.0, 98.0});
-
-  //elEffZsignalEB();
-  //elEffZsignalEE();
+  vector<double> binsphi{-3.3, -3.2, -3.1, -3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3};
+  efficiency(file, cutname, binsphi.size()-1, &binsphi[0], "#phi");
 
   tempfile->Close();
   return -1;
