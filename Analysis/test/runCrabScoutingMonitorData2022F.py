@@ -1,8 +1,8 @@
 from CRABClient.UserUtilities import config
 config = config()
 
-config.General.requestName = 'Run3Scouting2022F_crabRunSkim230418'
-config.General.workArea = 'crabRunSkim230418_Run3Scouting2022F'
+config.General.requestName = 'Run3Scouting2022F_crabRunSkim230502'
+config.General.workArea = 'crabRunSkim230502_Run3Scouting2022F'
 config.General.transferOutputs = True
 
 config.JobType.pluginName = 'Analysis'
@@ -15,7 +15,7 @@ config.Data.inputDBS = 'global'
 config.Data.splitting = 'Automatic'
 config.Data.LumiMask = 'Cert_Collisions2022_355100_362760_Golden.json'
 config.Data.publication = False
-config.Data.outputDatasetTag = 'Scouting2022F_crabRunSkim230418_asahasra'
+config.Data.outputDatasetTag = 'Scouting2022F_crabRunSkim230502_asahasra'
 config.Data.ignoreLocality = True
 
 config.Site.whitelist = ['T2_US*','T2_CH*']

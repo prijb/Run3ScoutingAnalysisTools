@@ -95,7 +95,17 @@ private:
   const edm::EDGetTokenT<std::vector<Run3ScoutingPhoton> > photonsToken;
   const edm::EDGetTokenT<double> rhoToken;
 
+  // For L1 trig bits access
+  bool doL1;
+  edm::InputTag                algInputTag_;       
+  edm::InputTag                extInputTag_;       
+  edm::EDGetToken              algToken_;
+  std::unique_ptr<l1t::L1TGlobalUtil> l1GtUtils_;
+  std::vector<std::string>     l1Seeds_;
+
   // Interesting trigger results
+  std::vector<bool> l1Result_;
+  Int_t L1_TwoMu, L1_TwoMu_SQOS, L1_HT_ET, L1_OneJet, L1_TwoJet, L1_OneEG, L1_TwoEG;
   Int_t HLT_IsoMu27, HLT_Mu50, DST_Run3PFScouting, DST_HLTMuon_Run3PFScouting, HLT_OtherScoutingPFMonitor;
 
   // Offline Primary Vertex
@@ -212,9 +222,22 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   pVtxToken(consumes<std::vector<Run3ScoutingVertex> >(iConfig.getParameter<edm::InputTag>("primaryVtx"))), 
   electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
   photonsToken(consumes<std::vector<Run3ScoutingPhoton> >(iConfig.getParameter<edm::InputTag>("photons"))),
-  rhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))) {
+  rhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("rho"))),
+  doL1(iConfig.existsAs<bool>("doL1")?iConfig.getParameter<bool>("doL1"):false) {
 
   usesResource("TFileService");
+  if (doL1) {
+    algInputTag_ = iConfig.getParameter<edm::InputTag>("AlgInputTag");
+    extInputTag_ = iConfig.getParameter<edm::InputTag>("l1tExtBlkInputTag");
+    algToken_ = consumes<BXVector<GlobalAlgBlk>>(algInputTag_);
+    l1Seeds_ = iConfig.getParameter<std::vector<std::string> >("l1Seeds");
+    l1GtUtils_ = std::make_unique<l1t::L1TGlobalUtil>
+      (iConfig, consumesCollector(), *this, algInputTag_, extInputTag_, l1t::UseEventSetupIn::Event);
+  }
+  else {
+    l1Seeds_ = std::vector<std::string>();
+    l1GtUtils_ = 0;
+  }
 
   // Access the TFileService
   edm::Service<TFileService> fs;
@@ -228,6 +251,14 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("event", &event, "event/i" );
 
   // Trigger Results
+  tree->Branch("l1Result", "std::vector<bool>", &l1Result_, 32000, 0);
+  tree->Branch("L1_TwoMu", &L1_TwoMu, "L1_TwoMu/i" );
+  tree->Branch("L1_TwoMu_SQOS", &L1_TwoMu_SQOS, "L1_TwoMu_SQOS/i" );
+  tree->Branch("L1_HT_ET", &L1_HT_ET, "L1_HT_ET/i" );
+  tree->Branch("L1_OneJet", &L1_OneJet, "L1_OneJet/i" );
+  tree->Branch("L1_TwoJet", &L1_TwoJet, "L1_TwoJet/i" );
+  tree->Branch("L1_OneEG", &L1_OneEG, "L1_OneEG/i" );
+  tree->Branch("L1_TwoEG", &L1_TwoEG, "L1_TwoEG/i" );
   tree->Branch("HLT_IsoMu27", &HLT_IsoMu27, "HLT_IsoMu27/i" );
   tree->Branch("HLT_Mu50", &HLT_Mu50, "HLT_Mu50/i" );
   tree->Branch("DST_Run3PFScouting", &DST_Run3PFScouting, "DST_Run3PFScouting/i" );
@@ -373,6 +404,54 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   run = iEvent.eventAuxiliary().run();
   event = iEvent.eventAuxiliary().event();
   lumSec = iEvent.eventAuxiliary().luminosityBlock();
+
+  L1_TwoMu = 0;
+  L1_TwoMu_SQOS = 0;
+  L1_HT_ET = 0;
+  L1_OneJet = 0;
+  L1_TwoJet = 0;
+  L1_OneEG = 0;
+  L1_TwoEG = 0;
+  if(doL1) {
+    l1GtUtils_->retrieveL1(iEvent,iSetup,algToken_);
+    /*
+    for( int r = 0; r<512; r++){
+      string name ("empty");
+      bool algoName_ = false;
+      algoName_ = l1GtUtils_->getAlgNameFromBit(r,name);
+      cout << "getAlgNameFromBit = " << algoName_  << endl;
+      cout << "L1 bit number = " << r << " ; L1 bit name = " << name << endl;
+    }
+    */
+    for( unsigned int iseed = 0; iseed < l1Seeds_.size(); iseed++ ) {
+      bool l1htbit = 0;
+      
+      l1GtUtils_->getFinalDecisionByName(string(l1Seeds_[iseed]), l1htbit);
+      //cout<<string(l1Seeds_[iseed])<<"  "<<l1htbit<<endl;
+      l1Result_.push_back( l1htbit );
+    }
+    if(l1Result_[0] || l1Result_[1]) {
+      L1_TwoMu = 1;
+    }
+    if(l1Result_[2] || l1Result_[3] || l1Result_[4] || l1Result_[5]) {
+      L1_TwoMu_SQOS = 1;
+    }
+    if(l1Result_[6] || l1Result_[7] || l1Result_[8] || l1Result_[9] || l1Result_[10] || l1Result_[11] || l1Result_[12] || l1Result_[13]) {
+      L1_HT_ET = 1;
+    }
+    if(l1Result_[14] || l1Result_[15]) {
+      L1_OneJet = 1;
+    }
+    if(l1Result_[16] || l1Result_[17] || l1Result_[18]) {
+      L1_TwoJet = 1;
+    }
+    if(l1Result_[19] || l1Result_[20] || l1Result_[21] || l1Result_[22] || l1Result_[23] || l1Result_[24]) {
+      L1_OneEG = 1;
+    }
+    if(l1Result_[25] || l1Result_[26] || l1Result_[27] || l1Result_[28]) {
+      L1_TwoEG = 1;
+    }
+  }
 
   // Access the trigger bits
   HLT_IsoMu27 = 0;
@@ -547,6 +626,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 }
 
 void EGammaOnly_ScoutingNanoAOD::clearVars(){
+  l1Result_.clear();
   oflpVtx_x.clear();
   oflpVtx_y.clear();
   oflpVtx_z.clear();
