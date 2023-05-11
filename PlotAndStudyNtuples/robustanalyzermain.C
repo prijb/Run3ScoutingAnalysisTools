@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     
     stringstream ss1;
     ss1<<"hists_data_"<<cnt<<".root";
-    robustanalyzer rana_data("./data/CrabSkim230414_ScoutingNTuple_ForScoutingEleEff_fatdummy.root", ss1.str(), numCores);
+    robustanalyzer rana_data("./data/CrabSkim230502_ScoutingNTuple_ForScoutingEleEff_fatdummy.root", ss1.str(), numCores);
     rana_data.analyzersinglefile(cnt);
   }
   catch (char const* exc) {

@@ -66,7 +66,7 @@ int autoplotter(std::vector<TFile*> file, std::vector<TString> cutname) {
     gStyle->SetOptStat(0);
     //c1->SetLogx(true);
     histVar->Draw();
-    c1->SaveAs("./dirplots/"+foldername+"/"+keyName+".png");
+    c1->SaveAs("./ScoutingParkingPaper_dirplots/"+foldername+"/"+keyName+".png");
     
   }
 
@@ -393,7 +393,7 @@ int subtractsideband(TFile* histfile, TString SpBhistname, double scaleSpB, TStr
   TCanvas* c1;
   c1 = new TCanvas();
   c1 = enhance_plotter(allhists, legendEntries, xaxistitle, yaxistitle, legPos, false, logY, yrange, false, histtype, markerstyle, markersize, legendmarkerstyle);
-  c1->SaveAs("./dirplots/"+foldername+"/"+hist_S->GetName()+".png");
+  c1->SaveAs("./ScoutingParkingPaper_dirplots/"+foldername+"/"+hist_S->GetName()+".png");
 
   return -1;
 }
@@ -461,8 +461,8 @@ int comparesamevariable(std::vector<TFile*> file, std::vector<TString> cutname, 
   TCanvas* c1;
   c1 = new TCanvas();
   c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(),legPos, false, logY,yrange,normalize,histtype,markerstyle,markersize,legendmarkerstyle);
-  if(!normalize) c1->SaveAs("./dirplots/"+foldername+"/"+var+".png");
-  else  c1->SaveAs("./dirplots/"+foldername+"/"+var+"_normed.png");
+  if(!normalize) c1->SaveAs("./ScoutingParkingPaper_dirplots/"+foldername+"/"+var+".png");
+  else  c1->SaveAs("./ScoutingParkingPaper_dirplots/"+foldername+"/"+var+"_normed.png");
 
   return -1;
 }
@@ -502,7 +502,7 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   std::vector<TH1F*> allhists;
   demo->SetTitle("");
   demo->GetXaxis()->SetTitle(xaxistitle);
-  demo->GetYaxis()->SetTitle("reco. eff.");
+  demo->GetYaxis()->SetTitle("trig. eff.");
   demo->SetLineColorAlpha(kWhite,1);
   demo->SetFillColorAlpha(kWhite,1);
   allhists.push_back(demo);
@@ -519,12 +519,431 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   return -1;
 }
 
-int plotter() {
+void angmatching() {
 
   std::vector<TFile*> file;
   std::vector<TString> cutname;
   std::vector<TString> legend;  
 
+  // Angular matching constraints
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  cutname.push_back("ptgt2lt5etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt5lt8etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt8lt11etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt11lt14etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt14lt18etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt18lt22etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt22lt26etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt26lt30etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt30lt50etalt2p5_oflsct_elesct_ofl_eb");
+  cutname.push_back("ptgt50lt100etalt2p5_oflsct_elesct_ofl_eb");
+
+  coloropt.push_back(40);
+  coloropt.push_back(41);
+  coloropt.push_back(42);
+  coloropt.push_back(43);
+  coloropt.push_back(44);
+  coloropt.push_back(45);
+  coloropt.push_back(46);
+  coloropt.push_back(47);
+  coloropt.push_back(48);
+  coloropt.push_back(49);
+
+  legend.push_back("2<p_{T}<5");
+  legend.push_back("5<p_{T}<8");
+  legend.push_back("8<p_{T}<11");
+  legend.push_back("11<p_{T}<14");
+  legend.push_back("14<p_{T}<18");
+  legend.push_back("18<p_{T}<22");
+  legend.push_back("22<p_{T}<26");
+  legend.push_back("26<p_{T}<30");
+  legend.push_back("30<p_{T}<50");
+  legend.push_back("50<p_{T}<100");
+
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+
+  histtype.push_back("hist e1");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "deta", 9500, 10500, 10, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
+  comparesamevariable(file, cutname, "dphi", 9700, 10500, 5, false, false, false, (float []){0,0.13}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
+  comparesamevariable(file, cutname, "dr", -1, 400, 5, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  cutname.push_back("ptgt2lt5etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt5lt8etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt8lt11etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt11lt14etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt14lt18etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt18lt22etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt22lt26etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt26lt30etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt30lt50etalt2p5_oflsct_elesct_ofl_ee");
+  cutname.push_back("ptgt50lt100etalt2p5_oflsct_elesct_ofl_ee");
+
+  coloropt.push_back(40);
+  coloropt.push_back(41);
+  coloropt.push_back(42);
+  coloropt.push_back(43);
+  coloropt.push_back(44);
+  coloropt.push_back(45);
+  coloropt.push_back(46);
+  coloropt.push_back(47);
+  coloropt.push_back(48);
+  coloropt.push_back(49);
+
+  legend.push_back("2<p_{T}<5");
+  legend.push_back("5<p_{T}<8");
+  legend.push_back("8<p_{T}<11");
+  legend.push_back("11<p_{T}<14");
+  legend.push_back("14<p_{T}<18");
+  legend.push_back("18<p_{T}<22");
+  legend.push_back("22<p_{T}<26");
+  legend.push_back("26<p_{T}<30");
+  legend.push_back("30<p_{T}<50");
+  legend.push_back("50<p_{T}<100");
+
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+
+  histtype.push_back("hist e1");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "deta", 9500, 10500, 10, false, false, false, (float []){0,0.27}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
+  comparesamevariable(file, cutname, "dphi", 9700, 10500, 5, false, false, false, (float []){0,0.09}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
+  comparesamevariable(file, cutname, "dr", -1, 400, 5, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  cutname.push_back("ptgt2lt5etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt5lt8etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt8lt11etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt11lt14etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt14lt18etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt18lt22etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt22lt26etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt26lt30etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt30lt50etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+  cutname.push_back("ptgt50lt100etalt2p5_oflsct_elesct_ofl_aftmch_eb");
+
+  coloropt.push_back(40);
+  coloropt.push_back(41);
+  coloropt.push_back(42);
+  coloropt.push_back(43);
+  coloropt.push_back(44);
+  coloropt.push_back(45);
+  coloropt.push_back(46);
+  coloropt.push_back(47);
+  coloropt.push_back(48);
+  coloropt.push_back(49);
+
+  legend.push_back("2<p_{T}<5");
+  legend.push_back("5<p_{T}<8");
+  legend.push_back("8<p_{T}<11");
+  legend.push_back("11<p_{T}<14");
+  legend.push_back("14<p_{T}<18");
+  legend.push_back("18<p_{T}<22");
+  legend.push_back("22<p_{T}<26");
+  legend.push_back("26<p_{T}<30");
+  legend.push_back("30<p_{T}<50");
+  legend.push_back("50<p_{T}<100");
+
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+
+  histtype.push_back("hist e1");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "deta", 9500, 10500, 10, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
+  comparesamevariable(file, cutname, "dphi", 9700, 10500, 5, false, false, false, (float []){0,0.13}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
+  comparesamevariable(file, cutname, "dr", -1, 400, 5, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  cutname.push_back("ptgt2lt5etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt5lt8etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt8lt11etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt11lt14etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt14lt18etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt18lt22etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt22lt26etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt26lt30etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt30lt50etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+  cutname.push_back("ptgt50lt100etalt2p5_oflsct_elesct_ofl_aftmch_ee");
+
+  coloropt.push_back(40);
+  coloropt.push_back(41);
+  coloropt.push_back(42);
+  coloropt.push_back(43);
+  coloropt.push_back(44);
+  coloropt.push_back(45);
+  coloropt.push_back(46);
+  coloropt.push_back(47);
+  coloropt.push_back(48);
+  coloropt.push_back(49);
+
+  legend.push_back("2<p_{T}<5");
+  legend.push_back("5<p_{T}<8");
+  legend.push_back("8<p_{T}<11");
+  legend.push_back("11<p_{T}<14");
+  legend.push_back("14<p_{T}<18");
+  legend.push_back("18<p_{T}<22");
+  legend.push_back("22<p_{T}<26");
+  legend.push_back("26<p_{T}<30");
+  legend.push_back("30<p_{T}<50");
+  legend.push_back("50<p_{T}<100");
+
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+  file.push_back(datahistfile);
+
+  histtype.push_back("hist e1");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+  histtype.push_back("hist e1 same");
+
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+  markerstyle.push_back(1);
+
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+  markersize.push_back(0);
+
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+  legendmarkerstyle.push_back("le");
+
+  legendEntries = legend;
+  comparesamevariable(file, cutname, "deta", 9500, 10500, 10, false, false, false, (float []){0,0.27}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
+  comparesamevariable(file, cutname, "dphi", 9700, 10500, 5, false, false, false, (float []){0,0.09}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
+  comparesamevariable(file, cutname, "dr", -1, 400, 5, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
+
+}
+
+int plotter() {
+
+  //angmatching();
+
+  std::vector<TFile*> file;
+  std::vector<TString> cutname;
+  std::vector<TString> legend;  
+  
   file.clear();
   cutname.clear();
   coloropt.clear();
@@ -535,64 +954,85 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("mutrigselsct_elpt");
-  cutname.push_back("muAscouttrigselsct_elpt");
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb");
+  coloropt.push_back(kBlack);
+  legend.push_back("Mu Trig");
+  histtype.push_back("hist e1");
+  markerstyle.push_back(1);
+  markersize.push_back(0);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(datahistfile);
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb_aftmch");
+  coloropt.push_back(kRed);
+  legend.push_back("Mu+Sct Trig");
+  histtype.push_back("hist e1 same");
+  markerstyle.push_back(1);
+  markersize.push_back(0);
+  legendmarkerstyle.push_back("le");
+
+  legendEntries = legend;
+  //comparesamevariable(file, cutname, "elpt", -1, 250, 1, true, true, true, (float []){1,5000}, (float []){0.6,0.7,0.85,0.95}, false, "p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "eleta", 200, 800, 10, false, true, true, (float []){0,800}, (float []){0.6,0.7,0.85,0.95}, false, "#eta");
+ 
+  coloropt.clear();
+  legend.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
   coloropt.push_back(kBlack);
   legend.push_back("Muon");
   histtype.push_back("hist");
   markerstyle.push_back(20);
   markersize.push_back(2);
   legendmarkerstyle.push_back("pe");
-
   legendEntries = legend;
-  vector<double> binspt{0,10,20,30,40,50,60,70,80,100};
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  file.push_back(datahistfile);
+  coloropt.push_back(kBlue);
+  cutname.push_back("noeg_ptgt2etalt2p5_oflsct_eleofleb_lead_elpt");
+  cutname.push_back("noeg_ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_elpt");  
+  file.push_back(datahistfile);
+  coloropt.push_back(kGreen+2);
+  cutname.push_back("eg1_ptgt2etalt2p5_oflsct_eleofleb_lead_elpt");
+  cutname.push_back("eg1_ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_elpt");  
+  file.push_back(datahistfile);
+  coloropt.push_back(kOrange+2);
+  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_lead_elpt");
+  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_elpt");  
+  file.push_back(datahistfile);
+  coloropt.push_back(kOrange);
+  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_sublead_elpt");
+  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_aftmch_sublead_elpt");  
+  vector<double> binspt{0,1,2,3,4,6,8,10,14,18,22,26,30,35,40,50,60,70,80,100};
   efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
 
-  file.clear();
   cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleoflee_lead_elpt");
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleoflee_aftmch_lead_elpt");  
+  //efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
 
+  file.clear();
   file.push_back(datahistfile);
-  cutname.push_back("mutrigselsct_eleta");
-  cutname.push_back("muAscouttrigselsct_eleta");
-  coloropt.push_back(kBlack);
-  legend.push_back("Muon");
-  histtype.push_back("hist");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("pe");
-
-  legendEntries = legend;
+  file.push_back(datahistfile);
+  cutname.clear();
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb_lead_eleta");
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_eleta");  
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleoflee_lead_eleta");
+  cutname.push_back("ptgt2etalt2p5_oflsct_eleoflee_aftmch_lead_eleta");  
   vector<double> binseta{-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
-  efficiency(file, cutname, binseta.size()-1, &binseta[0], "#eta");
+  //efficiency(file, cutname, binseta.size()-1, &binseta[0], "#eta");
 
-  file.clear();
   cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("mutrigselsct_elphi");
-  cutname.push_back("muAscouttrigselsct_elphi");
-  coloropt.push_back(kBlack);
-  legend.push_back("Muon");
-  histtype.push_back("hist");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("pe");
-
-  legendEntries = legend;
+  cutname.push_back("mutrig_elptgt50_elesct_elphi");
+  cutname.push_back("muAscouttrig_elptgt50_elesct_elphi");  
   vector<double> binsphi{-3.3, -3.2, -3.1, -3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3};
-  efficiency(file, cutname, binsphi.size()-1, &binsphi[0], "#phi");
+  //efficiency(file, cutname, binsphi.size()-1, &binsphi[0], "#phi");
 
   tempfile->Close();
   return -1;
