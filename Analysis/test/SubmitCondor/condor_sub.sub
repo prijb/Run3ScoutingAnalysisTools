@@ -7,6 +7,6 @@ output                = output/output_$(ClusterId)_$(ProcId).out
 error                 = error/error_$(ClusterId)_$(ProcId).err
 log                   = log/log_$(ClusterId)_$(ProcId).log
 
-+JobFlavour           = "espresso"
++JobFlavour           = "longlunch"
 
-queue filename from QCDPt80To120_dataFileName_All.txt
+queue filename from dataFileName.txt

@@ -51,6 +51,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/PatCandidates/interface/Muon.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Photon.h"
 #include "DataFormats/PatCandidates/interface/TriggerObjectStandAlone.h"
 #include "DataFormats/PatCandidates/interface/PackedTriggerPrescales.h"
 #include "DataFormats/L1TGlobal/interface/GlobalAlgBlk.h"
@@ -88,6 +89,7 @@ private:
 
   const edm::EDGetTokenT<std::vector<reco::Vertex> > oflpVtxToken;
   const edm::EDGetTokenT<std::vector<pat::Electron> > oflelectronsToken;
+  const edm::EDGetTokenT<std::vector<pat::Photon> > oflphotonsToken;
   const edm::EDGetTokenT<double> oflrhoToken;
 
   const edm::EDGetTokenT<std::vector<Run3ScoutingVertex> > pVtxToken;
@@ -106,7 +108,7 @@ private:
   // Interesting trigger results
   std::vector<bool> l1Result_;
   Int_t L1_TwoMu, L1_TwoMu_SQOS, L1_HT_ET, L1_OneJet, L1_TwoJet, L1_OneEG, L1_TwoEG;
-  Int_t HLT_IsoMu27, HLT_Mu50, DST_Run3PFScouting, DST_HLTMuon_Run3PFScouting, HLT_OtherScoutingPFMonitor;
+  Int_t HLT_IsoMu27, HLT_Mu50, DST_Scouting_DoubleMu3, DST_Scouting_EG16EG12, DST_Scouting_EG30, DST_Scouting_JetHT, DST_HLTMuon_Run3PFScouting, HLT_OtherScoutingPFMonitor;
 
   // Offline Primary Vertex
   const static int max_oflpv = 1000;
@@ -161,15 +163,12 @@ private:
   vector<Float16_t> Electron_eta;
   vector<Float16_t> Electron_phi;
   vector<Float16_t> Electron_m;
-  vector<Float16_t> Electron_d0;
-  vector<Float16_t> Electron_dz;
   vector<Float16_t> Electron_detain;
   vector<Float16_t> Electron_dphiin;
   vector<Float16_t> Electron_sigmaietaieta;
   vector<Float16_t> Electron_hoe;
   vector<Float16_t> Electron_ooemoop;
   vector<Int_t>	Electron_missinghits;
-  vector<Int_t> Electron_charge;
   vector<Float16_t> Electron_ecaliso;
   vector<Float16_t> Electron_hcaliso;
   vector<Float16_t> Electron_tkiso;
@@ -178,6 +177,15 @@ private:
   vector<Float16_t> Electron_smaj;
   vector<UInt_t> Electron_seedid;
   vector<Bool_t> Electron_rechitzerosuppression;
+
+  // Offline Photon
+  UInt_t n_oflpho;
+  vector<Float16_t> OflPhoton_energy;
+  vector<Float16_t> OflPhoton_pt;
+  vector<Float16_t> OflPhoton_eta;
+  vector<Float16_t> OflPhoton_phi;
+  vector<Float16_t> OflPhoton_sigmaietaieta;
+  vector<Float16_t> OflPhoton_hoe;
 
   //Photon
   UInt_t n_pho;
@@ -218,6 +226,7 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   trgResultsToken(consumes<edm::TriggerResults>(iConfig.getParameter<edm::InputTag>("triggerhltres"))),
   oflpVtxToken(consumes<std::vector<reco::Vertex> >(iConfig.getParameter<edm::InputTag>("oflprimaryVtx"))), 
   oflelectronsToken(consumes<std::vector<pat::Electron> >(iConfig.getParameter<edm::InputTag>("oflelectrons"))), 
+  oflphotonsToken(consumes<std::vector<pat::Photon> >(iConfig.getParameter<edm::InputTag>("oflphotons"))), 
   oflrhoToken(consumes<double>(iConfig.getParameter<edm::InputTag>("oflrho"))), 
   pVtxToken(consumes<std::vector<Run3ScoutingVertex> >(iConfig.getParameter<edm::InputTag>("primaryVtx"))), 
   electronsToken(consumes<std::vector<Run3ScoutingElectron> >(iConfig.getParameter<edm::InputTag>("electrons"))), 
@@ -261,7 +270,10 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("L1_TwoEG", &L1_TwoEG, "L1_TwoEG/i" );
   tree->Branch("HLT_IsoMu27", &HLT_IsoMu27, "HLT_IsoMu27/i" );
   tree->Branch("HLT_Mu50", &HLT_Mu50, "HLT_Mu50/i" );
-  tree->Branch("DST_Run3PFScouting", &DST_Run3PFScouting, "DST_Run3PFScouting/i" );
+  tree->Branch("DST_Scouting_DoubleMu3", &DST_Scouting_DoubleMu3, "DST_Scouting_DoubleMu3/i" );
+  tree->Branch("DST_Scouting_EG16EG12", &DST_Scouting_EG16EG12, "DST_Scouting_EG16EG12/i" );
+  tree->Branch("DST_Scouting_EG30", &DST_Scouting_EG30, "DST_Scouting_EG30/i" );
+  tree->Branch("DST_Scouting_JetHT", &DST_Scouting_JetHT, "DST_Scouting_JetHT/i" );
   tree->Branch("DST_HLTMuon_Run3PFScouting", &DST_HLTMuon_Run3PFScouting, "DST_HLTMuon_Run3PFScouting/i" );
   tree->Branch("HLT_OtherScoutingPFMonitor", &HLT_OtherScoutingPFMonitor, "HLT_OtherScoutingPFMonitor/i" );
 
@@ -317,15 +329,12 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Electron_eta", &Electron_eta);
   tree->Branch("Electron_phi", &Electron_phi);
   tree->Branch("Electron_m", &Electron_m);
-  tree->Branch("Electron_d0", &Electron_d0);
-  tree->Branch("Electron_dz", &Electron_dz);
   tree->Branch("Electron_detain", &Electron_detain);
   tree->Branch("Electron_dphiin", &Electron_dphiin);
   tree->Branch("Electron_sigmaietaieta", &Electron_sigmaietaieta);
   tree->Branch("Electron_hoe", &Electron_hoe);
   tree->Branch("Electron_ooemoop", &Electron_ooemoop);
   tree->Branch("Electron_missinghits", &Electron_missinghits);
-  tree->Branch("Electron_charge", &Electron_charge);
   tree->Branch("Electron_ecaliso", &Electron_ecaliso);
   tree->Branch("Electron_hcaliso", &Electron_hcaliso);
   tree->Branch("Electron_tkiso", &Electron_tkiso);
@@ -335,6 +344,15 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("Electron_seedid", &Electron_seedid);
   tree->Branch("Electron_rechitzerosuppression", &Electron_rechitzerosuppression);
   
+  // Offline Photons
+  tree->Branch("n_oflpho", &n_oflpho, "n_oflpho/i");
+  tree->Branch("OflPhoton_energy", &OflPhoton_energy);
+  tree->Branch("OflPhoton_pt", &OflPhoton_pt);
+  tree->Branch("OflPhoton_eta", &OflPhoton_eta);
+  tree->Branch("OflPhoton_phi", &OflPhoton_phi);
+  tree->Branch("OflPhoton_sigmaietaieta", &OflPhoton_sigmaietaieta);
+  tree->Branch("OflPhoton_hoe", &OflPhoton_hoe);
+
   // Photons
   tree->Branch("n_pho", &n_pho, "n_pho/i");
   tree->Branch("Photon_pt", &Photon_pt);
@@ -388,6 +406,10 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   Handle<vector<Run3ScoutingElectron> > electronsH;
   iEvent.getByToken(electronsToken, electronsH);
   bool eleValid = electronsH.isValid();
+
+  Handle<vector<pat::Photon> > oflphotonsH;
+  iEvent.getByToken(oflphotonsToken, oflphotonsH);
+  bool oflphoValid = oflphotonsH.isValid();
 
   Handle<vector<Run3ScoutingPhoton> > photonsH;
   iEvent.getByToken(photonsToken, photonsH);
@@ -456,7 +478,10 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   // Access the trigger bits
   HLT_IsoMu27 = 0;
   HLT_Mu50 = 0;
-  DST_Run3PFScouting = 0;
+  DST_Scouting_DoubleMu3 = 0;
+  DST_Scouting_EG16EG12 = 0;
+  DST_Scouting_EG30 = 0;
+  DST_Scouting_JetHT = 0;
   DST_HLTMuon_Run3PFScouting = 0;
   Int_t HLT_Ele115_CaloIdVT_GsfTrkIdT = 0;
   Int_t HLT_Ele35_WPTight_Gsf = 0;
@@ -472,7 +497,10 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 	TString TrigPath =trigName.triggerName(i_Trig);
 	if(TrigPath.Index("HLT_IsoMu27_v") >=0) HLT_IsoMu27 = 1; 
 	if(TrigPath.Index("HLT_Mu50_v") >=0) HLT_Mu50 = 1; 
-	if(TrigPath.Index("DST_Run3_PFScoutingPixelTracking_v") >=0) DST_Run3PFScouting = 1; 
+	if(TrigPath.Index("DST_Run3_DoubleMu3_PFScoutingPixelTracking_v") >=0) DST_Scouting_DoubleMu3 = 1;
+	if(TrigPath.Index("DST_Run3_EG16_EG12_PFScoutingPixelTracking_v") >=0) DST_Scouting_EG16EG12 = 1;
+	if(TrigPath.Index("DST_Run3_EG30_PFScoutingPixelTracking_v") >=0) DST_Scouting_EG30 = 1;
+	if(TrigPath.Index("DST_Run3_JetHT_PFScoutingPixelTracking_v") >=0) DST_Scouting_JetHT = 1;
 	if(TrigPath.Index("DST_HLTMuon_Run3_PFScoutingPixelTracking_v") >=0) DST_HLTMuon_Run3PFScouting = 1; 
 	if(TrigPath.Index("HLT_Ele115_CaloIdVT_GsfTrkIdT_v") >=0) HLT_Ele115_CaloIdVT_GsfTrkIdT = 1; 
 	if(TrigPath.Index("HLT_Ele35_WPTight_Gsf_v") >=0) HLT_Ele35_WPTight_Gsf = 1; 
@@ -542,7 +570,7 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       OflElectron_sigmaietaieta.push_back(oflelectrons_iter->full5x5_sigmaIetaIeta());
       OflElectron_hoe.push_back(oflelectrons_iter->hadronicOverEm());
       OflElectron_ooemoop.push_back( (1.0/oflelectrons_iter->correctedEcalEnergy()) - (1.0/oflelectrons_iter->p()) );
-      OflElectron_missinghits.push_back(oflelectrons_iter->gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS));
+      //OflElectron_missinghits.push_back(oflelectrons_iter->gsfTrack()->hitPattern().numberOfLostHits(reco::HitPattern::MISSING_INNER_HITS));
       OflElectron_charge.push_back(oflelectrons_iter->charge());
       OflElectron_photoniso.push_back(oflelectrons_iter->photonIso());
       OflElectron_neuthadroniso.push_back(oflelectrons_iter->neutralHadronIso());
@@ -562,15 +590,12 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
       Electron_eta.push_back(electrons_iter->eta());
       Electron_phi.push_back(electrons_iter->phi());	
       Electron_m.push_back(electrons_iter->m());
-      Electron_d0.push_back(electrons_iter->d0());
-      Electron_dz.push_back(electrons_iter->dz());
       Electron_detain.push_back(electrons_iter->dEtaIn());
       Electron_dphiin.push_back(electrons_iter->dPhiIn());
       Electron_sigmaietaieta.push_back(electrons_iter->sigmaIetaIeta());
       Electron_hoe.push_back(electrons_iter->hOverE());	
       Electron_ooemoop.push_back(electrons_iter->ooEMOop());
       Electron_missinghits.push_back(electrons_iter->missingHits());
-      Electron_charge.push_back(electrons_iter->charge());
       Electron_ecaliso.push_back(electrons_iter->ecalIso());
       Electron_hcaliso.push_back(electrons_iter->hcalIso());
       Electron_tkiso.push_back(electrons_iter->trackIso());
@@ -583,7 +608,22 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
     } // end electron loop
   } // end eleValid condition
 
-  // Muons
+  // Offline Photons
+  n_oflpho = 0;
+  if(oflphoValid) {
+    for (auto &oflpho : *oflphotonsH) {
+      auto *oflphotons_iter = &oflpho;
+      OflPhoton_energy.push_back(oflphotons_iter->energy());
+      OflPhoton_pt.push_back(oflphotons_iter->pt());
+      OflPhoton_eta.push_back(oflphotons_iter->eta());
+      OflPhoton_phi.push_back(oflphotons_iter->phi());	
+      OflPhoton_sigmaietaieta.push_back(oflphotons_iter->full5x5_sigmaIetaIeta());
+      OflPhoton_hoe.push_back(oflphotons_iter->hadronicOverEm());
+      n_oflpho++;
+    } // end offline photon loop
+  } // end oflphoValid condition
+
+  // Photons
   n_pho = 0;  
   if(phoValid) {
 
@@ -668,15 +708,12 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Electron_eta.clear();
   Electron_phi.clear();
   Electron_m.clear();
-  Electron_d0.clear();
-  Electron_dz.clear();
   Electron_detain.clear();
   Electron_dphiin.clear();
   Electron_sigmaietaieta.clear();
   Electron_hoe.clear();
   Electron_ooemoop.clear();
   Electron_missinghits.clear();
-  Electron_charge.clear();
   Electron_ecaliso.clear();
   Electron_hcaliso.clear();
   Electron_tkiso.clear();
@@ -685,6 +722,12 @@ void EGammaOnly_ScoutingNanoAOD::clearVars(){
   Electron_smaj.clear();
   Electron_seedid.clear();
   Electron_rechitzerosuppression.clear();
+  OflPhoton_energy.clear();
+  OflPhoton_pt.clear();
+  OflPhoton_eta.clear();
+  OflPhoton_phi.clear();
+  OflPhoton_sigmaietaieta.clear();
+  OflPhoton_hoe.clear();
   Photon_pt.clear();
   Photon_eta.clear();
   Photon_phi.clear();
