@@ -33,7 +33,7 @@ params.parseArguments()
 
 # Message Logger settings
 process.load("FWCore.MessageService.MessageLogger_cfi")
-process.MessageLogger.cerr.FwkReport.reportEvery = 1
+process.MessageLogger.cerr.FwkReport.reportEvery = 1000
 
 # Set the process options -- Display summary at the end, enable unscheduled execution
 process.options = cms.untracked.PSet(
@@ -42,11 +42,10 @@ process.options = cms.untracked.PSet(
 )
 
 # How many events to process
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( -1 ) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32( 100000 ) )
 
 process.source = cms.Source("PoolSource",
-#                            fileNames = cms.untracked.vstring(params.inputFile),
-                            fileNames = cms.untracked.vstring("file:/pnfs/iihe/cms/store/user/asahasra/ScoutingPFMonitor/Monitoring2023ScoutingConfigv1_230502ScoutingReRun_small100k/230502_190754/0000/outputScoutingPF_1.root"),
+                            fileNames = cms.untracked.vstring(params.inputFile),
                         )
 
 # Load the standard set of configuration modules
@@ -54,6 +53,11 @@ process.source = cms.Source("PoolSource",
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 #process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
 #process.load('Configuration.StandardSequences.MagneticField_cff')
+
+##--- l1 stage2 digis ---
+process.load("EventFilter.L1TRawToDigi.gtStage2Digis_cfi")
+process.gtStage2Digis.InputLabel = cms.InputTag( "hltFEDSelectorL1" )
+process.load('PhysicsTools.PatAlgos.producersLayer1.patCandidates_cff')
 
 # Load the global tag
 from Configuration.AlCa.GlobalTag import GlobalTag
@@ -68,17 +72,17 @@ L1Info = ['L1_DoubleMu_12_5', 'L1_DoubleMu_15_7', 'L1_HTT200er', 'L1_HTT255er', 
 
 # Make tree
 process.mmtree = cms.EDAnalyzer('EGammaOnly_ScoutingNanoAOD',
-                                triggerhltres = cms.InputTag("TriggerResults::HLTX"),
-                                primaryVtx = cms.InputTag("hltScoutingPrimaryVertexPacker:primaryVtx:HLTX"),
-                                electrons = cms.InputTag("hltScoutingEgammaPacker::HLTX"),
-                                photons = cms.InputTag("hltScoutingEgammaPacker::HLTX"),
-                                rho = cms.InputTag("hltScoutingPFPacker:rho:HLTX"),
-                                AlgInputTag = cms.InputTag("hltGtStage2Digis::HLTX"),
-                                l1tAlgBlkInputTag = cms.InputTag("hltGtStage2Digis::HLTX"),
-                                l1tExtBlkInputTag = cms.InputTag("hltGtStage2Digis::HLTX"),
+                                triggerhltres = cms.InputTag("TriggerResults::HLT"),
+                                primaryVtx = cms.InputTag("hltScoutingPrimaryVertexPacker:primaryVtx:HLT"),
+                                electrons = cms.InputTag("hltScoutingEgammaPacker::HLT"),
+                                photons = cms.InputTag("hltScoutingEgammaPacker::HLT"),
+                                rho = cms.InputTag("hltScoutingPFPacker:rho:HLT"),
+                                AlgInputTag = cms.InputTag("gtStage2Digis"),
+                                l1tAlgBlkInputTag = cms.InputTag("gtStage2Digis"),
+                                l1tExtBlkInputTag = cms.InputTag("gtStage2Digis"),
                                 l1Seeds = cms.vstring(L1Info),
                                 doL1 = cms.bool(True)
                             )
 
-#process.p = cms.Path( process.gtStage2Digis*process.mmtree )
-process.p = cms.Path( process.mmtree )
+process.p = cms.Path( process.gtStage2Digis*process.mmtree )
+#process.p = cms.Path( process.mmtree )

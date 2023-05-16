@@ -102,7 +102,7 @@ private:
   // Interesting trigger results
   std::vector<bool> l1Result_;
   Int_t L1_TwoMu, L1_TwoMu_SQOS, L1_HT_ET, L1_OneJet, L1_TwoJet, L1_OneEG, L1_TwoEG;
-  Int_t HLT_IsoMu27, HLT_Mu50, DST_Run3PFScouting, DST_HLTMuon_Run3PFScouting, HLT_OtherScoutingPFMonitor;
+  Int_t HLT_IsoMu27, HLT_Mu50, DST_Scouting_DoubleMu3, DST_Scouting_EG16EG12, DST_Scouting_EG30, DST_Scouting_JetHT, DST_Run3PFScouting, DST_HLTMuon_Run3PFScouting, HLT_OtherScoutingPFMonitor;
 
   // Primary Vertex
   UInt_t n_pVtx;
@@ -220,6 +220,10 @@ EGammaOnly_ScoutingNanoAOD::EGammaOnly_ScoutingNanoAOD(const edm::ParameterSet& 
   tree->Branch("L1_TwoEG", &L1_TwoEG, "L1_TwoEG/i" );
   tree->Branch("HLT_IsoMu27", &HLT_IsoMu27, "HLT_IsoMu27/i" );
   tree->Branch("HLT_Mu50", &HLT_Mu50, "HLT_Mu50/i" );
+  tree->Branch("DST_Scouting_DoubleMu3", &DST_Scouting_DoubleMu3, "DST_Scouting_DoubleMu3/i" );
+  tree->Branch("DST_Scouting_EG16EG12", &DST_Scouting_EG16EG12, "DST_Scouting_EG16EG12/i" );
+  tree->Branch("DST_Scouting_EG30", &DST_Scouting_EG30, "DST_Scouting_EG30/i" );
+  tree->Branch("DST_Scouting_JetHT", &DST_Scouting_JetHT, "DST_Scouting_JetHT/i" );
   tree->Branch("DST_Run3PFScouting", &DST_Run3PFScouting, "DST_Run3PFScouting/i" );
   tree->Branch("DST_HLTMuon_Run3PFScouting", &DST_HLTMuon_Run3PFScouting, "DST_HLTMuon_Run3PFScouting/i" );
   tree->Branch("HLT_OtherScoutingPFMonitor", &HLT_OtherScoutingPFMonitor, "HLT_OtherScoutingPFMonitor/i" );
@@ -370,6 +374,10 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
   // Access the trigger bits
   HLT_IsoMu27 = 0;
   HLT_Mu50 = 0;
+  DST_Scouting_DoubleMu3 = 0;
+  DST_Scouting_EG16EG12 = 0;
+  DST_Scouting_EG30 = 0;
+  DST_Scouting_JetHT = 0;
   DST_Run3PFScouting = 0;
   DST_HLTMuon_Run3PFScouting = 0;
   Int_t HLT_Ele115_CaloIdVT_GsfTrkIdT = 0;
@@ -386,6 +394,10 @@ void EGammaOnly_ScoutingNanoAOD::analyze(const edm::Event& iEvent, const edm::Ev
 	TString TrigPath =trigName.triggerName(i_Trig);
 	if(TrigPath.Index("HLT_IsoMu27_v") >=0) HLT_IsoMu27 = 1; 
 	if(TrigPath.Index("HLT_Mu50_v") >=0) HLT_Mu50 = 1; 
+	if(TrigPath.Index("DST_Run3_DoubleMu3_PFScoutingPixelTracking_v") >=0) DST_Scouting_DoubleMu3 = 1;
+	if(TrigPath.Index("DST_Run3_EG16_EG12_PFScoutingPixelTracking_v") >=0) DST_Scouting_EG16EG12 = 1;
+	if(TrigPath.Index("DST_Run3_EG30_PFScoutingPixelTracking_v") >=0) DST_Scouting_EG30 = 1;
+	if(TrigPath.Index("DST_Run3_JetHT_PFScoutingPixelTracking_v") >=0) DST_Scouting_JetHT = 1;
 	if(TrigPath.Index("DST_Run3_PFScoutingPixelTracking_v") >=0) DST_Run3PFScouting = 1; 
 	if(TrigPath.Index("DST_HLTMuon_Run3_PFScoutingPixelTracking_v") >=0) DST_HLTMuon_Run3PFScouting = 1; 
 	if(TrigPath.Index("HLT_Ele115_CaloIdVT_GsfTrkIdT_v") >=0) HLT_Ele115_CaloIdVT_GsfTrkIdT = 1; 
