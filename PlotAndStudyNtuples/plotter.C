@@ -509,7 +509,7 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   
   TCanvas* c1;
   c1 = new TCanvas();
-  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(), (float []){-1,0.8,0.9,0.95},false,false,(float []){0.0,1.1},false);
+  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(), (float []){0.5,0.15,0.75,0.45},false,false,(float []){0.0,1.1},false);
   auto pad = c1->GetPad(3);
   for(unsigned int filenum=0; filenum<file.size(); filenum++) {
     pEff[filenum]->Draw("same");
@@ -975,41 +975,58 @@ int plotter() {
   //comparesamevariable(file, cutname, "elpt", -1, 250, 1, true, true, true, (float []){1,5000}, (float []){0.6,0.7,0.85,0.95}, false, "p_{T} [GeV]");
   //comparesamevariable(file, cutname, "eleta", 200, 800, 10, false, true, true, (float []){0,800}, (float []){0.6,0.7,0.85,0.95}, false, "#eta");
  
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  coloropt.push_back(kBlack);
-  legend.push_back("Muon");
-  histtype.push_back("hist");
-  markerstyle.push_back(20);
-  markersize.push_back(2);
-  legendmarkerstyle.push_back("pe");
-  legendEntries = legend;
-
   file.clear();
   cutname.clear();
   coloropt.clear();
+  legendEntries.clear();
+  legendmarkerstyle.clear();
+
   file.push_back(datahistfile);
-  coloropt.push_back(kBlue);
-  cutname.push_back("noeg_ptgt2etalt2p5_oflsct_eleofleb_lead_elpt");
-  cutname.push_back("noeg_ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_elpt");  
+  coloropt.push_back(kBlack);
+  legendEntries.push_back("|#eta|<1.44");
+  legendmarkerstyle.push_back("le");
+  cutname.push_back("noeg_ptgt2etlt1p44_oflsct_eleofleb_lead_elpt");
+  cutname.push_back("noeg_ptgt2etlt1p44_oflsct_eleofleb_aftmch_lead_elpt");  
   file.push_back(datahistfile);
-  coloropt.push_back(kGreen+2);
-  cutname.push_back("eg1_ptgt2etalt2p5_oflsct_eleofleb_lead_elpt");
-  cutname.push_back("eg1_ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_elpt");  
+  coloropt.push_back(kGray);
+  legendEntries.push_back("1.57<|#eta|<2.0");
+  legendmarkerstyle.push_back("le");
+  cutname.push_back("noeg_ptgt2etgt1p57lt2_oflsct_eleoflee_lead_elpt");
+  cutname.push_back("noeg_ptgt2etgt1p57lt2_oflsct_eleoflee_aftmch_lead_elpt");  
   file.push_back(datahistfile);
-  coloropt.push_back(kOrange+2);
-  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_lead_elpt");
-  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_elpt");  
-  file.push_back(datahistfile);
-  coloropt.push_back(kOrange);
-  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_sublead_elpt");
-  cutname.push_back("eg2_ptgt2etalt2p5_oflsct_eleofleb_aftmch_sublead_elpt");  
+  coloropt.push_back(kRed);
+  legendEntries.push_back("2.0<|#eta|<2.5");
+  legendmarkerstyle.push_back("le");
+  cutname.push_back("noeg_ptgt2etgt2lt2p5_oflsct_eleoflee_lead_elpt");
+  cutname.push_back("noeg_ptgt2etgt2lt2p5_oflsct_eleoflee_aftmch_lead_elpt");  
   vector<double> binspt{0,1,2,3,4,6,8,10,14,18,22,26,30,35,40,50,60,70,80,100};
+  efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
+
+  cutname.clear();
+  cutname.push_back("eg1_ptgt2etlt1p44_oflsct_eleofleb_lead_elpt");
+  cutname.push_back("eg1_ptgt2etlt1p44_oflsct_eleofleb_aftmch_lead_elpt");  
+  cutname.push_back("eg1_ptgt2etgt1p57lt2_oflsct_eleoflee_lead_elpt");
+  cutname.push_back("eg1_ptgt2etgt1p57lt2_oflsct_eleoflee_aftmch_lead_elpt");  
+  cutname.push_back("eg1_ptgt2etgt2lt2p5_oflsct_eleoflee_lead_elpt");
+  cutname.push_back("eg1_ptgt2etgt2lt2p5_oflsct_eleoflee_aftmch_lead_elpt");  
+  efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
+
+  cutname.clear();
+  cutname.push_back("eg2_ptgt2etlt1p44_oflsct_eleofleb_lead_elpt");
+  cutname.push_back("eg2_ptgt2etlt1p44_oflsct_eleofleb_aftmch_lead_elpt");  
+  cutname.push_back("eg2_ptgt2etgt1p57lt2_oflsct_eleoflee_lead_elpt");
+  cutname.push_back("eg2_ptgt2etgt1p57lt2_oflsct_eleoflee_aftmch_lead_elpt");  
+  cutname.push_back("eg2_ptgt2etgt2lt2p5_oflsct_eleoflee_lead_elpt");
+  cutname.push_back("eg2_ptgt2etgt2lt2p5_oflsct_eleoflee_aftmch_lead_elpt");  
+  efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
+
+  cutname.clear();
+  cutname.push_back("eg2_ptgt2etlt1p44_oflsct_eleofleb_sublead_elpt");
+  cutname.push_back("eg2_ptgt2etlt1p44_oflsct_eleofleb_aftmch_sublead_elpt");  
+  cutname.push_back("eg2_ptgt2etgt1p57lt2_oflsct_eleoflee_sublead_elpt");
+  cutname.push_back("eg2_ptgt2etgt1p57lt2_oflsct_eleoflee_aftmch_sublead_elpt");  
+  cutname.push_back("eg2_ptgt2etgt2lt2p5_oflsct_eleoflee_sublead_elpt");
+  cutname.push_back("eg2_ptgt2etgt2lt2p5_oflsct_eleoflee_aftmch_sublead_elpt");  
   efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
 
   cutname.clear();
@@ -1020,13 +1037,16 @@ int plotter() {
   file.clear();
   file.push_back(datahistfile);
   file.push_back(datahistfile);
+  file.push_back(datahistfile);
   cutname.clear();
-  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb_lead_eleta");
-  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb_aftmch_lead_eleta");  
-  cutname.push_back("ptgt2etalt2p5_oflsct_eleoflee_lead_eleta");
-  cutname.push_back("ptgt2etalt2p5_oflsct_eleoflee_aftmch_lead_eleta");  
+  cutname.push_back("eg1_ptgt2etlt1p44_oflsct_eleofleb_lead_eleta");
+  cutname.push_back("eg1_ptgt2etlt1p44_oflsct_eleofleb_aftmch_lead_eleta");  
+  cutname.push_back("eg1_ptgt2etgt1p57lt2_oflsct_eleoflee_lead_eleta");
+  cutname.push_back("eg1_ptgt2etgt1p57lt2_oflsct_eleoflee_aftmch_lead_eleta");  
+  cutname.push_back("eg1_ptgt2etgt2lt2p5_oflsct_eleoflee_lead_eleta");
+  cutname.push_back("eg1_ptgt2etgt2lt2p5_oflsct_eleoflee_aftmch_lead_eleta");  
   vector<double> binseta{-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
-  //efficiency(file, cutname, binseta.size()-1, &binseta[0], "#eta");
+  efficiency(file, cutname, binseta.size()-1, &binseta[0], "#eta");
 
   cutname.clear();
   cutname.push_back("mutrig_elptgt50_elesct_elphi");

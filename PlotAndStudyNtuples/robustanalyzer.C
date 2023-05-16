@@ -71,6 +71,8 @@ robustanalyzer::robustanalyzer(TString filename, TString outfilename, int numCor
 
   n_rho = new TTreeReaderValue<unsigned int>((*tree), "n_rhoval");
   rho = new TTreeReaderValue<vector<float>>((*tree), "rho");
+  n_oflrho = new TTreeReaderValue<unsigned int>((*tree), "n_oflrhoval");
+  oflrho = new TTreeReaderValue<vector<float>>((*tree), "oflrho");
 
   n_pho = new TTreeReaderValue<unsigned int>((*tree), "n_pho");
   pho_pt = new TTreeReaderValue<vector<float>>((*tree), "Photon_pt");
@@ -116,10 +118,26 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   int nosel=0;
 
   addhist_oflsct_electron("nosel_oflsct_ele");
+
   addhist_oflsct_electron("ptgt2etalt2p5_oflsct_ele");
   addhist_oflsct_electron("noeg_ptgt2etalt2p5_oflsct_ele");
   addhist_oflsct_electron("eg1_ptgt2etalt2p5_oflsct_ele");
   addhist_oflsct_electron("eg2_ptgt2etalt2p5_oflsct_ele");
+
+  addhist_oflsct_electron("ptgt2etlt1p44_oflsct_ele");
+  addhist_oflsct_electron("noeg_ptgt2etlt1p44_oflsct_ele");
+  addhist_oflsct_electron("eg1_ptgt2etlt1p44_oflsct_ele");
+  addhist_oflsct_electron("eg2_ptgt2etlt1p44_oflsct_ele");
+
+  addhist_oflsct_electron("ptgt2etgt1p57lt2_oflsct_ele");
+  addhist_oflsct_electron("noeg_ptgt2etgt1p57lt2_oflsct_ele");
+  addhist_oflsct_electron("eg1_ptgt2etgt1p57lt2_oflsct_ele");
+  addhist_oflsct_electron("eg2_ptgt2etgt1p57lt2_oflsct_ele");
+
+  addhist_oflsct_electron("ptgt2etgt2lt2p5_oflsct_ele");
+  addhist_oflsct_electron("noeg_ptgt2etgt2lt2p5_oflsct_ele");
+  addhist_oflsct_electron("eg1_ptgt2etgt2lt2p5_oflsct_ele");
+  addhist_oflsct_electron("eg2_ptgt2etgt2lt2p5_oflsct_ele");
   /* For gen matching
   addhist_oflsct_electron("ptgt2lt5etalt2p5_oflsct_ele");
   addhist_oflsct_electron("ptgt5lt8etalt2p5_oflsct_ele");
@@ -179,6 +197,10 @@ void robustanalyzer::analyzerelectrons() {
   // vector of offline electron indices
   vector<int> noseloflelidx;
   vector<int> ptgt2etalt2p5oflelidx;
+  vector<int> ptgt2etlt1p44oflelidx;
+  vector<int> ptgt2etgt1p57lt2oflelidx;
+  vector<int> ptgt2etgt2lt2p5oflelidx;
+  /*
   vector<int> ptgt2lt5etalt2p5oflelidx;
   vector<int> ptgt5lt8etalt2p5oflelidx;
   vector<int> ptgt8lt11etalt2p5oflelidx;
@@ -189,7 +211,8 @@ void robustanalyzer::analyzerelectrons() {
   vector<int> ptgt26lt30etalt2p5oflelidx;
   vector<int> ptgt30lt50etalt2p5oflelidx;
   vector<int> ptgt50lt100etalt2p5oflelidx;
-
+  */
+  
   // vector of electron indices
   vector<int> noselelidx;
   vector<int> ptgt2etalt2p5elidx;
@@ -219,14 +242,53 @@ void robustanalyzer::analyzerelectrons() {
     TLorentzVector ele;
     ele.SetPtEtaPhiM((*ofle_pt)->at(ofleidx), (*ofle_eta)->at(ofleidx), (*ofle_phi)->at(ofleidx), 0.0005);
     double ele_energy = ele.Energy();
+    double ea = effectivearea((*ofle_eta)->at(ofleidx));
+    double neutiso = ((*ofle_nthadiso)->at(ofleidx))+((*ofle_phoiso)->at(ofleidx))-(((*oflrho)->at(0))*ea);
+    double reliso = ((*ofle_cghadiso)->at(ofleidx))+(neutiso>0?neutiso:0);
     
     bool ptgt2etalt2p5eldec = true;
     ptgt2etalt2p5eldec *= (*ofle_pt)->at(ofleidx)>2.0;
     ptgt2etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)/*+(0.0324*(*(*rho))/ele_energy)*/))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)/*+(0.183*(*(*rho))/ele_energy)*/));
+    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
+    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
+    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
+    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
+							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
+    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
     if(ptgt2etalt2p5eldec) ptgt2etalt2p5oflelidx.push_back(ofleidx);
+
+    bool ptgt2etlt1p44eldec = true;
+    ptgt2etlt1p44eldec *= (*ofle_pt)->at(ofleidx)>2.0;
+    ptgt2etlt1p44eldec *= abs((*ofle_eta)->at(ofleidx))<1.44;
+    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
+    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
+    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
+    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
+							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
+    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
+    if(ptgt2etlt1p44eldec) ptgt2etlt1p44oflelidx.push_back(ofleidx);
+
+    bool ptgt2etgt1p57lt2eldec = true;
+    ptgt2etgt1p57lt2eldec *= (*ofle_pt)->at(ofleidx)>2.0;
+    ptgt2etgt1p57lt2eldec *= ( (abs((*ofle_eta)->at(ofleidx))>1.57) && (abs((*ofle_eta)->at(ofleidx))<2.0) );
+    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
+    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
+    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
+    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
+							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
+    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
+    if(ptgt2etgt1p57lt2eldec) ptgt2etgt1p57lt2oflelidx.push_back(ofleidx);
+
+    bool ptgt2etgt2lt2p5eldec = true;
+    ptgt2etgt2lt2p5eldec *= (*ofle_pt)->at(ofleidx)>2.0;
+    ptgt2etgt2lt2p5eldec *= ( (abs((*ofle_eta)->at(ofleidx))>2.0) && (abs((*ofle_eta)->at(ofleidx))<2.5) );
+    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
+    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
+    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
+    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
+							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
+    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
+    if(ptgt2etgt2lt2p5eldec) ptgt2etgt2lt2p5oflelidx.push_back(ofleidx);
 
     /* For gen matching
     bool ptgt2lt5etalt2p5eldec = true;
@@ -359,6 +421,18 @@ void robustanalyzer::analyzerelectrons() {
   if(l1_noeg) fillhistinevent_oflsct_electron("noeg_ptgt2etalt2p5_oflsct_ele", ptgt2etalt2p5oflelidx, ptgt2etalt2p5elidx);
   if((*(*l1_1eg))==1) fillhistinevent_oflsct_electron("eg1_ptgt2etalt2p5_oflsct_ele", ptgt2etalt2p5oflelidx, ptgt2etalt2p5elidx);
   if((*(*l1_2eg))==1) fillhistinevent_oflsct_electron("eg2_ptgt2etalt2p5_oflsct_ele", ptgt2etalt2p5oflelidx, ptgt2etalt2p5elidx);
+  fillhistinevent_oflsct_electron("ptgt2etlt1p44_oflsct_ele", ptgt2etlt1p44oflelidx, ptgt2etalt2p5elidx);
+  if(l1_noeg) fillhistinevent_oflsct_electron("noeg_ptgt2etlt1p44_oflsct_ele", ptgt2etlt1p44oflelidx, ptgt2etalt2p5elidx);
+  if((*(*l1_1eg))==1) fillhistinevent_oflsct_electron("eg1_ptgt2etlt1p44_oflsct_ele", ptgt2etlt1p44oflelidx, ptgt2etalt2p5elidx);
+  if((*(*l1_2eg))==1) fillhistinevent_oflsct_electron("eg2_ptgt2etlt1p44_oflsct_ele", ptgt2etlt1p44oflelidx, ptgt2etalt2p5elidx);
+  fillhistinevent_oflsct_electron("ptgt2etgt1p57lt2_oflsct_ele", ptgt2etgt1p57lt2oflelidx, ptgt2etalt2p5elidx);
+  if(l1_noeg) fillhistinevent_oflsct_electron("noeg_ptgt2etgt1p57lt2_oflsct_ele", ptgt2etgt1p57lt2oflelidx, ptgt2etalt2p5elidx);
+  if((*(*l1_1eg))==1) fillhistinevent_oflsct_electron("eg1_ptgt2etgt1p57lt2_oflsct_ele", ptgt2etgt1p57lt2oflelidx, ptgt2etalt2p5elidx);
+  if((*(*l1_2eg))==1) fillhistinevent_oflsct_electron("eg2_ptgt2etgt1p57lt2_oflsct_ele", ptgt2etgt1p57lt2oflelidx, ptgt2etalt2p5elidx);
+  fillhistinevent_oflsct_electron("ptgt2etgt2lt2p5_oflsct_ele", ptgt2etgt2lt2p5oflelidx, ptgt2etalt2p5elidx);
+  if(l1_noeg) fillhistinevent_oflsct_electron("noeg_ptgt2etgt2lt2p5_oflsct_ele", ptgt2etgt2lt2p5oflelidx, ptgt2etalt2p5elidx);
+  if((*(*l1_1eg))==1) fillhistinevent_oflsct_electron("eg1_ptgt2etgt2lt2p5_oflsct_ele", ptgt2etgt2lt2p5oflelidx, ptgt2etalt2p5elidx);
+  if((*(*l1_2eg))==1) fillhistinevent_oflsct_electron("eg2_ptgt2etgt2lt2p5_oflsct_ele", ptgt2etgt2lt2p5oflelidx, ptgt2etalt2p5elidx);
   /* For gen matching
   fillhistinevent_oflsct_electron("ptgt2lt5etalt2p5_oflsct_ele", ptgt2lt5etalt2p5oflelidx, ptgt2etalt2p5elidx);
   fillhistinevent_oflsct_electron("ptgt5lt8etalt2p5_oflsct_ele", ptgt5lt8etalt2p5oflelidx, ptgt2etalt2p5elidx);
@@ -375,6 +449,9 @@ void robustanalyzer::analyzerelectrons() {
   // Clear all vector
   noseloflelidx.clear();
   ptgt2etalt2p5oflelidx.clear();
+  ptgt2etlt1p44oflelidx.clear();
+  ptgt2etgt1p57lt2oflelidx.clear();
+  ptgt2etgt2lt2p5oflelidx.clear();
   /* For gen matching
   ptgt2lt5etalt2p5oflelidx.clear();
   ptgt5lt8etalt2p5oflelidx.clear();
@@ -1267,4 +1344,52 @@ void robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *factor
       }
     }
   }
+}
+
+double robustanalyzer::effectivearea(double eta) {
+
+  double ea = -1.0;
+  double abseta = abs(eta);
+
+  if(abseta < 1.0) {
+    ea = 0.1243;
+  }
+  else if(abseta >= 1.0 && abseta < 1.479) {
+    ea = 0.1458;
+  }
+  else if(abseta >= 1.479 && abseta < 2.0) {
+    ea = 0.0992;
+  }
+  else if(abseta >= 2.0 && abseta < 2.2) {
+    ea = 0.0794;
+  }
+  else if(abseta >= 2.2 && abseta < 2.3) {
+    ea = 0.0762;
+  }
+  else if(abseta >= 2.3 && abseta < 2.4) {
+    ea = 0.0766;
+  }
+  else if(abseta >= 2.4 && abseta < 2.5) {
+    ea = 0.1003;
+  }
+  else if(abseta >= 2.5 && abseta < 2.6) {
+    ea = 0.2322;
+  }
+  else if(abseta >= 2.6 && abseta < 2.65) {
+    ea = 0.2537;
+  }
+  else if(abseta >= 2.65 && abseta < 2.7) {
+    ea = 0.2529;
+  }
+  else if(abseta >= 2.7 && abseta < 2.8) {
+    ea = 0.2563;
+  }
+  else if(abseta >= 2.8 && abseta < 3.0) {
+    ea = 0.2423;
+  }
+  else {
+    ea = 0.0;
+  }
+  
+  return ea;
 }

@@ -28,7 +28,8 @@ public:
   void fillhistinevent_photon(TString, vector<int>);
   bool offline_scouting_angmch(double, double);
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
-    
+  double effectivearea(double);
+  
   private:
 
   int nC;
@@ -99,6 +100,8 @@ public:
 
   TTreeReaderValue<unsigned int> *n_rho;
   TTreeReaderValue<vector<float>> *rho;
+  TTreeReaderValue<unsigned int> *n_oflrho;
+  TTreeReaderValue<vector<float>> *oflrho;
   
   TFile* outfile;
 
