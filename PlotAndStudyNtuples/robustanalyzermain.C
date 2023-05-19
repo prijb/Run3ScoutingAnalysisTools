@@ -20,8 +20,8 @@ int main(int argc, char* argv[]) {
   try {
     
     stringstream ss1;
-    ss1<<"hists_data_"<<cnt<<".root";
-    robustanalyzer rana_data("./data/CrabSkim230414_ScoutingNTuple_ForScoutingEleEff_fatdummy.root", ss1.str(), numCores);
+    ss1<<"hists_jpsipt28_"<<cnt<<".root";
+    robustanalyzer rana_data("./data/JPsiPt28_EPt15To100_13p6TeV_ntuple_1887590.root", ss1.str(), numCores, true/*isMC*/);
     rana_data.analyzersinglefile(cnt);
   }
   catch (char const* exc) {

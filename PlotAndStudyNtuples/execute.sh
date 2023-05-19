@@ -31,6 +31,8 @@ echo "Run over. Clean up and combine files."
 
 rm robustanalyzer.out
 
-hadd -f hists_data.root hists_data_?.root
+#hadd -f hists_data.root hists_data_?.root
+hadd -f hists_jpsipt28.root hists_jpsipt28_?.root
 
-rm hists_data_?.root
+#rm hists_data_?.root
+rm hists_jpsipt28_?.root

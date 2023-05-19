@@ -5,13 +5,9 @@
 #include "enhance_plotter.C"
 #include "RooMsgService.h"
 
-double datasf = 1.09/19; // Data rate - 1.1 Hz, 22 events from parent trigger selection
-double sig3cmsf = 1.0/15;
-double sig30cmsf = 1.0/28;
-double sig1msf = 1.0/19;
-double sig3msf = 1.0/7;
 TString cutdeets = "Cut details";
 TFile* datahistfile = TFile::Open("hists_data.root","READ");
+TFile* jpsifile = TFile::Open("hists_jpsipt28.root","READ");
 TFile* tempfile = TFile::Open("hists_temp.root","RECREATE");
 
 TString seltext[2] = {"line1", "line2"};
@@ -66,7 +62,7 @@ int autoplotter(std::vector<TFile*> file, std::vector<TString> cutname) {
     gStyle->SetOptStat(0);
     //c1->SetLogx(true);
     histVar->Draw();
-    c1->SaveAs("./dirplots/"+foldername+"/"+keyName+".png");
+    c1->SaveAs("./JPsi_dirplots/"+foldername+"/"+keyName+".png");
     
   }
 
@@ -393,7 +389,7 @@ int subtractsideband(TFile* histfile, TString SpBhistname, double scaleSpB, TStr
   TCanvas* c1;
   c1 = new TCanvas();
   c1 = enhance_plotter(allhists, legendEntries, xaxistitle, yaxistitle, legPos, false, logY, yrange, false, histtype, markerstyle, markersize, legendmarkerstyle);
-  c1->SaveAs("./dirplots/"+foldername+"/"+hist_S->GetName()+".png");
+  c1->SaveAs("./JPsi_dirplots/"+foldername+"/"+hist_S->GetName()+".png");
 
   return -1;
 }
@@ -461,8 +457,8 @@ int comparesamevariable(std::vector<TFile*> file, std::vector<TString> cutname, 
   TCanvas* c1;
   c1 = new TCanvas();
   c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(),legPos, false, logY,yrange,normalize,histtype,markerstyle,markersize,legendmarkerstyle);
-  if(!normalize) c1->SaveAs("./dirplots/"+foldername+"/"+var+".png");
-  else  c1->SaveAs("./dirplots/"+foldername+"/"+var+"_normed.png");
+  if(!normalize) c1->SaveAs("./JPsi_dirplots/"+foldername+"/"+var+".png");
+  else  c1->SaveAs("./JPsi_dirplots/"+foldername+"/"+var+"_normed.png");
 
   return -1;
 }
@@ -514,7 +510,7 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   for(unsigned int filenum=0; filenum<file.size(); filenum++) {
     pEff[filenum]->Draw("same");
   }
-  c1->SaveAs("./ScoutingParkingPaper_dirplots/"+((TString)file[0]->GetName()).ReplaceAll(".root","")+"/"+cutnames[1]+"_eff.png");
+  c1->SaveAs("./JPsi_dirplots/"+((TString)file[0]->GetName()).ReplaceAll(".root","")+"/"+cutnames[1]+"_eff.png");
   
   return -1;
 }
@@ -534,65 +530,46 @@ int plotter() {
   markersize.clear();
   legendmarkerstyle.clear();
 
-  file.push_back(datahistfile);
-  cutname.push_back("mutrigselsct_elpt");
-  cutname.push_back("muAscouttrigselsct_elpt");
+  file.push_back(jpsifile);
+  cutname.push_back("noselgen_gen");
   coloropt.push_back(kBlack);
-  legend.push_back("Muon");
-  histtype.push_back("hist");
+  legend.push_back("nosel");
+  histtype.push_back("hist same e1");
   markerstyle.push_back(20);
   markersize.push_back(2);
-  legendmarkerstyle.push_back("pe");
+  legendmarkerstyle.push_back("le");
 
-  legendEntries = legend;
-  vector<double> binspt{0,10,20,30,40,50,60,70,80,100};
-  efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("mutrigselsct_eleta");
-  cutname.push_back("muAscouttrigselsct_eleta");
-  coloropt.push_back(kBlack);
-  legend.push_back("Muon");
-  histtype.push_back("hist");
+  file.push_back(jpsifile);
+  cutname.push_back("noselgen_dieg_gen");
+  coloropt.push_back(kRed);
+  legend.push_back("dieg");
+  histtype.push_back("hist same e1");
   markerstyle.push_back(20);
   markersize.push_back(2);
-  legendmarkerstyle.push_back("pe");
+  legendmarkerstyle.push_back("le");
 
-  legendEntries = legend;
-  vector<double> binseta{-3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0};
-  efficiency(file, cutname, binseta.size()-1, &binseta[0], "#eta");
-
-  file.clear();
-  cutname.clear();
-  coloropt.clear();
-  legend.clear();
-  histtype.clear();
-  markerstyle.clear();
-  markersize.clear();
-  legendmarkerstyle.clear();
-
-  file.push_back(datahistfile);
-  cutname.push_back("mutrigselsct_elphi");
-  cutname.push_back("muAscouttrigselsct_elphi");
-  coloropt.push_back(kBlack);
-  legend.push_back("Muon");
-  histtype.push_back("hist");
+  file.push_back(jpsifile);
+  cutname.push_back("noselgen_eg30_gen");
+  coloropt.push_back(kBlue);
+  legend.push_back("eg30");
+  histtype.push_back("hist same e1");
   markerstyle.push_back(20);
   markersize.push_back(2);
-  legendmarkerstyle.push_back("pe");
+  legendmarkerstyle.push_back("le");
 
   legendEntries = legend;
-  vector<double> binsphi{-3.3, -3.2, -3.1, -3.0, -2.9, -2.8, -2.7, -2.6, -2.5, -2.4, -2.3, -2.2, -2.1, -2.0, -1.9, -1.8, -1.7, -1.6, -1.5, -1.4, -1.3, -1.2, -1.1, -1.0, -0.9, -0.8, -0.7, -0.6, -0.5, -0.4, -0.3, -0.2, -0.1, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 2.9, 3.0, 3.1, 3.2, 3.3};
-  efficiency(file, cutname, binsphi.size()-1, &binsphi[0], "#phi");
+  comparesamevariable(file, cutname, "diel_dR", -1, 40, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "#DeltaR");
+  comparesamevariable(file, cutname, "el_pt", -1, 200, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "p_{T} [GeV]");
+  comparesamevariable(file, cutname, "el_mult", 5, 15, 1, true, true, true, (float []){1e-8,2}, (float []){0.55,0.7,0.75,0.95}, true, "multiplicity");
+  comparesamevariable(file, cutname, "jpsi_pt", -1, 200, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "J/#psi p_{T} [GeV]");
+  comparesamevariable(file, cutname, "leadel_pt", -1, 200, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "e_{1} p_{T} [GeV]");
+  comparesamevariable(file, cutname, "subleadel_pt", -1, 200, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "e_{2} p_{T} [GeV]");
+  comparesamevariable(file, cutname, "leadel_pt", -1, 200, 1, true, true, true, (float []){1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "e_{1} p_{T} [GeV]");
+  comparesamevariable(file, cutname, "subleadel_pt", -1, 200, 1, true, true, true, (float []){1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "e_{2} p_{T} [GeV]");
+  comparesamevariable(file, cutname, "leadel_eta", -1, -1, 1, true, true, true, (float []){1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "e_{1} #eta");
+  comparesamevariable(file, cutname, "subleadel_eta", -1, -1, 1, true, true, true, (float []){1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "e_{2} #eta");
+  comparesamevariable(file, cutname, "leadel_phi", -1, -1, 1, true, true, true, (float []){1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "e_{1} #phi");
+  comparesamevariable(file, cutname, "subleadel_phi", -1, -1, 1, true, true, true, (float []){1,1e5}, (float []){0.55,0.7,0.75,0.95}, false, "e_{2} #phi");
 
   tempfile->Close();
   return -1;
