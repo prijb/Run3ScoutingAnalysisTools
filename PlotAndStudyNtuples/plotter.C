@@ -509,11 +509,17 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   
   TCanvas* c1;
   c1 = new TCanvas();
-  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(), (float []){0.5,0.15,0.75,0.45},false,false,(float []){0.0,1.1},false);
+  c1 = enhance_plotter(allhists, legendEntries, allhists[0]->GetXaxis()->GetTitle(),allhists[0]->GetYaxis()->GetTitle(), (float []){-1,0.15,0.75,0.45},false,false,(float []){0.0,1.1},false);
   auto pad = c1->GetPad(3);
+  TLegend* leg = new TLegend(0.5,0.15,0.75,0.45);
+  leg->SetTextFont(132);
+  leg->SetTextSize(0.065);
+  leg->SetBorderSize(0);
   for(unsigned int filenum=0; filenum<file.size(); filenum++) {
     pEff[filenum]->Draw("same");
+    leg->AddEntry(pEff[filenum],legendEntries[filenum],legendmarkerstyle[filenum]);
   }
+  leg->Draw();
   c1->SaveAs("./ScoutingParkingPaper_dirplots/"+((TString)file[0]->GetName()).ReplaceAll(".root","")+"/"+cutnames[1]+"_eff.png");
   
   return -1;
@@ -624,9 +630,9 @@ void angmatching() {
   legendmarkerstyle.push_back("le");
 
   legendEntries = legend;
-  comparesamevariable(file, cutname, "deta", 9500, 10500, 10, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
-  comparesamevariable(file, cutname, "dphi", 9700, 10500, 5, false, false, false, (float []){0,0.13}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
-  comparesamevariable(file, cutname, "dr", -1, 400, 5, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
+  comparesamevariable(file, cutname, "deta", 9700, 10300, 5, false, false, false, (float []){0,0.13}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
+  comparesamevariable(file, cutname, "dphi", 9750, 10400, 5, false, false, false, (float []){0,0.17}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
+  comparesamevariable(file, cutname, "dr", -1, 250, 5, false, false, false, (float []){0,0.23}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
 
   file.clear();
   cutname.clear();
@@ -726,9 +732,9 @@ void angmatching() {
   legendmarkerstyle.push_back("le");
 
   legendEntries = legend;
-  comparesamevariable(file, cutname, "deta", 9500, 10500, 10, false, false, false, (float []){0,0.27}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
-  comparesamevariable(file, cutname, "dphi", 9700, 10500, 5, false, false, false, (float []){0,0.09}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
-  comparesamevariable(file, cutname, "dr", -1, 400, 5, false, false, false, (float []){0,0.2}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
+  comparesamevariable(file, cutname, "deta", 9700, 10300, 5, false, false, false, (float []){0,0.17}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#eta(sct, ele)");
+  comparesamevariable(file, cutname, "dphi", 9700, 10500, 5, false, false, false, (float []){0,0.13}, (float []){0.7,0.3,0.95,0.95}, true, "#Delta#phi(sct, ele)");
+  comparesamevariable(file, cutname, "dr", -1, 250, 5, false, false, false, (float []){0,0.21}, (float []){0.7,0.3,0.95,0.95}, true, "#DeltaR(sct, ele)");
 
   file.clear();
   cutname.clear();
@@ -954,53 +960,57 @@ int plotter() {
   legendmarkerstyle.clear();
 
   file.push_back(datahistfile);
-  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb");
+  cutname.push_back("eg1_ptgt2etlt1p44_oflsct_eleofleb");
   coloropt.push_back(kBlack);
-  legend.push_back("Mu Trig");
+  legend.push_back("Offline electron");
   histtype.push_back("hist e1");
   markerstyle.push_back(1);
   markersize.push_back(0);
   legendmarkerstyle.push_back("le");
 
   file.push_back(datahistfile);
-  cutname.push_back("ptgt2etalt2p5_oflsct_eleofleb_aftmch");
+  cutname.push_back("eg1_ptgt2etlt1p44_oflsct_eleofleb_aftmch");
   coloropt.push_back(kRed);
-  legend.push_back("Mu+Sct Trig");
+  legend.push_back("Scouting #DeltaR matched");
   histtype.push_back("hist e1 same");
   markerstyle.push_back(1);
   markersize.push_back(0);
   legendmarkerstyle.push_back("le");
 
   legendEntries = legend;
-  //comparesamevariable(file, cutname, "elpt", -1, 250, 1, true, true, true, (float []){1,5000}, (float []){0.6,0.7,0.85,0.95}, false, "p_{T} [GeV]");
-  //comparesamevariable(file, cutname, "eleta", 200, 800, 10, false, true, true, (float []){0,800}, (float []){0.6,0.7,0.85,0.95}, false, "#eta");
+  comparesamevariable(file, cutname, "lead_elpt", -1, 250, 1, true, true, true, (float []){1,9e3}, (float []){0.4,0.7,0.65,0.95}, false, "e_{1} p_{T} [GeV]");
  
   file.clear();
   cutname.clear();
   coloropt.clear();
+  legend.clear();
+  histtype.clear();
   legendEntries.clear();
+  markerstyle.clear();
+  markersize.clear();
   legendmarkerstyle.clear();
+
+  legendEntries.push_back("|#eta|<1.44");
+  legendEntries.push_back("1.57<|#eta|<2.0");
+  legendEntries.push_back("2.0<|#eta|<2.5");
 
   file.push_back(datahistfile);
   coloropt.push_back(kBlack);
-  legendEntries.push_back("|#eta|<1.44");
   legendmarkerstyle.push_back("le");
   cutname.push_back("noeg_ptgt2etlt1p44_oflsct_eleofleb_lead_elpt");
   cutname.push_back("noeg_ptgt2etlt1p44_oflsct_eleofleb_aftmch_lead_elpt");  
   file.push_back(datahistfile);
   coloropt.push_back(kGray);
-  legendEntries.push_back("1.57<|#eta|<2.0");
   legendmarkerstyle.push_back("le");
   cutname.push_back("noeg_ptgt2etgt1p57lt2_oflsct_eleoflee_lead_elpt");
   cutname.push_back("noeg_ptgt2etgt1p57lt2_oflsct_eleoflee_aftmch_lead_elpt");  
   file.push_back(datahistfile);
   coloropt.push_back(kRed);
-  legendEntries.push_back("2.0<|#eta|<2.5");
   legendmarkerstyle.push_back("le");
   cutname.push_back("noeg_ptgt2etgt2lt2p5_oflsct_eleoflee_lead_elpt");
   cutname.push_back("noeg_ptgt2etgt2lt2p5_oflsct_eleoflee_aftmch_lead_elpt");  
   vector<double> binspt{0,1,2,3,4,6,8,10,14,18,22,26,30,35,40,50,60,70,80,100};
-  efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
+  //efficiency(file, cutname, binspt.size()-1, &binspt[0], "p_{T} / GeV");
 
   cutname.clear();
   cutname.push_back("eg1_ptgt2etlt1p44_oflsct_eleofleb_lead_elpt");

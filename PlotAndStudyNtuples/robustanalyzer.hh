@@ -18,17 +18,22 @@ public:
   ~robustanalyzer();
 
   void analyzersinglefile(int);
+  
   void analyzerelectrons();
-  void analyzerphotons();
   void addhist_electron(TString);
   void fillhistinevent_electron(TString, vector<int>);
   void addhist_oflsct_electron(TString);
   void fillhistinevent_oflsct_electron(TString, vector<int>, vector<int>);
+  bool offline_scouting_angmch(double, double);
+  double effectivearea(double);
+  bool vetosel_offline_electron(int);
+  bool vetoecalsel_offline_electron(int);
+
+  void analyzerphotons();
   void addhist_photon(TString);
   void fillhistinevent_photon(TString, vector<int>);
-  bool offline_scouting_angmch(double, double);
+
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
-  double effectivearea(double);
   
   private:
 

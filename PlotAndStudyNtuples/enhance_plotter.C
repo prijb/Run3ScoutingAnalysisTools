@@ -169,14 +169,17 @@ TCanvas* enhance_plotter(vector<TH1F*> histvec, vector<TString> legNam, TString 
     histvec[ctr]->Draw(histtype[ctr]);
   }
 
-  TLegend* leg = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
-  leg->SetTextFont(132);
-  leg->SetTextSize(0.065);
-  leg->SetBorderSize(0);
-  for(unsigned int ctr=0; ctr<histvec.size(); ctr++) {
-    leg->AddEntry(histvec[ctr],legNam[ctr],legendmarkerstyle[ctr]);
+  if(legPos[0]!=-1) {
+    TLegend* leg = new TLegend(legPos[0],legPos[1],legPos[2],legPos[3]);
+    leg->SetTextFont(132);
+    leg->SetTextSize(0.065);
+    leg->SetBorderSize(0);
+    for(unsigned int ctr=0; ctr<histvec.size(); ctr++) {
+      cout<<legNam[ctr]<<endl;
+      leg->AddEntry(histvec[ctr],legNam[ctr],legendmarkerstyle[ctr]);
+    }
+    leg->Draw();
   }
-  leg->Draw();
   
   return c1;
 }

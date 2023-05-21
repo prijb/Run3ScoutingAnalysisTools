@@ -138,7 +138,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist_oflsct_electron("noeg_ptgt2etgt2lt2p5_oflsct_ele");
   addhist_oflsct_electron("eg1_ptgt2etgt2lt2p5_oflsct_ele");
   addhist_oflsct_electron("eg2_ptgt2etgt2lt2p5_oflsct_ele");
-  /* For gen matching
+
   addhist_oflsct_electron("ptgt2lt5etalt2p5_oflsct_ele");
   addhist_oflsct_electron("ptgt5lt8etalt2p5_oflsct_ele");
   addhist_oflsct_electron("ptgt8lt11etalt2p5_oflsct_ele");
@@ -149,7 +149,6 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist_oflsct_electron("ptgt26lt30etalt2p5_oflsct_ele");
   addhist_oflsct_electron("ptgt30lt50etalt2p5_oflsct_ele");
   addhist_oflsct_electron("ptgt50lt100etalt2p5_oflsct_ele");
-  */
   
   addhist_electron("nosel_ele");
   addhist_electron("mutrigsel_ele");
@@ -200,7 +199,8 @@ void robustanalyzer::analyzerelectrons() {
   vector<int> ptgt2etlt1p44oflelidx;
   vector<int> ptgt2etgt1p57lt2oflelidx;
   vector<int> ptgt2etgt2lt2p5oflelidx;
-  /*
+
+  /* For angular matching
   vector<int> ptgt2lt5etalt2p5oflelidx;
   vector<int> ptgt5lt8etalt2p5oflelidx;
   vector<int> ptgt8lt11etalt2p5oflelidx;
@@ -249,132 +249,91 @@ void robustanalyzer::analyzerelectrons() {
     bool ptgt2etalt2p5eldec = true;
     ptgt2etalt2p5eldec *= (*ofle_pt)->at(ofleidx)>2.0;
     ptgt2etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
-    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
-    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
-    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
-    ptgt2etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
+    ptgt2etalt2p5eldec *= vetosel_offline_electron(ofleidx);
     if(ptgt2etalt2p5eldec) ptgt2etalt2p5oflelidx.push_back(ofleidx);
 
     bool ptgt2etlt1p44eldec = true;
     ptgt2etlt1p44eldec *= (*ofle_pt)->at(ofleidx)>2.0;
     ptgt2etlt1p44eldec *= abs((*ofle_eta)->at(ofleidx))<1.44;
-    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
-    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
-    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
-    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
-    ptgt2etlt1p44eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
+    ptgt2etlt1p44eldec *= vetosel_offline_electron(ofleidx);
     if(ptgt2etlt1p44eldec) ptgt2etlt1p44oflelidx.push_back(ofleidx);
 
     bool ptgt2etgt1p57lt2eldec = true;
     ptgt2etgt1p57lt2eldec *= (*ofle_pt)->at(ofleidx)>2.0;
     ptgt2etgt1p57lt2eldec *= ( (abs((*ofle_eta)->at(ofleidx))>1.57) && (abs((*ofle_eta)->at(ofleidx))<2.0) );
-    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
-    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
-    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
-    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
-    ptgt2etgt1p57lt2eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
+    ptgt2etgt1p57lt2eldec *= vetosel_offline_electron(ofleidx);
     if(ptgt2etgt1p57lt2eldec) ptgt2etgt1p57lt2oflelidx.push_back(ofleidx);
 
     bool ptgt2etgt2lt2p5eldec = true;
     ptgt2etgt2lt2p5eldec *= (*ofle_pt)->at(ofleidx)>2.0;
     ptgt2etgt2lt2p5eldec *= ( (abs((*ofle_eta)->at(ofleidx))>2.0) && (abs((*ofle_eta)->at(ofleidx))<2.5) );
-    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
-    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
-    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_sigmaietaieta)->at(ofleidx)<0.234);
-    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
-    ptgt2etgt2lt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));    
+    ptgt2etgt2lt2p5eldec *= vetosel_offline_electron(ofleidx);
     if(ptgt2etgt2lt2p5eldec) ptgt2etgt2lt2p5oflelidx.push_back(ofleidx);
 
-    /* For gen matching
+    /* For angular matching
     bool ptgt2lt5etalt2p5eldec = true;
     ptgt2lt5etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>2.0) && ((*ofle_pt)->at(ofleidx)<5.0) );
     ptgt2lt5etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt2lt5etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt2lt5etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt2lt5etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt2lt5etalt2p5eldec) ptgt2lt5etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt5lt8etalt2p5eldec = true;
     ptgt5lt8etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>5.0) && ((*ofle_pt)->at(ofleidx)<8.0) );
     ptgt5lt8etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt5lt8etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt5lt8etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt5lt8etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt5lt8etalt2p5eldec) ptgt5lt8etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt8lt11etalt2p5eldec = true;
     ptgt8lt11etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>8.0) && ((*ofle_pt)->at(ofleidx)<11.0) );
     ptgt8lt11etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt8lt11etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt8lt11etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
     if(ptgt8lt11etalt2p5eldec) ptgt8lt11etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt11lt14etalt2p5eldec = true;
     ptgt11lt14etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>11.0) && ((*ofle_pt)->at(ofleidx)<14.0) );
     ptgt11lt14etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt11lt14etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt11lt14etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt11lt14etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt11lt14etalt2p5eldec) ptgt11lt14etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt14lt18etalt2p5eldec = true;
     ptgt14lt18etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>14.0) && ((*ofle_pt)->at(ofleidx)<18.0) );
     ptgt14lt18etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt14lt18etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt14lt18etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt14lt18etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt14lt18etalt2p5eldec) ptgt14lt18etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt18lt22etalt2p5eldec = true;
     ptgt18lt22etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>18.0) && ((*ofle_pt)->at(ofleidx)<22.0) );
     ptgt18lt22etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt18lt22etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt18lt22etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt18lt22etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt18lt22etalt2p5eldec) ptgt18lt22etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt22lt26etalt2p5eldec = true;
     ptgt22lt26etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>22.0) && ((*ofle_pt)->at(ofleidx)<26.0) );
     ptgt22lt26etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt22lt26etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt22lt26etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt22lt26etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt22lt26etalt2p5eldec) ptgt22lt26etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt26lt30etalt2p5eldec = true;
     ptgt26lt30etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>26.0) && ((*ofle_pt)->at(ofleidx)<30.0) );
     ptgt26lt30etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt26lt30etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt26lt30etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt26lt30etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt26lt30etalt2p5eldec) ptgt26lt30etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt30lt50etalt2p5eldec = true;
     ptgt30lt50etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>30.0) && ((*ofle_pt)->at(ofleidx)<50.0) );
     ptgt30lt50etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt30lt50etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt30lt50etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt30lt50etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt30lt50etalt2p5eldec) ptgt30lt50etalt2p5oflelidx.push_back(ofleidx);
     
     bool ptgt50lt100etalt2p5eldec = true;
     ptgt50lt100etalt2p5eldec *= ( ((*ofle_pt)->at(ofleidx)>50.0) && ((*ofle_pt)->at(ofleidx)<100.0) );
     ptgt50lt100etalt2p5eldec *= abs((*ofle_eta)->at(ofleidx))<2.5;
-    ptgt50lt100etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0126):((*ofle_sigmaietaieta)->at(ofleidx)<0.0457);
-    ptgt50lt100etalt2p5eldec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.16/ele_energy)+(0.0324*(*(*rho))/ele_energy)))
-							:((*ofle_hoe)->at(ofleidx)<(0.05+(2.54/ele_energy)+(0.183*(*(*rho))/ele_energy)));
+    ptgt50lt100etalt2p5eldec *= vetoecalsel_offline_electron(ofleidx);
     if(ptgt50lt100etalt2p5eldec) ptgt50lt100etalt2p5oflelidx.push_back(ofleidx);
-    */    
+    */        
 
   }// End of loop on offline electrons in the event loop
 
-  // Loop on electrons in the event loop
+  // Loop on scouting electrons in the event loop
   for(unsigned int ele_ctr=0; ele_ctr<(*(*n_ele)); ele_ctr++) {
     
     // Take the sorted index only
@@ -433,7 +392,8 @@ void robustanalyzer::analyzerelectrons() {
   if(l1_noeg) fillhistinevent_oflsct_electron("noeg_ptgt2etgt2lt2p5_oflsct_ele", ptgt2etgt2lt2p5oflelidx, ptgt2etalt2p5elidx);
   if((*(*l1_1eg))==1) fillhistinevent_oflsct_electron("eg1_ptgt2etgt2lt2p5_oflsct_ele", ptgt2etgt2lt2p5oflelidx, ptgt2etalt2p5elidx);
   if((*(*l1_2eg))==1) fillhistinevent_oflsct_electron("eg2_ptgt2etgt2lt2p5_oflsct_ele", ptgt2etgt2lt2p5oflelidx, ptgt2etalt2p5elidx);
-  /* For gen matching
+
+  /* For angular matching
   fillhistinevent_oflsct_electron("ptgt2lt5etalt2p5_oflsct_ele", ptgt2lt5etalt2p5oflelidx, ptgt2etalt2p5elidx);
   fillhistinevent_oflsct_electron("ptgt5lt8etalt2p5_oflsct_ele", ptgt5lt8etalt2p5oflelidx, ptgt2etalt2p5elidx);
   fillhistinevent_oflsct_electron("ptgt8lt11etalt2p5_oflsct_ele", ptgt8lt11etalt2p5oflelidx, ptgt2etalt2p5elidx);
@@ -452,7 +412,8 @@ void robustanalyzer::analyzerelectrons() {
   ptgt2etlt1p44oflelidx.clear();
   ptgt2etgt1p57lt2oflelidx.clear();
   ptgt2etgt2lt2p5oflelidx.clear();
-  /* For gen matching
+
+  /* For angular matching
   ptgt2lt5etalt2p5oflelidx.clear();
   ptgt5lt8etalt2p5oflelidx.clear();
   ptgt8lt11etalt2p5oflelidx.clear();
@@ -863,7 +824,7 @@ void robustanalyzer::addhist_oflsct_electron(TString selection) {
   all1dhists.push_back(new TH1F(selection+"oflee_aftmch_sublead_elhoe","H/E",100000,0,1));
 }
 
-// Function to fill a set of histograms for scouting electrons
+// Function to fill a set of histograms for matched scouting and offline electrons
 void robustanalyzer::fillhistinevent_oflsct_electron(TString selection, vector<int> oflelidx, vector<int> sctelidx) {
 
   TH1F* rhohist = (TH1F*) outfile->Get(selection+"evt_rho");
@@ -1392,4 +1353,42 @@ double robustanalyzer::effectivearea(double eta) {
   }
   
   return ea;
+}
+
+bool robustanalyzer::vetosel_offline_electron(int ofleidx) {
+
+  TLorentzVector ele;
+  ele.SetPtEtaPhiM((*ofle_pt)->at(ofleidx), (*ofle_eta)->at(ofleidx), (*ofle_phi)->at(ofleidx), 0.0005);
+  double ele_energy = ele.Energy();
+  double ea = effectivearea((*ofle_eta)->at(ofleidx));
+  double neutiso = ((*ofle_nthadiso)->at(ofleidx))+((*ofle_phoiso)->at(ofleidx))-(((*oflrho)->at(0))*ea);
+  double reliso = ((*ofle_cghadiso)->at(ofleidx))+(neutiso>0?neutiso:0);
+    
+  bool dec = true;
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_detain)->at(ofleidx)<0.0071):((*ofle_detain)->at(ofleidx)<0.0173);
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_dphiin)->at(ofleidx)<0.208):((*ofle_dphiin)->at(ofleidx)<0.234);
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
+    :((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?reliso<0.406+0.535/((*ofle_pt)->at(ofleidx)):reliso<0.342+0.519/((*ofle_pt)->at(ofleidx));
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_ooemoop)->at(ofleidx)<0.178):((*ofle_ooemoop)->at(ofleidx)<0.137);
+
+  return dec;
+}
+
+bool robustanalyzer::vetoecalsel_offline_electron(int ofleidx) {
+
+  TLorentzVector ele;
+  ele.SetPtEtaPhiM((*ofle_pt)->at(ofleidx), (*ofle_eta)->at(ofleidx), (*ofle_phi)->at(ofleidx), 0.0005);
+  double ele_energy = ele.Energy();
+  double ea = effectivearea((*ofle_eta)->at(ofleidx));
+  double neutiso = ((*ofle_nthadiso)->at(ofleidx))+((*ofle_phoiso)->at(ofleidx))-(((*oflrho)->at(0))*ea);
+  double reliso = ((*ofle_cghadiso)->at(ofleidx))+(neutiso>0?neutiso:0);
+    
+  bool dec = true;
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_sigmaietaieta)->at(ofleidx)<0.0117):((*ofle_sigmaietaieta)->at(ofleidx)<0.0298);
+  dec *= (abs((*ofle_eta)->at(ofleidx))<1.479)?((*ofle_hoe)->at(ofleidx)<(0.05+(1.28/ele_energy)+(0.0422*((*oflrho)->at(0))/ele_energy)))
+    :((*ofle_hoe)->at(ofleidx)<(0.05+(2.3/ele_energy)+(0.262*((*oflrho)->at(0))/ele_energy)));
+
+  return dec;
 }
