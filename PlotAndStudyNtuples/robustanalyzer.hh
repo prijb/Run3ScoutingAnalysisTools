@@ -1,6 +1,8 @@
 #ifndef ROBUSTANALYZER_H
 #define ROBUSTANALYZER_H
 
+#include <utility>
+
 #include "TFile.h"
 #include "TString.h"
 #include "TH1F.h"
@@ -18,16 +20,22 @@ public:
   ~robustanalyzer();
   
   void sort(int*, TTreeReaderValue<std::vector<float>> *, int);
-
+  int charge(int);
+  
   void analyzersinglefile(int);
 
   void addhist(TString);
   void fillhistinevent(TString, vector<int>);
   
-  void addGenCollections();
+  void addtrkhist(TString);
+  void filltrkhistinevent(TString, vector<int>, vector<vector<int>>);
+  
   void addgenhist(TString);
   void fillgenhistinevent(TString, vector<int>, vector<int>);
 
+  void addgenmchhist(TString);
+  void fillgenmchhistinevent(TString, vector<int>, vector<int>);
+  std::pair< vector<int>,vector<int> > getGenMatched(vector<int>, vector<int>);
   
 private:
   

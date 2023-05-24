@@ -109,15 +109,20 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     addgenhist("noselgen_");
     addgenhist("noselgen_dieg_");
     addgenhist("noselgen_eg30_");
-    addgenhist("noselgen_othr_");
+    addgenhist("noselgen_muht_");
+    addgenmchhist("noselAnosel_genmch_");
+
+    addhist("noselAnosel_genmch_dieg_");
+    addhist("noselAnosel_genmch_eg30_");
   }
   
   // Count events passing certain selections
   int nosel=0;
   
-  addhist("nosel");
-  addhist("mutrigsel");
-  addhist("muAscouttrigsel");
+  addhist("nosel_");
+  addhist("nosel_dieg_");
+  addhist("nosel_eg30_");
+  addhist("nosel_muht_");
 
   // vector of gen indices
   vector<int> noselgenjpidx;
@@ -125,8 +130,6 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 
   // vector of electron indices
   vector<int> noselelidx;
-  vector<int> mutrigselelidx;
-  vector<int> muAscouttrigselelidx;
     
   // Loop beginning on events
   while(tree->Next()) {
@@ -152,7 +155,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       if(noselgenjpidx.size()==1) fillgenhistinevent("noselgen_", noselgenelidx, noselgenjpidx);
       if( (noselgenjpidx.size()==1) && ((*(*hlt_sct_dieg))==1) ) fillgenhistinevent("noselgen_dieg_", noselgenelidx, noselgenjpidx);
       if( (noselgenjpidx.size()==1) && ((*(*hlt_sct_eg30))==1) ) fillgenhistinevent("noselgen_eg30_", noselgenelidx, noselgenjpidx);
-      if( (noselgenjpidx.size()==1) && ((*(*hlt_sct_dimu3))==1) && ((*(*hlt_sct_jet))==1) ) fillgenhistinevent("noselgen_othr_", noselgenelidx, noselgenjpidx);
+      if( (noselgenjpidx.size()==1) && ((*(*hlt_sct_dimu3))==1) && ((*(*hlt_sct_jet))==1) ) fillgenhistinevent("noselgen_muht_", noselgenelidx, noselgenjpidx);
     }
 
     // Sort the electrons based on their pT
@@ -181,25 +184,126 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       mutrigdec *= abs((*ele_eta)->at(elidx))<2.5;
       //mutrigdec *= 
       
-      if( ( ((*(*hlt_isomu27))==1) || ((*(*hlt_mu50))==1) ) && ((*(*hlt_scouting))==1) ) muAscouttrigselelidx.push_back(elidx);
+      //if( ( ((*(*hlt_isomu27))==1) || ((*(*hlt_mu50))==1) ) && ((*(*hlt_scouting))==1) ) muAscouttrigselelidx.push_back(elidx);
       
     }// End of loop on electrons in the event loop
     
     if(noselelidx.size()>0) nosel++;
-    fillhistinevent("nosel", noselelidx);
-    fillhistinevent("mutrigsel", mutrigselelidx);
-    fillhistinevent("muAscouttrigsel", muAscouttrigselelidx);
+    fillhistinevent("nosel_", noselelidx);
+    if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("nosel_dieg_", noselelidx);
+    if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("nosel_eg30_", noselelidx);
+    if( ((*(*hlt_sct_dimu3))==1) && ((*(*hlt_sct_jet))==1) ) fillhistinevent("nosel_muht_", noselelidx);
 
+    if(isMC) {
+
+      fillgenmchhistinevent("noselAnosel_genmch_", noselgenelidx, noselelidx);
+      
+      std::pair< vector<int>,vector<int> > noselAnosel_gensctpair = getGenMatched(noselgenelidx, noselelidx);
+      vector<int> noselAnosel_matchedgenidx = noselAnosel_gensctpair.first;
+      vector<int> noselAnosel_matchedsctidx = noselAnosel_gensctpair.second;
+      if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("noselAnosel_genmch_dieg_", noselAnosel_matchedsctidx);
+      if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("noselAnosel_genmch_eg30_", noselAnosel_matchedsctidx);
+      
+    }
+    
     // Clear all vector
-    noselelidx.clear();
-    mutrigselelidx.clear();
-    muAscouttrigselelidx.clear();
     noselgenjpidx.clear();
     noselgenelidx.clear();
+
+    noselelidx.clear();
     
   } // End of loop on events
 
   cout<<totEntries<<"\t"<<endevent-beginevent<<"\t"<<nosel<<endl;
+}
+
+// Function to add a set of histograms for scouting electrons
+void robustanalyzer::addhist(TString selection) {
+
+  all1dhists.push_back(new TH1F(selection+"sct_rho","rho",10000,-10,90));
+  all1dhists.push_back(new TH1F(selection+"sct_isomu27","HLT_IsoMu27",10,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_mu50","HLT_Mu50",10,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_scouting","HLT_Run3PixelOnlyPFScouting",10,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_elmult","N e",50,-5,45));
+  all1dhists.push_back(new TH1F(selection+"sct_elpt","p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_eleta","#eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_elphi","#phi",66,-3.3,3.3));
+  all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",100000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_leadsublead_dielM","M(e_{1},e_{2})",100000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_leadsublead_chargeprod","q_{e1}*q_{e2}",3,-1,1));
+  all1dhists.push_back(new TH1F(selection+"sct_leadbarsubleadbar_dielM","bar.e_{1} M(e_{1},e_{2})",100000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_leadecsubleadec_dielM","ec. e_{1} M(e_{1},e_{2})",100000,-10,990));
+
+  all1dhists.push_back(new TH1F(selection+"sct_trk_dielM","all trk M(e,e)",100000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_trk_elmult","N trk e",50,-5,45));
+
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elpt","p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_eleta","#eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elphi","#phi",66,-3.3,3.3));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elm","m / GeV",1000,-1e-5,1e-5));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_eldetain","#Delta#eta_{in}",100000,0,0.1));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_eldphiin","#Delta#phi_{in}",100000,0,0.1));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elsigmaietaieta","#sigmai#etai#eta",1000,0,0.1));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elhoe","H/E",100000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elooemoop","1/E-1/p",20000,0,0.2));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elmhits","missing hits",10,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elecaliso","ecal. iso.",10000,0,50));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elhcaliso","hcal. iso.",10000,0,50));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_eltkiso","tk. iso.",10000,0,50));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elecalisoovere","ecal. iso. / E",10000,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elhcalisoovere","hcal. iso. / E",10000,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_eltkisoovere","tk. iso. / E",10000,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elr9","r9",1500,0,15));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elsmin","smin",3500,-0.1,3.4));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_elsmaj","smaj",1500,-0.1,1.4));
+
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_elpt","trk p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_eleta","trk #eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_elphi","trk #phi",66,-3.3,3.3));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_eld0","trk d_{0} / cm",20000,-10,10));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_ellog10d0","trk log_{10}d_{0} / log_{10}cm",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_eldz","trk d_{z} / cm",4000,-20,20));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_elcharge","trk charge",5,-2,3));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_elrchi2","trk reduced chi sq.",10000,0,100));
+
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_el_min_dE","min #DeltaE(SC, trk)",1000,-50,50));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_el_min_dEoverE","min #DeltaE(SC, trk) / SC E",1000,-50,50));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_el_min_deta","min #Delta#eta(SC, trk)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_bar_trk_el_min_dphi","min #Delta#phi(SC, trk)",10000,-5,5));
+  
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elpt","p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_eleta","#eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elphi","#phi",66,-3.3,3.3));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elm","m / GeV",1000,-1e-5,1e-5));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_eldetain","#Delta#eta_{in}",100000,0,0.1));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_eldphiin","#Delta#phi_{in}",100000,0,0.1));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elsigmaietaieta","#sigmai#etai#eta",1000,0,0.1));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elhoe","H/E",100000,0,1));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elooemoop","1/E-1/p",20000,0,0.2));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elmhits","missing hits",10,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elecaliso","ecal. iso.",10000,0,50));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elhcaliso","hcal. iso.",10000,0,50));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_eltkiso","tk. iso.",10000,0,50));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elecalisoovere","ecal. iso. / E",10000,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elhcalisoovere","hcal. iso. / E",10000,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_eltkisoovere","tk. iso. / E",10000,0,10));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elr9","r9",1500,0,15));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elsmin","smin",3500,-0.1,3.4));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_elsmaj","smaj",1500,-0.1,1.4));
+
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_elpt","trk p_{T} / GeV",1000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_eleta","trk #eta",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_elphi","trk #phi",66,-3.3,3.3));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_eld0","trk d_{0} / cm",20000,-10,10));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_ellog10d0","trk log_{10}d_{0} / log_{10}cm",1000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_eldz","trk d_{z} / cm",4000,-20,20));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_elcharge","trk charge",5,-2,3));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_elrchi2","trk reduced chi sq.",10000,0,100));
+
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_el_min_dE","min #DeltaE(SC, trk)",1000,-50,50));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_el_min_dEoverE","min #DeltaE(SC, trk) / SC E",1000,-50,50));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_el_min_deta","min #Delta#eta(SC, trk)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"sct_ec_trk_el_min_dphi","min #Delta#phi(SC, trk)",10000,-5,5));
 }
 
 // Function to fill a set of histograms for scouting electrons
@@ -212,6 +316,7 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   TH1F* mu50 = (TH1F*) outfile->Get(selection+"sct_mu50");
   TH1F* scouting = (TH1F*) outfile->Get(selection+"sct_scouting");
   TH1F* elmult = (TH1F*) outfile->Get(selection+"sct_elmult");
+
   TH1F* elpt = (TH1F*) outfile->Get(selection+"sct_elpt");
   TH1F* eleta = (TH1F*) outfile->Get(selection+"sct_eleta");
   TH1F* elphi = (TH1F*) outfile->Get(selection+"sct_elphi");
@@ -220,50 +325,77 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   TH1F* leadsubleadqprod = (TH1F*) outfile->Get(selection+"sct_leadsublead_chargeprod");
   TH1F* leadbarsubleadbardielM = (TH1F*) outfile->Get(selection+"sct_leadbarsubleadbar_dielM");
   TH1F* leadecsubleadecdielM = (TH1F*) outfile->Get(selection+"sct_leadecsubleadec_dielM");
-  
-  TH1F* barelpt = (TH1F*) outfile->Get(selection+"sctbar_elpt");
-  TH1F* bareleta = (TH1F*) outfile->Get(selection+"sctbar_eleta");
-  TH1F* barelphi = (TH1F*) outfile->Get(selection+"sctbar_elphi");
-  TH1F* barelm = (TH1F*) outfile->Get(selection+"sctbar_elm");
-  TH1F* bareldetain = (TH1F*) outfile->Get(selection+"sctbar_eldetain");
-  TH1F* bareldphiin = (TH1F*) outfile->Get(selection+"sctbar_eldphiin");
-  TH1F* barelsigmaietaieta = (TH1F*) outfile->Get(selection+"sctbar_elsigmaietaieta");
-  TH1F* barelhoe = (TH1F*) outfile->Get(selection+"sctbar_elhoe");
-  TH1F* barelooemoop = (TH1F*) outfile->Get(selection+"sctbar_elooemoop");
-  TH1F* barelmhits = (TH1F*) outfile->Get(selection+"sctbar_elmhits");
-  TH1F* barelecaliso = (TH1F*) outfile->Get(selection+"sctbar_elecaliso");
-  TH1F* barelhcaliso = (TH1F*) outfile->Get(selection+"sctbar_elhcaliso");
-  TH1F* bareltkiso = (TH1F*) outfile->Get(selection+"sctbar_eltkiso");
-  TH1F* barelr9 = (TH1F*) outfile->Get(selection+"sctbar_elr9");
-  TH1F* barelsmin = (TH1F*) outfile->Get(selection+"sctbar_elsmin");
-  TH1F* barelsmaj = (TH1F*) outfile->Get(selection+"sctbar_elsmaj");
-  
-  TH1F* bareld0 = (TH1F*) outfile->Get(selection+"sctbar_eld0");
-  TH1F* barellog10d0 = (TH1F*) outfile->Get(selection+"sctbar_ellog10d0");
-  TH1F* bareldz = (TH1F*) outfile->Get(selection+"sctbar_eldz");
-  TH1F* barelcharge = (TH1F*) outfile->Get(selection+"sctbar_elcharge");
 
-  TH1F* ecelpt = (TH1F*) outfile->Get(selection+"sctec_elpt");
-  TH1F* eceleta = (TH1F*) outfile->Get(selection+"sctec_eleta");
-  TH1F* ecelphi = (TH1F*) outfile->Get(selection+"sctec_elphi");
-  TH1F* ecelm = (TH1F*) outfile->Get(selection+"sctec_elm");
-  TH1F* eceldetain = (TH1F*) outfile->Get(selection+"sctec_eldetain");
-  TH1F* eceldphiin = (TH1F*) outfile->Get(selection+"sctec_eldphiin");
-  TH1F* ecelsigmaietaieta = (TH1F*) outfile->Get(selection+"sctec_elsigmaietaieta");
-  TH1F* ecelhoe = (TH1F*) outfile->Get(selection+"sctec_elhoe");
-  TH1F* ecelooemoop = (TH1F*) outfile->Get(selection+"sctec_elooemoop");
-  TH1F* ecelmhits = (TH1F*) outfile->Get(selection+"sctec_elmhits");
-  TH1F* ecelecaliso = (TH1F*) outfile->Get(selection+"sctec_elecaliso");
-  TH1F* ecelhcaliso = (TH1F*) outfile->Get(selection+"sctec_elhcaliso");
-  TH1F* eceltkiso = (TH1F*) outfile->Get(selection+"sctec_eltkiso");
-  TH1F* ecelr9 = (TH1F*) outfile->Get(selection+"sctec_elr9");
-  TH1F* ecelsmin = (TH1F*) outfile->Get(selection+"sctec_elsmin");
-  TH1F* ecelsmaj = (TH1F*) outfile->Get(selection+"sctec_elsmaj");
+  TH1F* trkdielM = (TH1F*) outfile->Get(selection+"sct_trk_dielM");
+  TH1F* trkmult = (TH1F*) outfile->Get(selection+"sct_trk_elmult");
+  
+  TH1F* barelpt = (TH1F*) outfile->Get(selection+"sct_bar_elpt");
+  TH1F* bareleta = (TH1F*) outfile->Get(selection+"sct_bar_eleta");
+  TH1F* barelphi = (TH1F*) outfile->Get(selection+"sct_bar_elphi");
+  TH1F* barelm = (TH1F*) outfile->Get(selection+"sct_bar_elm");
+  TH1F* bareldetain = (TH1F*) outfile->Get(selection+"sct_bar_eldetain");
+  TH1F* bareldphiin = (TH1F*) outfile->Get(selection+"sct_bar_eldphiin");
+  TH1F* barelsigmaietaieta = (TH1F*) outfile->Get(selection+"sct_bar_elsigmaietaieta");
+  TH1F* barelhoe = (TH1F*) outfile->Get(selection+"sct_bar_elhoe");
+  TH1F* barelooemoop = (TH1F*) outfile->Get(selection+"sct_bar_elooemoop");
+  TH1F* barelmhits = (TH1F*) outfile->Get(selection+"sct_bar_elmhits");
+  TH1F* barelecaliso = (TH1F*) outfile->Get(selection+"sct_bar_elecaliso");
+  TH1F* barelhcaliso = (TH1F*) outfile->Get(selection+"sct_bar_elhcaliso");
+  TH1F* bareltkiso = (TH1F*) outfile->Get(selection+"sct_bar_eltkiso");
+  TH1F* barelecalisoovere = (TH1F*) outfile->Get(selection+"sct_bar_elecalisoovere");
+  TH1F* barelhcalisoovere = (TH1F*) outfile->Get(selection+"sct_bar_elhcalisoovere");
+  TH1F* bareltkisoovere = (TH1F*) outfile->Get(selection+"sct_bar_eltkisoovere");
+  TH1F* barelr9 = (TH1F*) outfile->Get(selection+"sct_bar_elr9");
+  TH1F* barelsmin = (TH1F*) outfile->Get(selection+"sct_bar_elsmin");
+  TH1F* barelsmaj = (TH1F*) outfile->Get(selection+"sct_bar_elsmaj");
+  
+  TH1F* trkbarelpt = (TH1F*) outfile->Get(selection+"sct_bar_trk_elpt");
+  TH1F* trkbareleta = (TH1F*) outfile->Get(selection+"sct_bar_trk_eleta");
+  TH1F* trkbarelphi = (TH1F*) outfile->Get(selection+"sct_bar_trk_elphi");
+  TH1F* trkbareld0 = (TH1F*) outfile->Get(selection+"sct_bar_trk_eld0");
+  TH1F* trkbarellog10d0 = (TH1F*) outfile->Get(selection+"sct_bar_trk_ellog10d0");
+  TH1F* trkbareldz = (TH1F*) outfile->Get(selection+"sct_bar_trk_eldz");
+  TH1F* trkbarelcharge = (TH1F*) outfile->Get(selection+"sct_bar_trk_elcharge");
+  TH1F* trkbarelrchi2 = (TH1F*) outfile->Get(selection+"sct_bar_trk_elrchi2");
 
-  TH1F* eceld0 = (TH1F*) outfile->Get(selection+"sctec_eld0");
-  TH1F* ecellog10d0 = (TH1F*) outfile->Get(selection+"sctec_ellog10d0");
-  TH1F* eceldz = (TH1F*) outfile->Get(selection+"sctec_eldz");
-  TH1F* ecelcharge = (TH1F*) outfile->Get(selection+"sctec_elcharge");
+  TH1F* trkbarmindE = (TH1F*) outfile->Get(selection+"sct_bar_trk_el_min_dE");
+  TH1F* trkbarmindEoverE = (TH1F*) outfile->Get(selection+"sct_bar_trk_el_min_dEoverE");
+  TH1F* trkbarmindeta = (TH1F*) outfile->Get(selection+"sct_bar_trk_el_min_deta");
+  TH1F* trkbarmindphi = (TH1F*) outfile->Get(selection+"sct_bar_trk_el_min_dphi");
+
+  TH1F* ecelpt = (TH1F*) outfile->Get(selection+"sct_ec_elpt");
+  TH1F* eceleta = (TH1F*) outfile->Get(selection+"sct_ec_eleta");
+  TH1F* ecelphi = (TH1F*) outfile->Get(selection+"sct_ec_elphi");
+  TH1F* ecelm = (TH1F*) outfile->Get(selection+"sct_ec_elm");
+  TH1F* eceldetain = (TH1F*) outfile->Get(selection+"sct_ec_eldetain");
+  TH1F* eceldphiin = (TH1F*) outfile->Get(selection+"sct_ec_eldphiin");
+  TH1F* ecelsigmaietaieta = (TH1F*) outfile->Get(selection+"sct_ec_elsigmaietaieta");
+  TH1F* ecelhoe = (TH1F*) outfile->Get(selection+"sct_ec_elhoe");
+  TH1F* ecelooemoop = (TH1F*) outfile->Get(selection+"sct_ec_elooemoop");
+  TH1F* ecelmhits = (TH1F*) outfile->Get(selection+"sct_ec_elmhits");
+  TH1F* ecelecaliso = (TH1F*) outfile->Get(selection+"sct_ec_elecaliso");
+  TH1F* ecelhcaliso = (TH1F*) outfile->Get(selection+"sct_ec_elhcaliso");
+  TH1F* eceltkiso = (TH1F*) outfile->Get(selection+"sct_ec_eltkiso");
+  TH1F* ecelecalisoovere = (TH1F*) outfile->Get(selection+"sct_ec_elecalisoovere");
+  TH1F* ecelhcalisoovere = (TH1F*) outfile->Get(selection+"sct_ec_elhcalisoovere");
+  TH1F* eceltkisoovere = (TH1F*) outfile->Get(selection+"sct_ec_eltkisoovere");
+  TH1F* ecelr9 = (TH1F*) outfile->Get(selection+"sct_ec_elr9");
+  TH1F* ecelsmin = (TH1F*) outfile->Get(selection+"sct_ec_elsmin");
+  TH1F* ecelsmaj = (TH1F*) outfile->Get(selection+"sct_ec_elsmaj");
+
+  TH1F* trkecelpt = (TH1F*) outfile->Get(selection+"sct_ec_trk_elpt");
+  TH1F* trkeceleta = (TH1F*) outfile->Get(selection+"sct_ec_trk_eleta");
+  TH1F* trkecelphi = (TH1F*) outfile->Get(selection+"sct_ec_trk_elphi");
+  TH1F* trkeceld0 = (TH1F*) outfile->Get(selection+"sct_ec_trk_eld0");
+  TH1F* trkecellog10d0 = (TH1F*) outfile->Get(selection+"sct_ec_trk_ellog10d0");
+  TH1F* trkeceldz = (TH1F*) outfile->Get(selection+"sct_ec_trk_eldz");
+  TH1F* trkecelcharge = (TH1F*) outfile->Get(selection+"sct_ec_trk_elcharge");
+  TH1F* trkecelrchi2 = (TH1F*) outfile->Get(selection+"sct_ec_trk_elrchi2");
+
+  TH1F* trkecmindE = (TH1F*) outfile->Get(selection+"sct_ec_trk_el_min_dE");
+  TH1F* trkecmindEoverE = (TH1F*) outfile->Get(selection+"sct_ec_trk_el_min_dEoverE");
+  TH1F* trkecmindeta = (TH1F*) outfile->Get(selection+"sct_ec_trk_el_min_deta");
+  TH1F* trkecmindphi = (TH1F*) outfile->Get(selection+"sct_ec_trk_el_min_dphi");
 
   rhohist->Fill((*rho)->at(0));
   isomu27->Fill((*(*hlt_isomu27)));
@@ -286,12 +418,16 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
   }
 
   for(unsigned int ctr=0; ctr<elidx.size(); ctr++) {
+
     elpt->Fill((*ele_pt)->at(elidx[ctr]));
     eleta->Fill((*ele_eta)->at(elidx[ctr]));
     elphi->Fill((*ele_phi)->at(elidx[ctr]));
+
+    TLorentzVector el;
+    el.SetPtEtaPhiM((*ele_pt)->at(elidx[ctr]),(*ele_eta)->at(elidx[ctr]),(*ele_phi)->at(elidx[ctr]),0.0005);
+    
     for(unsigned int ctr2=ctr+1; ctr2<elidx.size(); ctr2++) {
-      TLorentzVector el, el2;
-      el.SetPtEtaPhiM((*ele_pt)->at(elidx[ctr]),(*ele_eta)->at(elidx[ctr]),(*ele_phi)->at(elidx[ctr]),0.0005);
+      TLorentzVector el2;
       el2.SetPtEtaPhiM((*ele_pt)->at(elidx[ctr2]),(*ele_eta)->at(elidx[ctr2]),(*ele_phi)->at(elidx[ctr2]),0.0005);
       dielM->Fill((el+el2).M());
     }
@@ -301,19 +437,18 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
       bareleta->Fill((*ele_eta)->at(elidx[ctr]));
       barelphi->Fill((*ele_phi)->at(elidx[ctr]));
       barelm->Fill((*ele_m)->at(elidx[ctr]));
-      //bareld0->Fill((*ele_d0)->at(elidx[ctr]));
-      //barellog10d0->Fill(TMath::Log10(TMath::Abs((*ele_d0)->at(elidx[ctr]))));
-      //bareldz->Fill((*ele_dz)->at(elidx[ctr]));
       bareldetain->Fill((*ele_detain)->at(elidx[ctr]));
       bareldphiin->Fill((*ele_dphiin)->at(elidx[ctr]));
       barelsigmaietaieta->Fill((*ele_sigmaietaieta)->at(elidx[ctr]));
       barelhoe->Fill((*ele_hoe)->at(elidx[ctr]));
       barelooemoop->Fill((*ele_ooemoop)->at(elidx[ctr]));
       barelmhits->Fill((*ele_mhits)->at(elidx[ctr]));
-      //barelcharge->Fill((*ele_charge)->at(elidx[ctr]));
       barelecaliso->Fill((*ele_ecaliso)->at(elidx[ctr]));
       barelhcaliso->Fill((*ele_hcaliso)->at(elidx[ctr]));
       bareltkiso->Fill((*ele_tkiso)->at(elidx[ctr]));
+      barelecalisoovere->Fill( (*ele_ecaliso)->at(elidx[ctr])/el.E() );
+      barelhcalisoovere->Fill( (*ele_hcaliso)->at(elidx[ctr])/el.E() );
+      bareltkisoovere->Fill( (*ele_tkiso)->at(elidx[ctr])/el.E() );
       barelr9->Fill((*ele_r9)->at(elidx[ctr]));
       barelsmin->Fill((*ele_smin)->at(elidx[ctr]));
       barelsmaj->Fill((*ele_smaj)->at(elidx[ctr]));
@@ -324,88 +459,97 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
       eceleta->Fill((*ele_eta)->at(elidx[ctr]));
       ecelphi->Fill((*ele_phi)->at(elidx[ctr]));
       ecelm->Fill((*ele_m)->at(elidx[ctr]));
-      //eceld0->Fill((*ele_d0)->at(elidx[ctr]));
-      //ecellog10d0->Fill(TMath::Log10(TMath::Abs((*ele_d0)->at(elidx[ctr]))));
-      //eceldz->Fill((*ele_dz)->at(elidx[ctr]));
       eceldetain->Fill((*ele_detain)->at(elidx[ctr]));
       eceldphiin->Fill((*ele_dphiin)->at(elidx[ctr]));
       ecelsigmaietaieta->Fill((*ele_sigmaietaieta)->at(elidx[ctr]));
       ecelhoe->Fill((*ele_hoe)->at(elidx[ctr]));
       ecelooemoop->Fill((*ele_ooemoop)->at(elidx[ctr]));
       ecelmhits->Fill((*ele_mhits)->at(elidx[ctr]));
-      //ecelcharge->Fill((*ele_charge)->at(elidx[ctr]));
       ecelecaliso->Fill((*ele_ecaliso)->at(elidx[ctr]));
       ecelhcaliso->Fill((*ele_hcaliso)->at(elidx[ctr]));
       eceltkiso->Fill((*ele_tkiso)->at(elidx[ctr]));
+      ecelecalisoovere->Fill( (*ele_ecaliso)->at(elidx[ctr])/el.E() );
+      ecelhcalisoovere->Fill( (*ele_hcaliso)->at(elidx[ctr])/el.E() );
+      eceltkisoovere->Fill( (*ele_tkiso)->at(elidx[ctr])/el.E() );
       ecelr9->Fill((*ele_r9)->at(elidx[ctr]));
       ecelsmin->Fill((*ele_smin)->at(elidx[ctr]));
       ecelsmaj->Fill((*ele_smaj)->at(elidx[ctr]));
     }
+
+    trkmult->Fill(((*ele_trkpt)->at(elidx[ctr])).size());
+    double minde, mindeta, mindphi;
+    TLorentzVector trk;
+    trk.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[ctr]))[0], ((*ele_trketa)->at(elidx[ctr]))[0], ((*ele_trkphi)->at(elidx[ctr]))[0], 0.0005);
+    minde = el.E() - trk.E();
+    mindeta = (*ele_eta)->at(elidx[ctr]) - ((*ele_trketa)->at(elidx[ctr]))[0];
+    mindphi = (*ele_phi)->at(elidx[ctr]) - ((*ele_trkphi)->at(elidx[ctr]))[0];
+    // Fill the track variables
+    for(unsigned int trkc=0; trkc<((*ele_trkpt)->at(elidx[ctr])).size(); trkc++) {
+      if(TMath::Abs((*ele_eta)->at(elidx[ctr]))<1.479) {
+	trkbarelpt->Fill(((*ele_trkpt)->at(elidx[ctr]))[trkc]);
+	trkbareleta->Fill(((*ele_trketa)->at(elidx[ctr]))[trkc]);
+	trkbarelphi->Fill(((*ele_trkphi)->at(elidx[ctr]))[trkc]);
+	trkbareld0->Fill(((*ele_trkd0)->at(elidx[ctr]))[trkc]);
+	trkbarellog10d0->Fill(TMath::Log10(TMath::Abs(((*ele_trkd0)->at(elidx[ctr]))[trkc])));
+	trkbareldz->Fill(((*ele_trkdz)->at(elidx[ctr]))[trkc]);
+	trkbarelcharge->Fill(((*ele_trkcharge)->at(elidx[ctr]))[trkc]);
+	trkbarelrchi2->Fill(((*ele_trkchi2)->at(elidx[ctr]))[trkc]);
+      }
+      else {
+	trkecelpt->Fill(((*ele_trkpt)->at(elidx[ctr]))[trkc]);
+	trkeceleta->Fill(((*ele_trketa)->at(elidx[ctr]))[trkc]);
+	trkecelphi->Fill(((*ele_trkphi)->at(elidx[ctr]))[trkc]);
+	trkeceld0->Fill(((*ele_trkd0)->at(elidx[ctr]))[trkc]);
+	trkecellog10d0->Fill(TMath::Log10(TMath::Abs(((*ele_trkd0)->at(elidx[ctr]))[trkc])));
+	trkeceldz->Fill(((*ele_trkdz)->at(elidx[ctr]))[trkc]);
+	trkecelcharge->Fill(((*ele_trkcharge)->at(elidx[ctr]))[trkc]);
+	trkecelrchi2->Fill(((*ele_trkchi2)->at(elidx[ctr]))[trkc]);
+      }
+      trk.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[ctr]))[trkc], ((*ele_trketa)->at(elidx[ctr]))[trkc], ((*ele_trkphi)->at(elidx[ctr]))[trkc], 0.0005);
+      double de = el.E() - trk.E();
+      double deta = (*ele_eta)->at(elidx[ctr]) - ((*ele_trketa)->at(elidx[ctr]))[trkc];
+      double dphi = (*ele_phi)->at(elidx[ctr]) - ((*ele_trkphi)->at(elidx[ctr]))[trkc];
+      if(abs(de)<minde) {
+	minde = de;
+      }
+      if(abs(deta)<mindeta) {
+	mindeta = deta;
+      }
+      if(abs(dphi)<mindphi) {
+	mindphi = dphi;
+      }
+    } // End of track loop
+    if(TMath::Abs((*ele_eta)->at(elidx[ctr]))<1.479) {
+      trkbarmindE->Fill(minde);
+      trkbarmindEoverE->Fill(minde/el.E());
+      trkbarmindeta->Fill(mindeta);
+      trkbarmindphi->Fill(mindphi);
+    }
+    else {
+      trkecmindE->Fill(minde);
+      trkecmindEoverE->Fill(minde/el.E());
+      trkecmindeta->Fill(mindeta);
+      trkecmindphi->Fill(mindphi);
+    }
+    
   } // End of main electron for loop
 
+  // For all track invariant mass
+  for(unsigned int sc1=0; sc1<elidx.size(); sc1++) {
+    for(unsigned int tk1=0; tk1<((*ele_trkpt)->at(elidx[sc1])).size(); tk1++) {
+      TLorentzVector trk1;
+      trk1.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[sc1]))[tk1], ((*ele_trketa)->at(elidx[sc1]))[tk1], ((*ele_trkphi)->at(elidx[sc1]))[tk1], 0.0005);
+      for(unsigned int sc2=sc1+1; sc2<elidx.size(); sc2++) {
+	for(unsigned int tk2=0; tk2<((*ele_trkpt)->at(elidx[sc1])).size(); tk2++) {
+	  TLorentzVector trk2;
+	  trk2.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[sc2]))[tk2], ((*ele_trketa)->at(elidx[sc2]))[tk2], ((*ele_trkphi)->at(elidx[sc2]))[tk2], 0.0005);
+	  trkdielM->Fill((trk1+trk2).M());
+	}
+      }
+    }
+  }
+    
 }  
-
-// Function to add a set of histograms for scouting electrons
-void robustanalyzer::addhist(TString selection) {
-
-  all1dhists.push_back(new TH1F(selection+"sct_rho","rho",10000,-10,90));
-  all1dhists.push_back(new TH1F(selection+"sct_isomu27","HLT_IsoMu27",10,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sct_mu50","HLT_Mu50",10,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sct_scouting","HLT_Run3PixelOnlyPFScouting",10,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sct_elmult","N e",50,-5,45));
-  all1dhists.push_back(new TH1F(selection+"sct_elpt","p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sct_eleta","#eta",1000,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sct_elphi","#phi",66,-3.3,3.3));
-  all1dhists.push_back(new TH1F(selection+"sct_dielM","all M(e,e)",100000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sct_leadsublead_dielM","M(e_{1},e_{2})",100000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sct_leadsublead_chargeprod","q_{e1}*q_{e2}",3,-1,1));
-  all1dhists.push_back(new TH1F(selection+"sct_leadbarsubleadbar_dielM","bar.e_{1} M(e_{1},e_{2})",100000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sct_leadecsubleadec_dielM","ec. e_{1} M(e_{1},e_{2})",100000,-10,990));
-
-  all1dhists.push_back(new TH1F(selection+"sctbar_elpt","p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sctbar_eleta","#eta",1000,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elphi","#phi",66,-3.3,3.3));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elm","m / GeV",1000,-1e-5,1e-5));
-  all1dhists.push_back(new TH1F(selection+"sctbar_eldetain","#Delta#eta_{in}",200000,-0.1,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctbar_eldphiin","#Delta#phi_{in}",200000,-0.1,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elsigmaietaieta","#sigmai#etai#eta",1000,0,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elhoe","H/E",100000,0,1));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elooemoop","1/E-1/p",20000,0,0.2));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elmhits","missing hits",10,0,10));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elecaliso","ecal. iso.",10000,0,50));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elhcaliso","hcal. iso.",10000,0,50));
-  all1dhists.push_back(new TH1F(selection+"sctbar_eltkiso","tk. iso.",10000,0,50));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elr9","r9",1500,0,15));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elsmin","smin",3500,-0.1,3.4));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elsmaj","smaj",1500,-0.1,1.4));
-
-  all1dhists.push_back(new TH1F(selection+"sctbar_eld0","d_{0} / cm",20000,-10,10));
-  all1dhists.push_back(new TH1F(selection+"sctbar_ellog10d0","log_{10}d_{0} / log_{10}cm",1000,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sctbar_eldz","d_{z} / cm",4000,-20,20));
-  all1dhists.push_back(new TH1F(selection+"sctbar_elcharge","charge",5,-2,3));
-
-  all1dhists.push_back(new TH1F(selection+"sctec_elpt","p_{T} / GeV",1000,-10,990));
-  all1dhists.push_back(new TH1F(selection+"sctec_eleta","#eta",1000,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sctec_elphi","#phi",66,-3.3,3.3));
-  all1dhists.push_back(new TH1F(selection+"sctec_elm","m / GeV",1000,-1e-5,1e-5));
-  all1dhists.push_back(new TH1F(selection+"sctec_eldetain","#Delta#eta_{in}",200000,-0.1,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctec_eldphiin","#Delta#phi_{in}",200000,-0.1,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctec_elsigmaietaieta","#sigmai#etai#eta",1000,0,0.1));
-  all1dhists.push_back(new TH1F(selection+"sctec_elhoe","H/E",100000,0,1));
-  all1dhists.push_back(new TH1F(selection+"sctec_elooemoop","1/E-1/p",20000,0,0.2));
-  all1dhists.push_back(new TH1F(selection+"sctec_elmhits","missing hits",10,0,10));
-  all1dhists.push_back(new TH1F(selection+"sctec_elecaliso","ecal. iso.",10000,0,50));
-  all1dhists.push_back(new TH1F(selection+"sctec_elhcaliso","hcal. iso.",10000,0,50));
-  all1dhists.push_back(new TH1F(selection+"sctec_eltkiso","tk. iso.",10000,0,50));
-  all1dhists.push_back(new TH1F(selection+"sctec_elr9","r9",1500,0,15));
-  all1dhists.push_back(new TH1F(selection+"sctec_elsmin","smin",3500,-0.1,3.4));
-  all1dhists.push_back(new TH1F(selection+"sctec_elsmaj","smaj",1500,-0.1,1.4));
-
-  all1dhists.push_back(new TH1F(selection+"sctec_eld0","d_{0} / cm",20000,-10,10));
-  all1dhists.push_back(new TH1F(selection+"sctec_ellog10d0","log_{10}d_{0} / log_{10}cm",1000,-5,5));
-  all1dhists.push_back(new TH1F(selection+"sctec_eldz","d_{z} / cm",4000,-20,20));
-  all1dhists.push_back(new TH1F(selection+"sctec_elcharge","charge",5,-2,3));
-}
 
 // Function to add a set of histograms for gen electrons
 void robustanalyzer::addgenhist(TString selection) {
@@ -553,6 +697,157 @@ void robustanalyzer::fillgenhistinevent(TString selection, vector<int> genelidx,
   }
 }
 
+// Function to add a set of histograms for gen matching scouting electrons
+void robustanalyzer::addgenmchhist(TString selection) {
+
+  // Variables before gen match
+  all1dhists.push_back(new TH1F(selection+"genelsct_eb_dE","#Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsct_eb_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsct_eb_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsct_ee_dE","#Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsct_ee_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsct_ee_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
+  
+  // Variables after gen match
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_dE","#Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_dE","#Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
+
+}
+
+// Function to fill a set of histograms for genmatching particles
+void robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx, vector<int> sctidx) {
+
+  if(!isMC) throw "Error!!! Trying to obtain gen info. for a non MC file.";
+    
+  if(genidx.size()==0 || sctidx.size()==0) return;
+  
+  // Variables before gen match
+  TH1F* eb_dE = (TH1F*) outfile->Get(selection+"genelsct_eb_dE");
+  TH1F* eb_dEta = (TH1F*) outfile->Get(selection+"genelsct_eb_dEta");
+  TH1F* eb_qdPhi = (TH1F*) outfile->Get(selection+"genelsct_eb_qdPhi");
+  TH1F* ee_dE = (TH1F*) outfile->Get(selection+"genelsct_ee_dE");
+  TH1F* ee_dEta = (TH1F*) outfile->Get(selection+"genelsct_ee_dEta");
+  TH1F* ee_qdPhi = (TH1F*) outfile->Get(selection+"genelsct_ee_qdPhi");
+  
+  // Variables after gen match
+  TH1F* mcheb_dE = (TH1F*) outfile->Get(selection+"genelsctmch_eb_dE");
+  TH1F* mcheb_dEta = (TH1F*) outfile->Get(selection+"genelsctmch_eb_dEta");
+  TH1F* mcheb_qdPhi = (TH1F*) outfile->Get(selection+"genelsctmch_eb_qdPhi");
+  TH1F* mchee_dE = (TH1F*) outfile->Get(selection+"genelsctmch_ee_dE");
+  TH1F* mchee_dEta = (TH1F*) outfile->Get(selection+"genelsctmch_ee_dEta");
+  TH1F* mchee_qdPhi = (TH1F*) outfile->Get(selection+"genelsctmch_ee_qdPhi");
+
+  for(int ge : genidx) {
+    TLorentzVector gene, scte;
+    gene.SetPtEtaPhiM((*genlep_pt)->at(ge), (*genlep_eta)->at(ge), (*genlep_phi)->at(ge), 0.0005);
+    scte.SetPtEtaPhiM((*ele_pt)->at(sctidx[0]), (*ele_eta)->at(sctidx[0]), (*ele_phi)->at(sctidx[0]), 0.0005);
+    double mdene = gene.E() - scte.E();
+    double mdeta = ((*genlep_eta)->at(ge)) - ((*ele_eta)->at(sctidx[0]));
+    double mdphi = ((*genlep_phi)->at(ge)) - ((*ele_phi)->at(sctidx[0]));
+    double mqdph = (charge((*genlep_pdg)->at(ge))) * mdphi;
+    double eta = (*ele_eta)->at(sctidx[0]);
+    for(int se : sctidx) {
+      scte.SetPtEtaPhiM((*ele_pt)->at(se), (*ele_eta)->at(se), (*ele_phi)->at(se), 0.0005);
+      double dene = gene.E() - scte.E();
+      double deta = ((*genlep_eta)->at(ge)) - ((*ele_eta)->at(se));
+      double dphi = ((*genlep_phi)->at(ge)) - ((*ele_phi)->at(se));
+      double qdph = (charge((*genlep_pdg)->at(ge))) * dphi;      
+      if(abs(dene)<mdene) {
+	mdene = dene;
+      }
+      if(abs(deta)<mdeta) {
+	mdeta = deta;
+	eta = (*ele_eta)->at(se);
+      }
+      if(abs(qdph)<mqdph) {
+	mqdph = qdph;
+      }
+    }
+    if(abs(eta)<1.479) {
+      eb_dE->Fill(mdene);
+      eb_dEta->Fill(mdeta);
+      eb_qdPhi->Fill(mqdph);
+    }
+    else {
+      ee_dE->Fill(mdene);
+      ee_dEta->Fill(mdeta);
+      ee_qdPhi->Fill(mqdph);
+    }
+  }
+
+  // Get the gen-matched indices and sort
+  std::pair< vector<int>,vector<int> > gensctpair = getGenMatched(genidx, sctidx);
+  vector<int> matchedgenidx = gensctpair.first;
+  vector<int> matchedsctidx = gensctpair.second;
+
+  // Check for duplications
+  for(unsigned int ctr1=0; ctr1<matchedsctidx.size(); ctr1++) {
+    for(unsigned int ctr2=ctr1+1; ctr2<matchedsctidx.size(); ctr2++) {
+      if(matchedsctidx[ctr1]==matchedsctidx[ctr2]) throw "Error!!! Faulty gen matching. Duplicated Scouting Index.";
+    }
+  }  
+  
+  for(unsigned int ctr=0; ctr<matchedsctidx.size(); ctr++) {
+    TLorentzVector gene, scte;
+    gene.SetPtEtaPhiM((*genlep_pt)->at(matchedgenidx[ctr]), (*genlep_eta)->at(matchedgenidx[ctr]), (*genlep_phi)->at(matchedgenidx[ctr]), 0.0005);
+    scte.SetPtEtaPhiM((*ele_pt)->at(matchedsctidx[ctr]), (*ele_eta)->at(matchedsctidx[ctr]), (*ele_phi)->at(matchedsctidx[ctr]), 0.0005);
+    double dene = gene.E() - scte.E();
+    double deta = ((*genlep_eta)->at(matchedgenidx[ctr])) - ((*ele_eta)->at(matchedsctidx[ctr]));
+    double dphi = ((*genlep_phi)->at(matchedgenidx[ctr])) - ((*ele_phi)->at(matchedsctidx[ctr]));
+    double qdph = (charge((*genlep_pdg)->at(matchedgenidx[ctr]))) * dphi;
+    double eta = (*ele_eta)->at(matchedsctidx[ctr]);
+    if(abs(eta)<1.479) {
+      mcheb_dE->Fill(dene);
+      mcheb_dEta->Fill(deta);
+      mcheb_qdPhi->Fill(qdph);
+    }
+    else {
+      mchee_dE->Fill(dene);
+      mchee_dEta->Fill(deta);
+      mchee_qdPhi->Fill(qdph);
+    }
+  }
+}
+
+// Function to perform gen matching
+std::pair< vector<int>,vector<int> > robustanalyzer::getGenMatched(vector<int> geni, vector<int> ei) {
+
+  vector<int> genfoundi, sctfoundi;
+  
+  for(int gid: geni) {
+
+    /////////////////////////
+    for(unsigned int sct=0; sct<ei.size(); sct++) {
+      double deta = ((*genlep_eta)->at(gid)) - ((*ele_eta)->at(ei[sct]));
+      double dphi = ((*genlep_phi)->at(gid)) - ((*ele_phi)->at(ei[sct]));
+      double qdph = (charge((*genlep_pdg)->at(gid))) * dphi;
+      double eta = (*ele_eta)->at(ei[sct]);
+      if(abs(eta)<1.479 && abs(deta)<0.05 && qdph>-0.06 && qdph<0) {
+	genfoundi.push_back(gid);
+	sctfoundi.push_back(ei[sct]);
+	ei.erase(ei.begin()+sct);
+	break;
+      }
+      else {
+	if(abs(deta)<0.03 && qdph>-0.06 && qdph<0.01) {
+	  genfoundi.push_back(gid);
+	  sctfoundi.push_back(ei[sct]);
+	  ei.erase(ei.begin()+sct);
+	  break;
+	}
+      }
+    }
+    ////////////////////////
+    
+  }
+
+  return std::make_pair(genfoundi, sctfoundi);
+}
+
 // Function to sort the indices based on a factor (Usually pT)
 void robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *factor, int n) {
   for(unsigned int i=0; i<n; i++) {
@@ -564,4 +859,9 @@ void robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *factor
       }
     }
   }
+}
+
+// Function to obtain charge from pdg (Open to overloading)
+int robustanalyzer::charge(int pdg) {
+  return pdg/abs(pdg);
 }
