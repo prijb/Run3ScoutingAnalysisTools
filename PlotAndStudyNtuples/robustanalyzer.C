@@ -406,7 +406,7 @@ bool robustanalyzer::v1selfunc(int tkidx, int scidx, bool isSC) {
   double sE = se.Energy();
       
   if(isSC) {
-    sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_sigmaietaieta)->at(scidx))<0.014 : ((*ele_sigmaietaieta)->at(scidx))<0.035 ;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_sigmaietaieta)->at(scidx))<0.0105 : ((*ele_sigmaietaieta)->at(scidx))<0.035 ;
     sel *= ((*ele_hoe)->at(scidx))<0.1;
     sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_hcaliso)->at(scidx))<0.15*sE : ((*ele_hcaliso)->at(scidx))<0.2*sE;
     sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_ooemoop)->at(scidx))<0.015 : ((*ele_ooemoop)->at(scidx))<0.01;
@@ -421,10 +421,10 @@ bool robustanalyzer::v1selfunc(int tkidx, int scidx, bool isSC) {
     double dEoE = abs(sE - tE)/sE;
     double deta = abs((*ele_eta)->at(scidx) - ((*ele_trketa)->at(scidx))[tkidx]);
     double dphi = abs((*ele_phi)->at(scidx) - ((*ele_trkphi)->at(scidx))[tkidx]);
-    sel *= abs(((*ele_trkd0)->at(scidx))[tkidx])<0.15;
-    sel *= abs(((*ele_trkpt)->at(scidx))[tkidx])<12;
-    sel *= abs((*ele_eta)->at(scidx))<1.479 ? dEoE<0.4 : dEoE<1;
-    sel *= abs((*ele_eta)->at(scidx))<1.479 ? deta<0.04 : deta<0.02;
+    sel *= abs(((*ele_trkd0)->at(scidx))[tkidx])<0.25;
+    sel *= abs(((*ele_trkpt)->at(scidx))[tkidx])>12;
+    sel *= dEoE<1;
+    //sel *= abs((*ele_eta)->at(scidx))<1.479 ? deta<0.04 : deta<0.02;
     sel *= dphi<0.06;
     sel *= abs((*ele_eta)->at(scidx))<1.479 ? (((*ele_trkchi2)->at(scidx))[tkidx])<3 : (((*ele_trkchi2)->at(scidx))[tkidx])<2;
   }
