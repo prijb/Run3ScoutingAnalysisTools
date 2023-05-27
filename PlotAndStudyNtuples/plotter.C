@@ -6,7 +6,7 @@
 #include "RooMsgService.h"
 
 TString cutdeets = "Cut details";
-TFile* datahistfile = TFile::Open("hists_data.root","READ");
+TFile* datafile = TFile::Open("hists_data.root","READ");
 TFile* jpsifile = TFile::Open("hists_jpsipt28.root","READ");
 TFile* tempfile = TFile::Open("hists_temp.root","RECREATE");
 
@@ -77,7 +77,7 @@ int invmee_specialplot(TString selection, double res) {
     return -1;
   }
   
-  auto invmeehistorig = (TH1F*) datahistfile->Get(selection);
+  auto invmeehistorig = (TH1F*) datafile->Get(selection);
   TH1F* invmeehist = (TH1F*) invmeehistorig->Clone(invmeehistorig->GetName());
   
   vector<double> xbins;
@@ -99,7 +99,7 @@ int invmee_specialplot(TString selection, double res) {
 
 int fitinvmee(TString selection) {
 
-  auto invmeehistorig = (TH1F*) datahistfile->Get(selection);
+  auto invmeehistorig = (TH1F*) datafile->Get(selection);
   TH1F* invmeehist = (TH1F*) invmeehistorig->Clone(invmeehistorig->GetName());
 
   invmeehist->SetTitle("");
@@ -193,7 +193,7 @@ int fitinvmee(TString selection) {
 int fitinvmee_roofit(TString selection, double fitrange[2], double *SpBinSpB, double *BinSpB, double SpBrange[2]) {
   using namespace RooFit;
 
-  auto invmeehistorig = (TH1F*) datahistfile->Get(selection);
+  auto invmeehistorig = (TH1F*) datafile->Get(selection);
   TH1F* invmeehist = (TH1F*) invmeehistorig->Clone(invmeehistorig->GetName());
   invmeehist->SetTitle("");
   invmeehist->Rebin(100);
@@ -513,6 +513,33 @@ int efficiency(std::vector<TFile*> file, std::vector<TString> cutnames, int nbin
   c1->SaveAs("./JPsi_dirplots/"+((TString)file[0]->GetName()).ReplaceAll(".root","")+"/"+cutnames[1]+"_eff.png");
   
   return -1;
+}
+
+void plotForData() {
+
+  std::vector<TFile*> file;
+  std::vector<TString> cutname;
+  std::vector<TString> legend;  
+
+  file.clear();
+  cutname.clear();
+  coloropt.clear();
+  legendEntries.clear();
+  histtype.clear();
+  markerstyle.clear();
+  markersize.clear();
+  legendmarkerstyle.clear();
+
+  file.push_back(datafile);
+  cutname.push_back("v1sel_diegOeg30_sct");
+  coloropt.push_back(kGreen+2);
+  legendEntries.push_back("v1sel");
+  histtype.push_back("hist e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("le");
+
+  comparesamevariable(file, cutname, "trk_dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
 }
 
 int plotter() {
@@ -1118,10 +1145,12 @@ int plotter() {
   markersize.push_back(1);
   legendmarkerstyle.push_back("le");
 
-  comparesamevariable(file, cutname, "dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
-  comparesamevariable(file, cutname, "trk_dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
-  comparesamevariable(file, cutname, "trk_elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "track multiplicity / SC");
-  comparesamevariable(file, cutname, "elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "multiplicity");
+  //comparesamevariable(file, cutname, "dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
+  //comparesamevariable(file, cutname, "trk_dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
+  //comparesamevariable(file, cutname, "trk_elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "track multiplicity / SC");
+  //comparesamevariable(file, cutname, "elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "multiplicity");
+
+  plotForData();
 
   tempfile->Close();
   return -1;
