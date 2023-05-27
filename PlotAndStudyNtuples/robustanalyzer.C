@@ -112,8 +112,11 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     addgenhist("noselgen_muht_");
     addgenmchhist("noselAnosel_genmch_");
 
-    addhist("noselAnosel_genmch_dieg_");
-    addhist("noselAnosel_genmch_eg30_");
+    addhist("noselAnosel_genmchSC_dieg_");
+    addhist("noselAnosel_genmchSC_eg30_");
+    addhist("noselAnosel_genmchTRK_dieg_");
+    addhist("noselAnosel_genmchTRK_eg30_");
+    addhist("noselAnosel_genmchTRK_diegOeg30_");
   }
   
   // Count events passing certain selections
@@ -123,6 +126,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist("nosel_dieg_");
   addhist("nosel_eg30_");
   addhist("nosel_muht_");
+  addhist("v1sel_diegOeg30_");
 
   // vector of gen indices
   vector<int> noselgenjpidx;
@@ -130,6 +134,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 
   // vector of electron indices
   vector<int> noselelidx;
+  vector<vector<int>> noseleltrkidx;
+  vector<int> v1selelidx;
+  vector<vector<int>> v1seleltrkidx;
     
   // Loop beginning on events
   while(tree->Next()) {
@@ -172,28 +179,37 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       unsigned int elidx = sortedelidx[ele_ctr];
       
       noselelidx.push_back(elidx);
-      
-      // Get the energy of this electron
-      TLorentzVector ele;
-      ele.SetPtEtaPhiM((*ele_pt)->at(elidx), (*ele_eta)->at(elidx), (*ele_phi)->at(elidx), 0.0005);
-      double ele_energy = ele.Energy();
+      vector<int> trki;
+      for(unsigned int tkc=0; tkc<((*ele_trkpt)->at(elidx)).size(); tkc++) {
+	trki.push_back(tkc);
+      }
+      noseleltrkidx.push_back(trki);
+      trki.clear();
 
-      bool mutrigdec = true;
-      mutrigdec *= ( ((*(*hlt_isomu27))==1) || ((*(*hlt_mu50))==1) );
-      mutrigdec *= (*ele_pt)->at(elidx)>2.0;
-      mutrigdec *= abs((*ele_eta)->at(elidx))<2.5;
-      //mutrigdec *= 
-      
-      //if( ( ((*(*hlt_isomu27))==1) || ((*(*hlt_mu50))==1) ) && ((*(*hlt_scouting))==1) ) muAscouttrigselelidx.push_back(elidx);
+      bool v1selsc = true;
+      v1selsc *= v1selfunc(-1, elidx, true);
+      if(v1selsc) {
+	for(unsigned int tkc=0; tkc<((*ele_trkpt)->at(elidx)).size(); tkc++) {
+	  bool v1seltk = true;
+	  //v1seltk *= v1selfunc(tkc, elidx, false);
+	  if(v1seltk) trki.push_back(tkc);
+	}
+	if(trki.size()>0) {
+	  v1selelidx.push_back(elidx);
+	  v1seleltrkidx.push_back(trki);
+	}
+	trki.clear();
+      }
       
     }// End of loop on electrons in the event loop
     
     if(noselelidx.size()>0) nosel++;
-    fillhistinevent("nosel_", noselelidx);
-    if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("nosel_dieg_", noselelidx);
-    if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("nosel_eg30_", noselelidx);
-    if( ((*(*hlt_sct_dimu3))==1) && ((*(*hlt_sct_jet))==1) ) fillhistinevent("nosel_muht_", noselelidx);
-
+    fillhistinevent("nosel_", noselelidx, noseleltrkidx);
+    if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("nosel_dieg_", noselelidx, noseleltrkidx);
+    if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("nosel_eg30_", noselelidx, noseleltrkidx);
+    if( ((*(*hlt_sct_dimu3))==1) && ((*(*hlt_sct_jet))==1) ) fillhistinevent("nosel_muht_", noselelidx, noseleltrkidx);
+    if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) fillhistinevent("v1sel_diegOeg30_", v1selelidx, v1seleltrkidx);
+  
     if(isMC) {
 
       fillgenmchhistinevent("noselAnosel_genmch_", noselgenelidx, noselelidx);
@@ -201,9 +217,33 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       std::pair< vector<int>,vector<int> > noselAnosel_gensctpair = getGenMatched(noselgenelidx, noselelidx);
       vector<int> noselAnosel_matchedgenidx = noselAnosel_gensctpair.first;
       vector<int> noselAnosel_matchedsctidx = noselAnosel_gensctpair.second;
-      if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("noselAnosel_genmch_dieg_", noselAnosel_matchedsctidx);
-      if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("noselAnosel_genmch_eg30_", noselAnosel_matchedsctidx);
-      
+      vector<vector<int>> noselAnosel_matchedscttrkidx;
+      for(unsigned int si=0; si<noselAnosel_matchedsctidx.size(); si++) {
+	vector<int> trki;
+	for(unsigned int tkc=0; tkc<((*ele_trkpt)->at(noselAnosel_matchedsctidx[si])).size(); tkc++) {
+	  trki.push_back(tkc);
+	}
+	noselAnosel_matchedscttrkidx.push_back(trki);
+	trki.clear();
+      }
+      if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("noselAnosel_genmchSC_dieg_", noselAnosel_matchedsctidx, noselAnosel_matchedscttrkidx);
+      if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("noselAnosel_genmchSC_eg30_", noselAnosel_matchedsctidx, noselAnosel_matchedscttrkidx);
+
+      std::pair< vector<int>,vector< std::pair<int,int> > > noselAnosel_gentrkpair = getGenMatchedTrk(noselgenelidx, noselelidx);
+      vector<int> noselAnosel_trkmatchedgenidx = noselAnosel_gentrkpair.first;
+      vector< std::pair<int,int> > noselAnosel_trkmatchedidx = noselAnosel_gentrkpair.second;
+      vector<int> noselAnosel_trkmatchedsctidx;
+      vector<vector<int>> noselAnosel_trkmatchedtrkidx;
+      for(unsigned int si=0; si<noselAnosel_trkmatchedidx.size(); si++) {
+	noselAnosel_trkmatchedsctidx.push_back(noselAnosel_trkmatchedidx[si].first);
+	vector<int> trki;
+	trki.push_back(noselAnosel_trkmatchedidx[si].second);
+        noselAnosel_trkmatchedtrkidx.push_back(trki);
+	trki.clear();
+      }
+      if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("noselAnosel_genmchTRK_dieg_", noselAnosel_trkmatchedsctidx, noselAnosel_trkmatchedtrkidx);
+      if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("noselAnosel_genmchTRK_eg30_", noselAnosel_trkmatchedsctidx, noselAnosel_trkmatchedtrkidx);
+      if( ((*(*hlt_sct_dieg))==1) || ((*(*hlt_sct_eg30))==1) ) fillhistinevent("noselAnosel_genmchTRK_diegOeg30_", noselAnosel_trkmatchedsctidx, noselAnosel_trkmatchedtrkidx);
     }
     
     // Clear all vector
@@ -211,10 +251,146 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     noselgenelidx.clear();
 
     noselelidx.clear();
+    noseleltrkidx.clear();
+    v1selelidx.clear();
+    v1seleltrkidx.clear();
     
   } // End of loop on events
 
   cout<<totEntries<<"\t"<<endevent-beginevent<<"\t"<<nosel<<endl;
+}
+
+// Function to perform gen matching for the super-cluster
+std::pair< vector<int>,vector<int> > robustanalyzer::getGenMatched(vector<int> geni, vector<int> ei) {
+
+  vector<int> genfoundi, sctfoundi;
+  
+  for(int gid: geni) {
+
+    /////////////////////////
+    for(unsigned int sct=0; sct<ei.size(); sct++) {
+      double deta = ((*genlep_eta)->at(gid)) - ((*ele_eta)->at(ei[sct]));
+      double dphi = ((*genlep_phi)->at(gid)) - ((*ele_phi)->at(ei[sct]));
+      double qdph = (charge((*genlep_pdg)->at(gid))) * dphi;
+      double eta = (*ele_eta)->at(ei[sct]);
+      if(abs(eta)<1.479 && abs(deta)<0.05 && qdph>-0.06 && qdph<0) {
+	genfoundi.push_back(gid);
+	sctfoundi.push_back(ei[sct]);
+	ei.erase(ei.begin()+sct);
+	break;
+      }
+      else {
+	if(abs(deta)<0.03 && qdph>-0.06 && qdph<0.01) {
+	  genfoundi.push_back(gid);
+	  sctfoundi.push_back(ei[sct]);
+	  ei.erase(ei.begin()+sct);
+	  break;
+	}
+      }
+    }
+    ////////////////////////
+    
+  }
+
+  return std::make_pair(genfoundi, sctfoundi);
+}
+
+// Function to perform gen matching for the track
+std::pair< vector<int>, vector< std::pair<int,int> > > robustanalyzer::getGenMatchedTrk(vector<int> geni, vector<int> ei) {
+
+  vector<int> genfoundi;
+  vector< pair<int,int> > trkfoundi;
+
+  for(int gid: geni) {
+
+    for(unsigned int sct=0; sct<ei.size(); sct++) {
+      int sci = ei[sct];
+      unsigned int ntk = ((*ele_trkpt)->at(sci)).size();
+      double eta = (*ele_eta)->at(sci);
+
+      /////////////////////////
+      bool trkfound = false;
+      for(unsigned int tki=0; tki<ntk; tki++) {
+	double tdeta = ((*genlep_eta)->at(gid)) - ((*ele_trketa)->at(sci))[tki];
+	double tdphi = ((*genlep_phi)->at(gid)) - ((*ele_trkphi)->at(sci))[tki];
+	double tqdph = ((*ele_trkcharge)->at(sci))[tki] * tdphi;
+	if(abs(eta)<1.479 && abs(tdeta)<0.0015 && tqdph>-0.004 && tqdph<0.002) {
+	  genfoundi.push_back(gid);
+	  trkfoundi.push_back(std::make_pair(sci, tki));
+	  trkfound = true;
+	  ei.erase(ei.begin()+sct);
+	  break;
+	}
+	else {
+	  if(abs(tdeta)<0.003 && tqdph>-0.006 && tqdph<0.003) {
+	    genfoundi.push_back(gid);
+	    trkfoundi.push_back(std::make_pair(sci, tki));
+	    trkfound = true;
+	    ei.erase(ei.begin()+sct);
+	    break;
+	  }
+	}
+      }
+      if(trkfound) break;
+      ////////////////////////
+    }
+  }
+
+  return std::make_pair(genfoundi, trkfoundi);
+}
+
+// Function to sort the indices based on a factor (Usually pT)
+void robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *factor, int n) {
+  for(unsigned int i=0; i<n; i++) {
+    for(unsigned int j=i+1; j<n; j++) {
+      if((*factor)->at((*(idx+j)))>(*factor)->at((*(idx+i)))) { // Sort in decreasing value of factor
+	double temp = *(idx+i);
+	*(idx+i) = *(idx+j);
+	*(idx+j) = temp;
+      }
+    }
+  }
+}
+
+// Function to obtain charge from pdg (Open to overloading)
+int robustanalyzer::charge(int pdg) {
+  return pdg/abs(pdg);
+}
+
+bool robustanalyzer::v1selfunc(int tkidx, int scidx, bool isSC) {
+
+  bool sel = true;
+
+  // Get the energy of this electron
+  TLorentzVector se;
+  se.SetPtEtaPhiM((*ele_pt)->at(scidx), (*ele_eta)->at(scidx), (*ele_phi)->at(scidx), 0.0005);
+  double sE = se.Energy();
+      
+  if(isSC) {
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_sigmaietaieta)->at(scidx))<0.014 : ((*ele_sigmaietaieta)->at(scidx))<0.035 ;
+    sel *= ((*ele_hoe)->at(scidx))<0.1;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_hcaliso)->at(scidx))<0.15*sE : ((*ele_hcaliso)->at(scidx))<0.2*sE;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_ooemoop)->at(scidx))<0.015 : ((*ele_ooemoop)->at(scidx))<0.01;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_detain)->at(scidx))<0.005 : ((*ele_detain)->at(scidx))<0.01;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? ((*ele_dphiin)->at(scidx))<0.03 : ((*ele_dphiin)->at(scidx))<0.05;
+  }
+  else {
+    if(!isSC && tkidx<0) throw "Error!!! Tracker Index <0 in v1 selection.";
+    TLorentzVector te;
+    te.SetPtEtaPhiM(((*ele_trkpt)->at(scidx))[tkidx], ((*ele_trketa)->at(scidx))[tkidx], ((*ele_trkphi)->at(scidx))[tkidx], 0.0005);
+    double tE = te.Energy();
+    double dEoE = abs(sE - tE)/sE;
+    double deta = abs((*ele_eta)->at(scidx) - ((*ele_trketa)->at(scidx))[tkidx]);
+    double dphi = abs((*ele_phi)->at(scidx) - ((*ele_trkphi)->at(scidx))[tkidx]);
+    sel *= abs(((*ele_trkd0)->at(scidx))[tkidx])<0.15;
+    sel *= abs(((*ele_trkpt)->at(scidx))[tkidx])<12;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? dEoE<0.4 : dEoE<1;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? deta<0.04 : deta<0.02;
+    sel *= dphi<0.06;
+    sel *= abs((*ele_eta)->at(scidx))<1.479 ? (((*ele_trkchi2)->at(scidx))[tkidx])<3 : (((*ele_trkchi2)->at(scidx))[tkidx])<2;
+  }
+  
+  return sel;
 }
 
 // Function to add a set of histograms for scouting electrons
@@ -307,8 +483,9 @@ void robustanalyzer::addhist(TString selection) {
 }
 
 // Function to fill a set of histograms for scouting electrons
-void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
+void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx, vector<vector<int>> tkidx) {
 
+  if(tkidx.size()!=elidx.size()) throw "SC index count should match TRK index count";
   if(elidx.size()==0) return;
 
   TH1F* rhohist = (TH1F*) outfile->Get(selection+"sct_rho");
@@ -476,39 +653,40 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
       ecelsmaj->Fill((*ele_smaj)->at(elidx[ctr]));
     }
 
-    trkmult->Fill(((*ele_trkpt)->at(elidx[ctr])).size());
+    trkmult->Fill( tkidx[ctr].size() );
     double minde, mindeta, mindphi;
     TLorentzVector trk;
-    trk.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[ctr]))[0], ((*ele_trketa)->at(elidx[ctr]))[0], ((*ele_trkphi)->at(elidx[ctr]))[0], 0.0005);
+    trk.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[ctr]))[tkidx[ctr][0]], ((*ele_trketa)->at(elidx[ctr]))[tkidx[ctr][0]], ((*ele_trkphi)->at(elidx[ctr]))[tkidx[ctr][0]], 0.0005);
     minde = el.E() - trk.E();
-    mindeta = (*ele_eta)->at(elidx[ctr]) - ((*ele_trketa)->at(elidx[ctr]))[0];
-    mindphi = (*ele_phi)->at(elidx[ctr]) - ((*ele_trkphi)->at(elidx[ctr]))[0];
+    mindeta = (*ele_eta)->at(elidx[ctr]) - ((*ele_trketa)->at(elidx[ctr]))[tkidx[ctr][0]];
+    mindphi = (*ele_phi)->at(elidx[ctr]) - ((*ele_trkphi)->at(elidx[ctr]))[tkidx[ctr][0]];
     // Fill the track variables
-    for(unsigned int trkc=0; trkc<((*ele_trkpt)->at(elidx[ctr])).size(); trkc++) {
+    for(unsigned int trkc=0; trkc<tkidx[ctr].size(); trkc++) {
+      int trki = tkidx[ctr][trkc];
       if(TMath::Abs((*ele_eta)->at(elidx[ctr]))<1.479) {
-	trkbarelpt->Fill(((*ele_trkpt)->at(elidx[ctr]))[trkc]);
-	trkbareleta->Fill(((*ele_trketa)->at(elidx[ctr]))[trkc]);
-	trkbarelphi->Fill(((*ele_trkphi)->at(elidx[ctr]))[trkc]);
-	trkbareld0->Fill(((*ele_trkd0)->at(elidx[ctr]))[trkc]);
-	trkbarellog10d0->Fill(TMath::Log10(TMath::Abs(((*ele_trkd0)->at(elidx[ctr]))[trkc])));
-	trkbareldz->Fill(((*ele_trkdz)->at(elidx[ctr]))[trkc]);
-	trkbarelcharge->Fill(((*ele_trkcharge)->at(elidx[ctr]))[trkc]);
-	trkbarelrchi2->Fill(((*ele_trkchi2)->at(elidx[ctr]))[trkc]);
+	trkbarelpt->Fill(((*ele_trkpt)->at(elidx[ctr]))[trki]);
+	trkbareleta->Fill(((*ele_trketa)->at(elidx[ctr]))[trki]);
+	trkbarelphi->Fill(((*ele_trkphi)->at(elidx[ctr]))[trki]);
+	trkbareld0->Fill(((*ele_trkd0)->at(elidx[ctr]))[trki]);
+	trkbarellog10d0->Fill(TMath::Log10(TMath::Abs(((*ele_trkd0)->at(elidx[ctr]))[trki])));
+	trkbareldz->Fill(((*ele_trkdz)->at(elidx[ctr]))[trki]);
+	trkbarelcharge->Fill(((*ele_trkcharge)->at(elidx[ctr]))[trki]);
+	trkbarelrchi2->Fill(((*ele_trkchi2)->at(elidx[ctr]))[trki]);
       }
       else {
-	trkecelpt->Fill(((*ele_trkpt)->at(elidx[ctr]))[trkc]);
-	trkeceleta->Fill(((*ele_trketa)->at(elidx[ctr]))[trkc]);
-	trkecelphi->Fill(((*ele_trkphi)->at(elidx[ctr]))[trkc]);
-	trkeceld0->Fill(((*ele_trkd0)->at(elidx[ctr]))[trkc]);
-	trkecellog10d0->Fill(TMath::Log10(TMath::Abs(((*ele_trkd0)->at(elidx[ctr]))[trkc])));
-	trkeceldz->Fill(((*ele_trkdz)->at(elidx[ctr]))[trkc]);
-	trkecelcharge->Fill(((*ele_trkcharge)->at(elidx[ctr]))[trkc]);
-	trkecelrchi2->Fill(((*ele_trkchi2)->at(elidx[ctr]))[trkc]);
+	trkecelpt->Fill(((*ele_trkpt)->at(elidx[ctr]))[trki]);
+	trkeceleta->Fill(((*ele_trketa)->at(elidx[ctr]))[trki]);
+	trkecelphi->Fill(((*ele_trkphi)->at(elidx[ctr]))[trki]);
+	trkeceld0->Fill(((*ele_trkd0)->at(elidx[ctr]))[trki]);
+	trkecellog10d0->Fill(TMath::Log10(TMath::Abs(((*ele_trkd0)->at(elidx[ctr]))[trki])));
+	trkeceldz->Fill(((*ele_trkdz)->at(elidx[ctr]))[trki]);
+	trkecelcharge->Fill(((*ele_trkcharge)->at(elidx[ctr]))[trki]);
+	trkecelrchi2->Fill(((*ele_trkchi2)->at(elidx[ctr]))[trki]);
       }
-      trk.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[ctr]))[trkc], ((*ele_trketa)->at(elidx[ctr]))[trkc], ((*ele_trkphi)->at(elidx[ctr]))[trkc], 0.0005);
+      trk.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[ctr]))[trki], ((*ele_trketa)->at(elidx[ctr]))[trki], ((*ele_trkphi)->at(elidx[ctr]))[trki], 0.0005);
       double de = el.E() - trk.E();
-      double deta = (*ele_eta)->at(elidx[ctr]) - ((*ele_trketa)->at(elidx[ctr]))[trkc];
-      double dphi = (*ele_phi)->at(elidx[ctr]) - ((*ele_trkphi)->at(elidx[ctr]))[trkc];
+      double deta = (*ele_eta)->at(elidx[ctr]) - ((*ele_trketa)->at(elidx[ctr]))[trki];
+      double dphi = (*ele_phi)->at(elidx[ctr]) - ((*ele_trkphi)->at(elidx[ctr]))[trki];
       if(abs(de)<minde) {
 	minde = de;
       }
@@ -536,13 +714,15 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx) {
 
   // For all track invariant mass
   for(unsigned int sc1=0; sc1<elidx.size(); sc1++) {
-    for(unsigned int tk1=0; tk1<((*ele_trkpt)->at(elidx[sc1])).size(); tk1++) {
+    for(unsigned int tk1=0; tk1<tkidx[sc1].size(); tk1++) {
       TLorentzVector trk1;
-      trk1.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[sc1]))[tk1], ((*ele_trketa)->at(elidx[sc1]))[tk1], ((*ele_trkphi)->at(elidx[sc1]))[tk1], 0.0005);
+      int tki1 = tkidx[sc1][tk1];
+      trk1.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[sc1]))[tki1], ((*ele_trketa)->at(elidx[sc1]))[tki1], ((*ele_trkphi)->at(elidx[sc1]))[tki1], 0.0005);
       for(unsigned int sc2=sc1+1; sc2<elidx.size(); sc2++) {
-	for(unsigned int tk2=0; tk2<((*ele_trkpt)->at(elidx[sc1])).size(); tk2++) {
+	for(unsigned int tk2=0; tk2<tkidx[sc2].size(); tk2++) {
 	  TLorentzVector trk2;
-	  trk2.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[sc2]))[tk2], ((*ele_trketa)->at(elidx[sc2]))[tk2], ((*ele_trkphi)->at(elidx[sc2]))[tk2], 0.0005);
+	  int tki2 = tkidx[sc2][tk2];
+	  trk2.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[sc2]))[tki2], ((*ele_trketa)->at(elidx[sc2]))[tki2], ((*ele_trkphi)->at(elidx[sc2]))[tki2], 0.0005);
 	  trkdielM->Fill((trk1+trk2).M());
 	}
       }
@@ -707,7 +887,15 @@ void robustanalyzer::addgenmchhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"genelsct_ee_dE","#Delta E(gen e, sct. e)",10000,-1000,1000));
   all1dhists.push_back(new TH1F(selection+"genelsct_ee_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
   all1dhists.push_back(new TH1F(selection+"genelsct_ee_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
-  
+
+  // Variables before gen match with tracks
+  all1dhists.push_back(new TH1F(selection+"genelsct_eb_trk_dE","trk. #Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsct_eb_trk_dEta","trk. #Delta#eta(gen e, sct. e)",10000,-0.5,0.5));
+  all1dhists.push_back(new TH1F(selection+"genelsct_eb_trk_qdPhi","trk. q#Delta#phi(gen e, sct. e)",10000,-0.5,0.5));
+  all1dhists.push_back(new TH1F(selection+"genelsct_ee_trk_dE","trk. #Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsct_ee_trk_dEta","trk. #Delta#eta(gen e, sct. e)",10000,-0.5,0.5));
+  all1dhists.push_back(new TH1F(selection+"genelsct_ee_trk_qdPhi","trk. q#Delta#phi(gen e, sct. e)",10000,-0.5,0.5));
+
   // Variables after gen match
   all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_dE","#Delta E(gen e, sct. e)",10000,-1000,1000));
   all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
@@ -715,6 +903,14 @@ void robustanalyzer::addgenmchhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_dE","#Delta E(gen e, sct. e)",10000,-1000,1000));
   all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_dEta","#Delta#eta(gen e, sct. e)",10000,-5,5));
   all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_qdPhi","q#Delta#phi(gen e, sct. e)",10000,-5,5));
+
+  // Variables after gen match with tracks
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_trk_dE","trk. #Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_trk_dEta","trk. #Delta#eta(gen e, sct. e)",10000,-0.5,0.5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_eb_trk_qdPhi","trk. q#Delta#phi(gen e, sct. e)",10000,-0.5,0.5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_trk_dE","trk. #Delta E(gen e, sct. e)",10000,-1000,1000));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_trk_dEta","trk. #Delta#eta(gen e, sct. e)",10000,-0.5,0.5));
+  all1dhists.push_back(new TH1F(selection+"genelsctmch_ee_trk_qdPhi","trk. q#Delta#phi(gen e, sct. e)",10000,-0.5,0.5));
 
 }
 
@@ -733,6 +929,14 @@ void robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx
   TH1F* ee_dEta = (TH1F*) outfile->Get(selection+"genelsct_ee_dEta");
   TH1F* ee_qdPhi = (TH1F*) outfile->Get(selection+"genelsct_ee_qdPhi");
   
+  // Variables before gen match with tracks
+  TH1F* trkeb_dE = (TH1F*) outfile->Get(selection+"genelsct_eb_trk_dE");
+  TH1F* trkeb_dEta = (TH1F*) outfile->Get(selection+"genelsct_eb_trk_dEta");
+  TH1F* trkeb_qdPhi = (TH1F*) outfile->Get(selection+"genelsct_eb_trk_qdPhi");
+  TH1F* trkee_dE = (TH1F*) outfile->Get(selection+"genelsct_ee_trk_dE");
+  TH1F* trkee_dEta = (TH1F*) outfile->Get(selection+"genelsct_ee_trk_dEta");
+  TH1F* trkee_qdPhi = (TH1F*) outfile->Get(selection+"genelsct_ee_trk_qdPhi");
+  
   // Variables after gen match
   TH1F* mcheb_dE = (TH1F*) outfile->Get(selection+"genelsctmch_eb_dE");
   TH1F* mcheb_dEta = (TH1F*) outfile->Get(selection+"genelsctmch_eb_dEta");
@@ -741,15 +945,31 @@ void robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx
   TH1F* mchee_dEta = (TH1F*) outfile->Get(selection+"genelsctmch_ee_dEta");
   TH1F* mchee_qdPhi = (TH1F*) outfile->Get(selection+"genelsctmch_ee_qdPhi");
 
+  // Variables after gen match with tracks
+  TH1F* trkmcheb_dE = (TH1F*) outfile->Get(selection+"genelsctmch_eb_trk_dE");
+  TH1F* trkmcheb_dEta = (TH1F*) outfile->Get(selection+"genelsctmch_eb_trk_dEta");
+  TH1F* trkmcheb_qdPhi = (TH1F*) outfile->Get(selection+"genelsctmch_eb_trk_qdPhi");
+  TH1F* trkmchee_dE = (TH1F*) outfile->Get(selection+"genelsctmch_ee_trk_dE");
+  TH1F* trkmchee_dEta = (TH1F*) outfile->Get(selection+"genelsctmch_ee_trk_dEta");
+  TH1F* trkmchee_qdPhi = (TH1F*) outfile->Get(selection+"genelsctmch_ee_trk_qdPhi");
+
   for(int ge : genidx) {
-    TLorentzVector gene, scte;
+    TLorentzVector gene, scte, trke;
     gene.SetPtEtaPhiM((*genlep_pt)->at(ge), (*genlep_eta)->at(ge), (*genlep_phi)->at(ge), 0.0005);
     scte.SetPtEtaPhiM((*ele_pt)->at(sctidx[0]), (*ele_eta)->at(sctidx[0]), (*ele_phi)->at(sctidx[0]), 0.0005);
+    trke.SetPtEtaPhiM((*ele_trkpt)->at(sctidx[0])[0], (*ele_trketa)->at(sctidx[0])[0], (*ele_trkphi)->at(sctidx[0])[0], 0.0005);
+
     double mdene = gene.E() - scte.E();
     double mdeta = ((*genlep_eta)->at(ge)) - ((*ele_eta)->at(sctidx[0]));
     double mdphi = ((*genlep_phi)->at(ge)) - ((*ele_phi)->at(sctidx[0]));
     double mqdph = (charge((*genlep_pdg)->at(ge))) * mdphi;
     double eta = (*ele_eta)->at(sctidx[0]);
+
+    double mtrkdene = gene.E() - trke.E();
+    double mtrkdeta = ((*genlep_eta)->at(ge)) - ((*ele_trketa)->at(sctidx[0]))[0];
+    double mtrkdphi = ((*genlep_phi)->at(ge)) - ((*ele_trkphi)->at(sctidx[0]))[0];
+    double mtrkqdph = ((*ele_trkcharge)->at(sctidx[0]))[0] * mtrkdphi;
+
     for(int se : sctidx) {
       scte.SetPtEtaPhiM((*ele_pt)->at(se), (*ele_eta)->at(se), (*ele_phi)->at(se), 0.0005);
       double dene = gene.E() - scte.E();
@@ -766,20 +986,46 @@ void robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx
       if(abs(qdph)<mqdph) {
 	mqdph = qdph;
       }
-    }
+
+      int ntrk = ((*ele_trkpt)->at(se)).size();
+      for(unsigned int tc=0; tc<ntrk; tc++) {
+	trke.SetPtEtaPhiM((*ele_trkpt)->at(se)[tc], (*ele_trketa)->at(se)[tc], (*ele_trkphi)->at(se)[tc], 0.0005);
+	double tdene = gene.E() - trke.E();
+	double tdeta = ((*genlep_eta)->at(ge)) - ((*ele_trketa)->at(sctidx[se]))[tc];
+	double tdphi = ((*genlep_phi)->at(ge)) - ((*ele_trkphi)->at(sctidx[se]))[tc];
+	double tqdph = ((*ele_trkcharge)->at(sctidx[se]))[tc] * tdphi;
+
+	if(abs(tdene)<mtrkdene) {
+	  mtrkdene = tdene;
+	}
+	if(abs(tdeta)<mtrkdeta) {
+	  mtrkdeta = tdeta;
+	}
+	if(abs(tqdph)<mtrkqdph) {
+	  mtrkqdph = tqdph;
+	}
+      } // End of loop on track
+      
+    } // End of loop on SC
     if(abs(eta)<1.479) {
       eb_dE->Fill(mdene);
       eb_dEta->Fill(mdeta);
       eb_qdPhi->Fill(mqdph);
+      trkeb_dE->Fill(mtrkdene);
+      trkeb_dEta->Fill(mtrkdeta);
+      trkeb_qdPhi->Fill(mtrkqdph);
     }
     else {
       ee_dE->Fill(mdene);
       ee_dEta->Fill(mdeta);
       ee_qdPhi->Fill(mqdph);
+      trkee_dE->Fill(mtrkdene);
+      trkee_dEta->Fill(mtrkdeta);
+      trkee_qdPhi->Fill(mtrkqdph);
     }
   }
 
-  // Get the gen-matched indices and sort
+  // Get the gen-matched indices for SC
   std::pair< vector<int>,vector<int> > gensctpair = getGenMatched(genidx, sctidx);
   vector<int> matchedgenidx = gensctpair.first;
   vector<int> matchedsctidx = gensctpair.second;
@@ -811,57 +1057,40 @@ void robustanalyzer::fillgenmchhistinevent(TString selection, vector<int> genidx
       mchee_qdPhi->Fill(qdph);
     }
   }
-}
 
-// Function to perform gen matching
-std::pair< vector<int>,vector<int> > robustanalyzer::getGenMatched(vector<int> geni, vector<int> ei) {
-
-  vector<int> genfoundi, sctfoundi;
+  // Get the gen-matched indices for trk
+  std::pair< vector<int>,vector< std::pair<int,int> > > gentrkpair = getGenMatchedTrk(genidx, sctidx);
+  vector<int> matchedgentrkidx = gentrkpair.first;
+  vector< pair<int,int> > matchedtrkidx = gentrkpair.second;
   
-  for(int gid: geni) {
-
-    /////////////////////////
-    for(unsigned int sct=0; sct<ei.size(); sct++) {
-      double deta = ((*genlep_eta)->at(gid)) - ((*ele_eta)->at(ei[sct]));
-      double dphi = ((*genlep_phi)->at(gid)) - ((*ele_phi)->at(ei[sct]));
-      double qdph = (charge((*genlep_pdg)->at(gid))) * dphi;
-      double eta = (*ele_eta)->at(ei[sct]);
-      if(abs(eta)<1.479 && abs(deta)<0.05 && qdph>-0.06 && qdph<0) {
-	genfoundi.push_back(gid);
-	sctfoundi.push_back(ei[sct]);
-	ei.erase(ei.begin()+sct);
-	break;
-      }
-      else {
-	if(abs(deta)<0.03 && qdph>-0.06 && qdph<0.01) {
-	  genfoundi.push_back(gid);
-	  sctfoundi.push_back(ei[sct]);
-	  ei.erase(ei.begin()+sct);
-	  break;
-	}
-      }
+  // Check for duplications
+  for(unsigned int ctr1=0; ctr1<matchedtrkidx.size(); ctr1++) {
+    for(unsigned int ctr2=ctr1+1; ctr2<matchedtrkidx.size(); ctr2++) {
+      if(matchedtrkidx[ctr1].first==matchedtrkidx[ctr2].first) throw "Error!!! Faulty gen matching. Duplicated Scouting Index.";
     }
-    ////////////////////////
-    
-  }
-
-  return std::make_pair(genfoundi, sctfoundi);
-}
-
-// Function to sort the indices based on a factor (Usually pT)
-void robustanalyzer::sort(int* idx, TTreeReaderValue<std::vector<float>> *factor, int n) {
-  for(unsigned int i=0; i<n; i++) {
-    for(unsigned int j=i+1; j<n; j++) {
-      if((*factor)->at((*(idx+j)))>(*factor)->at((*(idx+i)))) { // Sort in decreasing value of factor
-	double temp = *(idx+i);
-	*(idx+i) = *(idx+j);
-	*(idx+j) = temp;
-      }
+  }  
+  
+  for(unsigned int ctr=0; ctr<matchedtrkidx.size(); ctr++) {
+    int ti = matchedtrkidx[ctr].second;
+    int si = matchedtrkidx[ctr].first;
+    TLorentzVector gene, trke;
+    gene.SetPtEtaPhiM((*genlep_pt)->at(matchedgentrkidx[ctr]), (*genlep_eta)->at(matchedgentrkidx[ctr]), (*genlep_phi)->at(matchedgentrkidx[ctr]), 0.0005);
+    trke.SetPtEtaPhiM(((*ele_trkpt)->at(si))[ti], ((*ele_trketa)->at(si))[ti], ((*ele_trkphi)->at(si))[ti], 0.0005);
+    double tdene = gene.E() - trke.E();
+    double tdeta = ((*genlep_eta)->at(matchedgentrkidx[ctr])) - ((*ele_trketa)->at(si))[ti];
+    double tdphi = ((*genlep_phi)->at(matchedgentrkidx[ctr])) - ((*ele_trkphi)->at(si))[ti];
+    double tqdph = ((*ele_trkcharge)->at(si))[ti] * tdphi;
+    double eta = (*ele_eta)->at(si);
+    if(abs(eta)<1.479) {
+      trkmcheb_dE->Fill(tdene);
+      trkmcheb_dEta->Fill(tdeta);
+      trkmcheb_qdPhi->Fill(tqdph);
+    }
+    else {
+      trkmchee_dE->Fill(tdene);
+      trkmchee_dEta->Fill(tdeta);
+      trkmchee_qdPhi->Fill(tqdph);
     }
   }
-}
 
-// Function to obtain charge from pdg (Open to overloading)
-int robustanalyzer::charge(int pdg) {
-  return pdg/abs(pdg);
 }

@@ -25,17 +25,16 @@ public:
   void analyzersinglefile(int);
 
   void addhist(TString);
-  void fillhistinevent(TString, vector<int>);
-  
-  void addtrkhist(TString);
-  void filltrkhistinevent(TString, vector<int>, vector<vector<int>>);
+  void fillhistinevent(TString, vector<int>, vector<vector<int>>);
+  bool v1selfunc(int, int, bool);
   
   void addgenhist(TString);
   void fillgenhistinevent(TString, vector<int>, vector<int>);
-
+  
   void addgenmchhist(TString);
   void fillgenmchhistinevent(TString, vector<int>, vector<int>);
   std::pair< vector<int>,vector<int> > getGenMatched(vector<int>, vector<int>);
+  std::pair< vector<int>, vector< std::pair<int,int> > > getGenMatchedTrk(vector<int>, vector<int>);
   
 private:
   
