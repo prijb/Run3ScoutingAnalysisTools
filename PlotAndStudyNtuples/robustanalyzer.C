@@ -126,6 +126,8 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist("nosel_dieg_");
   addhist("nosel_eg30_");
   addhist("nosel_muht_");
+  addhist("v1selSC_diegOeg30_");
+  addhist("v1selTK_diegOeg30_");
   addhist("v1sel_diegOeg30_");
 
   // vector of gen indices
@@ -135,6 +137,10 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   // vector of electron indices
   vector<int> noselelidx;
   vector<vector<int>> noseleltrkidx;
+  vector<int> v1selscelidx;
+  vector<vector<int>> v1selsceltrkidx;
+  vector<int> v1seltkelidx;
+  vector<vector<int>> v1seltkeltrkidx;
   vector<int> v1selelidx;
   vector<vector<int>> v1seleltrkidx;
     
@@ -144,7 +150,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     event++;
     //if(event>100) break;
     //if(event!=283991 && event!=326114) continue;
-    if(event%100000==0) std::cout<<"Processed event: "<<event+1<<std::endl;
+    if(event%1==0) std::cout<<"Processed event: "<<event+1<<std::endl;
 
     // Loop on Gen particles to select good gen electrons
     if(isMC) {
@@ -186,12 +192,39 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
       noseleltrkidx.push_back(trki);
       trki.clear();
 
+      bool v1selscsc = true;
+      v1selscsc *= v1selfunc(-1, elidx, true);
+      if(v1selscsc) {
+	for(unsigned int tkc=0; tkc<((*ele_trkpt)->at(elidx)).size(); tkc++) {
+	  trki.push_back(tkc);
+	}
+	if(trki.size()>0) {
+	  v1selscelidx.push_back(elidx);
+	  v1selsceltrkidx.push_back(trki);
+	}
+	trki.clear();
+      }
+      
+      bool v1seltksc = true;
+      if(v1seltksc) {
+	for(unsigned int tkc=0; tkc<((*ele_trkpt)->at(elidx)).size(); tkc++) {
+	  bool v1seltktk = true;
+	  v1seltktk *= v1selfunc(tkc, elidx, false);
+	  if(v1seltktk) trki.push_back(tkc);
+	}
+	if(trki.size()>0) {
+	  v1seltkelidx.push_back(elidx);
+	  v1seltkeltrkidx.push_back(trki);
+	}
+	trki.clear();
+      }
+      
       bool v1selsc = true;
       v1selsc *= v1selfunc(-1, elidx, true);
       if(v1selsc) {
 	for(unsigned int tkc=0; tkc<((*ele_trkpt)->at(elidx)).size(); tkc++) {
 	  bool v1seltk = true;
-	  //v1seltk *= v1selfunc(tkc, elidx, false);
+	  v1seltk *= v1selfunc(tkc, elidx, false);
 	  if(v1seltk) trki.push_back(tkc);
 	}
 	if(trki.size()>0) {
@@ -208,6 +241,8 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("nosel_dieg_", noselelidx, noseleltrkidx);
     if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("nosel_eg30_", noselelidx, noseleltrkidx);
     if( ((*(*hlt_sct_dimu3))==1) && ((*(*hlt_sct_jet))==1) ) fillhistinevent("nosel_muht_", noselelidx, noseleltrkidx);
+    if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) fillhistinevent("v1selSC_diegOeg30_", v1selscelidx, v1selsceltrkidx);
+    if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) fillhistinevent("v1selTK_diegOeg30_", v1seltkelidx, v1seltkeltrkidx);
     if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) fillhistinevent("v1sel_diegOeg30_", v1selelidx, v1seleltrkidx);
   
     if(isMC) {
@@ -252,6 +287,10 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
 
     noselelidx.clear();
     noseleltrkidx.clear();
+    v1selscelidx.clear();
+    v1selsceltrkidx.clear();
+    v1seltkelidx.clear();
+    v1seltkeltrkidx.clear();
     v1selelidx.clear();
     v1seleltrkidx.clear();
     
