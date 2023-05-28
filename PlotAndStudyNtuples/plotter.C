@@ -1212,6 +1212,15 @@ int plotter() {
   legendmarkerstyle.push_back("le");
 
   file.push_back(jpsifile);
+  cutname.push_back("v1selepem_diegOeg30_sct");
+  coloropt.push_back(kRed-7);
+  legendEntries.push_back("v1sel e+e-");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(jpsifile);
   cutname.push_back("noselAnosel_genmchTRK_diegOeg30_sct");
   coloropt.push_back(kGreen+2);
   legendEntries.push_back("genmch TRK");
@@ -1231,6 +1240,7 @@ int plotter() {
 
   //comparesamevariable(file, cutname, "dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
   //comparesamevariable(file, cutname, "trk_dielM", 1000, 2000, 10, false, true, true, (float []){1,3000}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
+  //comparesamevariable(file, cutname, "leadsublead_trk_dielM", 1000, 2000, 10, false, true, true, (float []){1,3000}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
   //comparesamevariable(file, cutname, "trk_elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "track multiplicity / SC");
   //comparesamevariable(file, cutname, "elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "multiplicity");
 

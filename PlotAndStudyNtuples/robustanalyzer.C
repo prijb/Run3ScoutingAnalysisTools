@@ -244,9 +244,20 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     if( ((*(*hlt_sct_dieg))==1) ) fillhistinevent("nosel_dieg_", noselelidx, noseleltrkidx);
     if( ((*(*hlt_sct_eg30))==1) ) fillhistinevent("nosel_eg30_", noselelidx, noseleltrkidx);
     if( ((*(*hlt_sct_dimu3))==1) && ((*(*hlt_sct_jet))==1) ) fillhistinevent("nosel_muht_", noselelidx, noseleltrkidx);
-    if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) fillhistinevent("v1selSC_diegOeg30_", v1selscelidx, v1selsceltrkidx);
-    if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) fillhistinevent("v1selTK_diegOeg30_", v1seltkelidx, v1seltkeltrkidx);
-    if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) fillhistinevent("v1sel_diegOeg30_", v1selelidx, v1seleltrkidx);
+    if( ((*(*hlt_sct_eg30))==1) || ((*(*hlt_sct_dieg))==1) ) {
+      fillhistinevent("v1selSC_diegOeg30_", v1selscelidx, v1selsceltrkidx);
+      fillhistinevent("v1selTK_diegOeg30_", v1seltkelidx, v1seltkeltrkidx);
+      fillhistinevent("v1sel_diegOeg30_", v1selelidx, v1seleltrkidx);
+      if(v1selscelidx.size()>=2) {
+	if( (((*ele_trkcharge)->at(v1selscelidx[0]))[v1selsceltrkidx[0][0]])*(((*ele_trkcharge)->at(v1selscelidx[1]))[v1selsceltrkidx[1][0]])==-1 ) fillhistinevent("v1selepemSC_diegOeg30_", v1selscelidx, v1selsceltrkidx);
+      }
+      if(v1seltkelidx.size()>=2) {
+	if( (((*ele_trkcharge)->at(v1seltkelidx[0]))[v1seltkeltrkidx[0][0]])*(((*ele_trkcharge)->at(v1seltkelidx[1]))[v1seltkeltrkidx[1][0]])==-1 ) fillhistinevent("v1selepemTK_diegOeg30_", v1seltkelidx, v1seltkeltrkidx);
+      }
+      if(v1selelidx.size()>=2) {
+	if( (((*ele_trkcharge)->at(v1selelidx[0]))[v1seleltrkidx[0][0]])*(((*ele_trkcharge)->at(v1selelidx[1]))[v1seleltrkidx[1][0]])==-1 ) fillhistinevent("v1selepem_diegOeg30_", v1selelidx, v1seleltrkidx);
+      }
+    }
   
     if(isMC) {
 
