@@ -6,7 +6,7 @@
 #include "RooMsgService.h"
 
 TString cutdeets = "Cut details";
-TFile* datafile = TFile::Open("hists_data.root","READ");
+TFile* datafile = TFile::Open("hists_data_1909852.root","READ");
 TFile* jpsifile = TFile::Open("hists_jpsipt28.root","READ");
 TFile* tempfile = TFile::Open("hists_temp.root","RECREATE");
 
@@ -539,7 +539,73 @@ void plotForData() {
   markersize.push_back(1);
   legendmarkerstyle.push_back("le");
 
-  comparesamevariable(file, cutname, "trk_dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
+  file.push_back(datafile);
+  cutname.push_back("v1selSC_diegOeg30_sct");
+  coloropt.push_back(kBlue);
+  legendEntries.push_back("v1selSC");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(datafile);
+  cutname.push_back("v1selTK_diegOeg30_sct");
+  coloropt.push_back(kRed);
+  legendEntries.push_back("v1selTRK");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("le");
+
+  //comparesamevariable(file, cutname, "trk_dielM", 1000, 3000, 10, false, true, true, (float []){1,2000}, (float []){0.55,0.7,0.75,0.95}, false, "trk. M(e, e)");
+  //comparesamevariable(file, cutname, "leadsublead_dielM", 1000, 3000, 10, false, true, true, (float []){1,2000}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
+
+  //comparesamevariable(file, cutname, "bar_elsigmaietaieta", 60, 200, 4, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "#sigma_{i#etai#eta}");
+  //comparesamevariable(file, cutname, "bar_elhoe", -1, -1, 800, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "H/E");
+  //comparesamevariable(file, cutname, "bar_elecalisoovere", -1, 1000, 20, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "I_E/E");
+  //comparesamevariable(file, cutname, "bar_elhcalisoovere", -1, 1000, 20, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "I_H/E");
+  //comparesamevariable(file, cutname, "bar_eldetain", -1, 150000, 400, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "|#Delta#eta^{seed}_{in}|");
+  //comparesamevariable(file, cutname, "bar_eldphiin", -1, 120000, 400, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "|#Delta#phi_{in}|");
+  //comparesamevariable(file, cutname, "bar_elooemoop", -1, 4000, 40, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "1/E - 1/p");
+  //comparesamevariable(file, cutname, "bar_eltkisoovere", -1, 300, 10, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "I_T/E");
+
+  //comparesamevariable(file, cutname, "ec_elsigmaietaieta", 120, 900, 10, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "#sigma_{i#etai#eta}");
+  //comparesamevariable(file, cutname, "ec_elhoe", -1, -1, 800, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "H/E");
+  //comparesamevariable(file, cutname, "ec_elecalisoovere", -1, 1000, 20, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "I_E/E");
+  //comparesamevariable(file, cutname, "ec_elhcalisoovere", -1, 1000, 20, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "I_H/E");
+  //comparesamevariable(file, cutname, "ec_eldetain", -1, 150000, 400, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "|#Delta#eta^{seed}_{in}|");
+  //comparesamevariable(file, cutname, "ec_eldphiin", -1, 120000, 400, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "|#Delta#phi_{in}|");
+  //comparesamevariable(file, cutname, "ec_elooemoop", -1, 4000, 40, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "1/E - 1/p");
+  //comparesamevariable(file, cutname, "ec_eltkisoovere", -1, 300, 10, true, true, true, (float []){1e-4,2}, (float []){0.55,0.7,0.75,0.95}, true, "I_T/E");
+
+  //comparesamevariable(file, cutname, "trk_elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "track multiplicity / SC");
+
+  //comparesamevariable(file, cutname, "bar_trk_elpt", -1, 200, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "bar_trk_eleta", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk #eta");
+  //comparesamevariable(file, cutname, "bar_trk_elphi", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk #phi");
+  //comparesamevariable(file, cutname, "bar_trk_eld0", 9000, 11000, 10, true, true, true, (float []){1e-5,5}, (float []){0.55,0.7,0.75,0.95}, true, "trk d_{0} [cm]");
+  //comparesamevariable(file, cutname, "bar_trk_ellog10d0", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk log_{10} d_{0} [log_{10} cm]");
+  //comparesamevariable(file, cutname, "bar_trk_elcharge", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk charge");
+  //comparesamevariable(file, cutname, "bar_trk_elrchi2", -1, 500, 10, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk reduced chi sq.");
+  
+  //comparesamevariable(file, cutname, "ec_trk_elpt", -1, 200, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk p_{T} [GeV]");
+  //comparesamevariable(file, cutname, "ec_trk_eleta", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk #eta");
+  //comparesamevariable(file, cutname, "ec_trk_elphi", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk #phi");
+  //comparesamevariable(file, cutname, "ec_trk_eld0", 9000, 11000, 10, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk d_{0} [cm]");
+  //comparesamevariable(file, cutname, "ec_trk_ellog10d0", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk log_{10} d_{0} [log_{10} cm]");
+  //comparesamevariable(file, cutname, "ec_trk_elcharge", -1, -1, 1, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk charge");
+  //comparesamevariable(file, cutname, "ec_trk_elrchi2", -1, 500, 10, true, true, true, (float []){1e-5,1}, (float []){0.55,0.7,0.75,0.95}, true, "trk reduced chi sq.");
+  
+  //comparesamevariable(file, cutname, "bar_trk_el_min_dE", -1, -1, 10, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EB #DeltaE [GeV]");
+  //comparesamevariable(file, cutname, "bar_trk_el_min_dEoverE", 400, 520, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EB #DeltaE / E");
+  //comparesamevariable(file, cutname, "bar_trk_el_min_deta", 4750, 5250, 4, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EB #Delta#eta");
+  //comparesamevariable(file, cutname, "bar_trk_el_min_dphi", 4500, 5500, 10, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EB #Delta#phi");
+  
+  //comparesamevariable(file, cutname, "ec_trk_el_min_dE", -1, -1, 10, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EE #DeltaE [GeV]");
+  //comparesamevariable(file, cutname, "ec_trk_el_min_dEoverE", 400, 520, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EE #DeltaE / E");
+  //comparesamevariable(file, cutname, "ec_trk_el_min_deta", 4750, 5250, 5, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EE #Delta#eta");
+  //comparesamevariable(file, cutname, "ec_trk_el_min_dphi", 4500, 5500, 10, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "EE #Delta#phi");
+    
 }
 
 int plotter() {
@@ -1120,7 +1186,7 @@ int plotter() {
 
   file.push_back(jpsifile);
   cutname.push_back("v1sel_diegOeg30_sct");
-  coloropt.push_back(kGreen+2);
+  coloropt.push_back(kRed);
   legendEntries.push_back("v1sel");
   histtype.push_back("hist e1");
   markerstyle.push_back(20);
@@ -1128,8 +1194,26 @@ int plotter() {
   legendmarkerstyle.push_back("le");
 
   file.push_back(jpsifile);
+  cutname.push_back("v1selSC_diegOeg30_sct");
+  coloropt.push_back(kOrange);
+  legendEntries.push_back("v1selSC");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(jpsifile);
+  cutname.push_back("v1selTK_diegOeg30_sct");
+  coloropt.push_back(kYellow+2);
+  legendEntries.push_back("v1selTK");
+  histtype.push_back("hist same e1");
+  markerstyle.push_back(20);
+  markersize.push_back(1);
+  legendmarkerstyle.push_back("le");
+
+  file.push_back(jpsifile);
   cutname.push_back("noselAnosel_genmchTRK_diegOeg30_sct");
-  coloropt.push_back(kRed);
+  coloropt.push_back(kGreen+2);
   legendEntries.push_back("genmch TRK");
   histtype.push_back("hist same e1");
   markerstyle.push_back(20);
@@ -1146,7 +1230,7 @@ int plotter() {
   legendmarkerstyle.push_back("le");
 
   //comparesamevariable(file, cutname, "dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
-  //comparesamevariable(file, cutname, "trk_dielM", 1000, 2000, 10, true, true, true, (float []){1,2e5}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
+  //comparesamevariable(file, cutname, "trk_dielM", 1000, 2000, 10, false, true, true, (float []){1,3000}, (float []){0.55,0.7,0.75,0.95}, false, "M(e, e)");
   //comparesamevariable(file, cutname, "trk_elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "track multiplicity / SC");
   //comparesamevariable(file, cutname, "elmult", 5, 15, 1, true, true, true, (float []){1,2e8}, (float []){0.55,0.7,0.75,0.95}, false, "multiplicity");
 

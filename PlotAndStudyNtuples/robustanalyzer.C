@@ -129,6 +129,9 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
   addhist("v1selSC_diegOeg30_");
   addhist("v1selTK_diegOeg30_");
   addhist("v1sel_diegOeg30_");
+  addhist("v1selepemSC_diegOeg30_");
+  addhist("v1selepemTK_diegOeg30_");
+  addhist("v1selepem_diegOeg30_");
 
   // vector of gen indices
   vector<int> noselgenjpidx;
@@ -150,7 +153,7 @@ void robustanalyzer::analyzersinglefile(int splitCnt) { // Assume splitCnt to ra
     event++;
     //if(event>100) break;
     //if(event!=283991 && event!=326114) continue;
-    if(event%1==0) std::cout<<"Processed event: "<<event+1<<std::endl;
+    if(event%1000==0) std::cout<<"Processed event: "<<event+1<<std::endl;
 
     // Loop on Gen particles to select good gen electrons
     if(isMC) {
@@ -450,6 +453,7 @@ void robustanalyzer::addhist(TString selection) {
   all1dhists.push_back(new TH1F(selection+"sct_leadecsubleadec_dielM","ec. e_{1} M(e_{1},e_{2})",100000,-10,990));
 
   all1dhists.push_back(new TH1F(selection+"sct_trk_dielM","all trk M(e,e)",100000,-10,990));
+  all1dhists.push_back(new TH1F(selection+"sct_leadsublead_trk_dielM","e1e2 trk M(e,e)",100000,-10,990));
   all1dhists.push_back(new TH1F(selection+"sct_trk_elmult","N trk e",50,-5,45));
 
   all1dhists.push_back(new TH1F(selection+"sct_bar_elpt","p_{T} / GeV",1000,-10,990));
@@ -543,6 +547,7 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx, vecto
   TH1F* leadecsubleadecdielM = (TH1F*) outfile->Get(selection+"sct_leadecsubleadec_dielM");
 
   TH1F* trkdielM = (TH1F*) outfile->Get(selection+"sct_trk_dielM");
+  TH1F* e1e2trkdielM = (TH1F*) outfile->Get(selection+"sct_leadsublead_trk_dielM");
   TH1F* trkmult = (TH1F*) outfile->Get(selection+"sct_trk_elmult");
   
   TH1F* barelpt = (TH1F*) outfile->Get(selection+"sct_bar_elpt");
@@ -765,6 +770,16 @@ void robustanalyzer::fillhistinevent(TString selection, vector<int> elidx, vecto
 	  trkdielM->Fill((trk1+trk2).M());
 	}
       }
+    }
+  }
+  if(elidx.size()>=2) {
+    if( tkidx[0].size()>=1 && tkidx[1].size()>=1 ) {
+      TLorentzVector trk1, trk2;
+      int tki1 = tkidx[0][0];
+      int tki2 = tkidx[1][0];
+      trk1.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[0]))[tki1], ((*ele_trketa)->at(elidx[0]))[tki1], ((*ele_trkphi)->at(elidx[0]))[tki1], 0.0005);
+      trk2.SetPtEtaPhiM(((*ele_trkpt)->at(elidx[1]))[tki2], ((*ele_trketa)->at(elidx[1]))[tki2], ((*ele_trkphi)->at(elidx[1]))[tki2], 0.0005);
+      e1e2trkdielM->Fill((trk1+trk2).M());
     }
   }
     
